@@ -72,7 +72,7 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExampleResource,
+		NewStorageResource,
 	}
 }
 
