@@ -2,7 +2,8 @@ package provider
 
 import (
 	"context"
-	"net/http"
+	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -11,20 +12,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Ensure BunnyProvider satisfies various provider interfaces.
 var _ provider.Provider = &BunnyProvider{}
 
-// BunnyProvider defines the provider implementation.
 type BunnyProvider struct {
-	// version is set to the provider version on release, "dev" when the
-	// provider is built and ran locally, and "test" when running acceptance
-	// testing.
 	version string
 }
 
-// BunnyProviderModel describes the provider data model.
 type BunnyProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
+	ApiKey types.String `tfsdk:"api_key"`
+	ApiUrl types.String `tfsdk:"api_url"`
 }
 
 func (p *BunnyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -35,8 +31,12 @@ func (p *BunnyProvider) Metadata(ctx context.Context, req provider.MetadataReque
 func (p *BunnyProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
+			"api_key": schema.StringAttribute{
+				MarkdownDescription: "API key",
+				Optional:            true,
+			},
+			"api_url": schema.StringAttribute{
+				MarkdownDescription: "API URL",
 				Optional:            true,
 			},
 		},
@@ -47,18 +47,27 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	var data BunnyProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
+	envApiKey := os.Getenv("BUNNY_API_KEY")
+	if envApiKey != "" {
+		data.ApiKey = types.StringValue(envApiKey)
+	}
 
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
-	resp.DataSourceData = client
-	resp.ResourceData = client
+	envApiUrl := os.Getenv("BUNNY_API_URL")
+	if envApiUrl != "" {
+		data.ApiUrl = types.StringValue(envApiUrl)
+	}
+
+	if data.ApiUrl.IsNull() {
+		data.ApiUrl = types.StringValue("https://api.bunny.net")
+	}
+
+	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString())
+	resp.DataSourceData = apiClient
+	resp.ResourceData = apiClient
 }
 
 func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resource {
@@ -69,7 +78,7 @@ func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resourc
 
 func (p *BunnyProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewExampleDataSource,
+		NewRegionDataSource,
 	}
 }
 

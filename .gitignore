@@ -23,7 +23,7 @@ website/node_modules
 .idea
 *.iml
 *.test
-*.iml
+/terraform-provider-bunny
 
 website/vendor
 

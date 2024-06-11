@@ -3,8 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
-	"net/http"
-
+	"github.com/bunnyway/terraform-provider-bunny/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -25,7 +24,7 @@ func NewExampleResource() resource.Resource {
 
 // ExampleResource defines the resource implementation.
 type ExampleResource struct {
-	client *http.Client
+	client *api.Client
 }
 
 // ExampleResourceModel describes the resource data model.
@@ -72,12 +71,12 @@ func (r *ExampleResource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	client, ok := req.ProviderData.(*http.Client)
+	client, ok := req.ProviderData.(*api.Client)
 
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *http.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return

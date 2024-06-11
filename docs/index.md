@@ -14,7 +14,8 @@ description: |-
 
 ```terraform
 provider "bunny" {
-  # example configuration here
+  api_key = "00000000-0000-0000-0000-000000000000"
+  api_url = "https://api.bunny.net"
 }
 ```
 
@@ -23,4 +24,5 @@ provider "bunny" {
 
 ### Optional
 
-- `endpoint` (String) Example provider attribute
+- `api_key` (String) API key
+- `api_url` (String) API URL
