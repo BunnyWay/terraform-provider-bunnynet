@@ -10,11 +10,12 @@ import (
 )
 
 type Pullzone struct {
-	Id            int64  `json:"Id,omitempty"`
-	Name          string `json:"Name,omitempty"`
-	OriginType    uint8  `json:"OriginType"`
-	OriginUrl     string `json:"OriginUrl,omitempty"`
-	StorageZoneId int64  `json:"StorageZoneId,omitempty"`
+	Id            int64              `json:"Id,omitempty"`
+	Name          string             `json:"Name,omitempty"`
+	OriginType    uint8              `json:"OriginType"`
+	OriginUrl     string             `json:"OriginUrl,omitempty"`
+	StorageZoneId int64              `json:"StorageZoneId,omitempty"`
+	Edgerules     []PullzoneEdgerule `json:"Edgerules"`
 }
 
 func (c *Client) GetPullzone(id int64) (Pullzone, error) {
