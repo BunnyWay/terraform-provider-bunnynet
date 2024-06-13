@@ -16,6 +16,7 @@ type Pullzone struct {
 	OriginUrl     string             `json:"OriginUrl,omitempty"`
 	StorageZoneId int64              `json:"StorageZoneId,omitempty"`
 	Edgerules     []PullzoneEdgerule `json:"Edgerules"`
+	Hostnames     []PullzoneHostname `json:"Hostnames"`
 }
 
 func (c *Client) GetPullzone(id int64) (Pullzone, error) {
