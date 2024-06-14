@@ -49,6 +49,7 @@ resource "bunny_pullzone" "test" {
 - `optimizer_watermark_url` (String)
 - `optimizer_webp` (Boolean)
 - `origin` (Block, Optional) (see [below for nested schema](#nestedblock--origin))
+- `routing` (Block, Optional) (see [below for nested schema](#nestedblock--routing))
 
 ### Read-Only
 
@@ -63,5 +64,18 @@ Required:
 
 Optional:
 
+- `follow_redirects` (Boolean)
+- `forward_host_header` (Boolean)
 - `storagezone` (Number)
 - `url` (String)
+- `verify_ssl` (Boolean)
+
+
+<a id="nestedblock--routing"></a>
+### Nested Schema for `routing`
+
+Optional:
+
+- `filters` (Set of String)
+- `tier` (String)
+- `zones` (Set of String)

@@ -10,15 +10,32 @@ import (
 )
 
 type Pullzone struct {
-	Id               int64                    `json:"Id,omitempty"`
-	Name             string                   `json:"Name,omitempty"`
-	OriginType       uint8                    `json:"OriginType"`
-	OriginUrl        string                   `json:"OriginUrl,omitempty"`
-	StorageZoneId    int64                    `json:"StorageZoneId,omitempty"`
+	Id   int64  `json:"Id,omitempty"`
+	Name string `json:"Name,omitempty"`
+
+	// sub-resources
 	Edgerules        []PullzoneEdgerule       `json:"Edgerules"`
 	Hostnames        []PullzoneHostname       `json:"Hostnames"`
 	OptimizerClasses []PullzoneOptimizerClass `json:"OptimizerClasses"`
 
+	// origin
+	OriginType      uint8  `json:"OriginType"`
+	OriginUrl       string `json:"OriginUrl,omitempty"`
+	StorageZoneId   int64  `json:"StorageZoneId,omitempty"`
+	AddHostHeader   bool   `json:"AddHostHeader"`
+	VerifyOriginSSL bool   `json:"VerifyOriginSSL"`
+	FollowRedirects bool   `json:"FollowRedirects"`
+
+	// routing
+	Type              uint8    `json:"Type"`
+	EnableGeoZoneAF   bool     `json:"EnableGeoZoneAF"`
+	EnableGeoZoneASIA bool     `json:"EnableGeoZoneASIA"`
+	EnableGeoZoneEU   bool     `json:"EnableGeoZoneEU"`
+	EnableGeoZoneSA   bool     `json:"EnableGeoZoneSA"`
+	EnableGeoZoneUS   bool     `json:"EnableGeoZoneUS"`
+	RoutingFilters    []string `json:"RoutingFilters"`
+
+	// optimizer
 	OptimizerEnabled                      bool    `json:"OptimizerEnabled"`
 	OptimizerMinifyCss                    bool    `json:"OptimizerMinifyCSS"`
 	OptimizerMinifyJs                     bool    `json:"OptimizerMinifyJavaScript"`
