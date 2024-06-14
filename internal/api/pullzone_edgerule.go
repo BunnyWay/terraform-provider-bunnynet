@@ -28,8 +28,7 @@ type PullzoneEdgeruleTrigger struct {
 }
 
 func (c *Client) CreatePullzoneEdgerule(data PullzoneEdgerule) (PullzoneEdgerule, error) {
-	pullzoneId := data.PullzoneId
-	if pullzoneId == 0 {
+	if data.PullzoneId == 0 {
 		return PullzoneEdgerule{}, errors.New("pullzone is required")
 	}
 
@@ -38,7 +37,7 @@ func (c *Client) CreatePullzoneEdgerule(data PullzoneEdgerule) (PullzoneEdgerule
 		return PullzoneEdgerule{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/edgerules/addOrUpdate", c.apiUrl, pullzoneId), bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/edgerules/addOrUpdate", c.apiUrl, data.PullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return PullzoneEdgerule{}, err
 	}
@@ -73,7 +72,7 @@ func (c *Client) CreatePullzoneEdgerule(data PullzoneEdgerule) (PullzoneEdgerule
 		return dataApiResult, err
 	}
 
-	dataApiResult.PullzoneId = pullzoneId
+	dataApiResult.PullzoneId = data.PullzoneId
 
 	return dataApiResult, nil
 }

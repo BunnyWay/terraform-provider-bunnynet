@@ -10,13 +10,31 @@ import (
 )
 
 type Pullzone struct {
-	Id            int64              `json:"Id,omitempty"`
-	Name          string             `json:"Name,omitempty"`
-	OriginType    uint8              `json:"OriginType"`
-	OriginUrl     string             `json:"OriginUrl,omitempty"`
-	StorageZoneId int64              `json:"StorageZoneId,omitempty"`
-	Edgerules     []PullzoneEdgerule `json:"Edgerules"`
-	Hostnames     []PullzoneHostname `json:"Hostnames"`
+	Id               int64                    `json:"Id,omitempty"`
+	Name             string                   `json:"Name,omitempty"`
+	OriginType       uint8                    `json:"OriginType"`
+	OriginUrl        string                   `json:"OriginUrl,omitempty"`
+	StorageZoneId    int64                    `json:"StorageZoneId,omitempty"`
+	Edgerules        []PullzoneEdgerule       `json:"Edgerules"`
+	Hostnames        []PullzoneHostname       `json:"Hostnames"`
+	OptimizerClasses []PullzoneOptimizerClass `json:"OptimizerClasses"`
+
+	OptimizerEnabled                      bool    `json:"OptimizerEnabled"`
+	OptimizerMinifyCss                    bool    `json:"OptimizerMinifyCSS"`
+	OptimizerMinifyJs                     bool    `json:"OptimizerMinifyJavaScript"`
+	OptimizerWebp                         bool    `json:"OptimizerEnableWebP"`
+	OptimizerForceClasses                 bool    `json:"OptimizerForceClasses"`
+	OptimizerImageOptimization            bool    `json:"OptimizerEnableManipulationEngine"`
+	OptimizerAutomaticOptimizationEnabled bool    `json:"OptimizerAutomaticOptimizationEnabled"`
+	OptimizerDesktopMaxWidth              uint64  `json:"OptimizerDesktopMaxWidth"`
+	OptimizerMobileMaxWidth               uint64  `json:"OptimizerMobileMaxWidth"`
+	OptimizerImageQuality                 uint8   `json:"OptimizerImageQuality"`
+	OptimizerMobileImageQuality           uint8   `json:"OptimizerMobileImageQuality"`
+	OptimizerWatermarkEnabled             bool    `json:"OptimizerWatermarkEnabled"`
+	OptimizerWatermarkUrl                 string  `json:"OptimizerWatermarkUrl"`
+	OptimizerWatermarkPosition            uint8   `json:"OptimizerWatermarkPosition"`
+	OptimizerWatermarkOffset              float64 `json:"OptimizerWatermarkOffset"`
+	OptimizerWatermarkMinImageSize        uint64  `json:"OptimizerWatermarkMinImageSize"`
 }
 
 func (c *Client) GetPullzone(id int64) (Pullzone, error) {

@@ -32,6 +32,22 @@ resource "bunny_pullzone" "test" {
 
 ### Optional
 
+- `optimizer_classes_force` (Boolean)
+- `optimizer_dynamic_image_api` (Boolean)
+- `optimizer_enabled` (Boolean)
+- `optimizer_minify_css` (Boolean)
+- `optimizer_minify_js` (Boolean)
+- `optimizer_smartimage` (Boolean)
+- `optimizer_smartimage_desktop_maxwidth` (Number)
+- `optimizer_smartimage_desktop_quality` (Number)
+- `optimizer_smartimage_mobile_maxwidth` (Number)
+- `optimizer_smartimage_mobile_quality` (Number)
+- `optimizer_watermark` (Boolean)
+- `optimizer_watermark_borderoffset` (Number)
+- `optimizer_watermark_minsize` (Number)
+- `optimizer_watermark_position` (String)
+- `optimizer_watermark_url` (String)
+- `optimizer_webp` (Boolean)
 - `origin` (Block, Optional) (see [below for nested schema](#nestedblock--origin))
 
 ### Read-Only

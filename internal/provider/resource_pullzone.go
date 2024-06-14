@@ -8,8 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -24,13 +30,30 @@ func NewPullzoneResource() resource.Resource {
 }
 
 type PullzoneResource struct {
-	client *api.Client
+	client        *api.Client
+	pullzoneMutex *pullzoneMutex
 }
 
 type PullzoneResourceModel struct {
-	Id     types.Int64  `tfsdk:"id"`
-	Name   types.String `tfsdk:"name"`
-	Origin types.Object `tfsdk:"origin"`
+	Id                                 types.Int64   `tfsdk:"id"`
+	Name                               types.String  `tfsdk:"name"`
+	Origin                             types.Object  `tfsdk:"origin"`
+	OptimizerEnabled                   types.Bool    `tfsdk:"optimizer_enabled"`
+	OptimizerMinifyCss                 types.Bool    `tfsdk:"optimizer_minify_css"`
+	OptimizerMinifyJs                  types.Bool    `tfsdk:"optimizer_minify_js"`
+	OptimizerWebp                      types.Bool    `tfsdk:"optimizer_webp"`
+	OptimizerClassesForce              types.Bool    `tfsdk:"optimizer_classes_force"`
+	OptimizerDynamicImageApi           types.Bool    `tfsdk:"optimizer_dynamic_image_api"`
+	OptimizerSmartImage                types.Bool    `tfsdk:"optimizer_smartimage"`
+	OptimizerSmartImageDesktopMaxwidth types.Int64   `tfsdk:"optimizer_smartimage_desktop_maxwidth"`
+	OptimizerSmartImageDesktopQuality  types.Int64   `tfsdk:"optimizer_smartimage_desktop_quality"`
+	OptimizerSmartImageMobileMaxwidth  types.Int64   `tfsdk:"optimizer_smartimage_mobile_maxwidth"`
+	OptimizerSmartImageMobileQuality   types.Int64   `tfsdk:"optimizer_smartimage_mobile_quality"`
+	OptimizerWatermark                 types.Bool    `tfsdk:"optimizer_watermark"`
+	OptimizerWatermarkUrl              types.String  `tfsdk:"optimizer_watermark_url"`
+	OptimizerWatermarkPosition         types.String  `tfsdk:"optimizer_watermark_position"`
+	OptimizerWatermarkBorderoffset     types.Float64 `tfsdk:"optimizer_watermark_borderoffset"`
+	OptimizerWatermarkMinsize          types.Int64   `tfsdk:"optimizer_watermark_minsize"`
 }
 
 var pullzoneOriginTypes = map[string]attr.Type{
@@ -42,6 +65,15 @@ var pullzoneOriginTypes = map[string]attr.Type{
 var pullzoneOriginTypeMap = map[uint8]string{
 	0: "OriginUrl",
 	2: "StorageZone",
+}
+
+var pullzoneOptimizerWatermarkPositionMap = map[uint8]string{
+	0: "BottomLeft",
+	1: "BottomRight",
+	2: "TopLeft",
+	3: "TopRight",
+	4: "Center",
+	5: "CenterStretch",
 }
 
 func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -63,6 +95,134 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"optimizer_classes_force": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_dynamic_image_api": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_enabled": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_minify_css": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_minify_js": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_smartimage": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_smartimage_desktop_maxwidth": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(1600),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_smartimage_desktop_quality": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(85),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_smartimage_mobile_maxwidth": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(800),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_smartimage_mobile_quality": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(70),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_watermark": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_watermark_url": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_watermark_position": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("BottomLeft"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_watermark_borderoffset": schema.Float64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  float64default.StaticFloat64(3.0),
+				PlanModifiers: []planmodifier.Float64{
+					float64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_watermark_minsize": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(300),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"optimizer_webp": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},
@@ -159,8 +319,12 @@ func (r *PullzoneResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	pullzoneId := data.Id.ValueInt64()
+	pzMutex.Lock(pullzoneId)
 	dataApi := r.convertModelToApi(ctx, data)
 	dataApi, err := r.client.UpdatePullzone(dataApi)
+	pzMutex.Unlock(pullzoneId)
+
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating pullzone", err.Error()))
 		return
@@ -182,7 +346,11 @@ func (r *PullzoneResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	err := r.client.DeletePullzone(data.Id.ValueInt64())
+	pullzoneId := data.Id.ValueInt64()
+	pzMutex.Lock(pullzoneId)
+	err := r.client.DeletePullzone(pullzoneId)
+	pzMutex.Unlock(pullzoneId)
+
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting pullzone", err.Error()))
 	}
@@ -220,6 +388,23 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.OriginUrl = origin["url"].(types.String).ValueString()
 	dataApi.StorageZoneId = origin["storagezone"].(types.Int64).ValueInt64()
 
+	dataApi.OptimizerEnabled = dataTf.OptimizerEnabled.ValueBool()
+	dataApi.OptimizerMinifyCss = dataTf.OptimizerMinifyCss.ValueBool()
+	dataApi.OptimizerMinifyJs = dataTf.OptimizerMinifyJs.ValueBool()
+	dataApi.OptimizerWebp = dataTf.OptimizerWebp.ValueBool()
+	dataApi.OptimizerForceClasses = dataTf.OptimizerClassesForce.ValueBool()
+	dataApi.OptimizerImageOptimization = dataTf.OptimizerDynamicImageApi.ValueBool()
+	dataApi.OptimizerAutomaticOptimizationEnabled = dataTf.OptimizerSmartImage.ValueBool()
+	dataApi.OptimizerDesktopMaxWidth = uint64(dataTf.OptimizerSmartImageDesktopMaxwidth.ValueInt64())
+	dataApi.OptimizerImageQuality = uint8(dataTf.OptimizerSmartImageDesktopQuality.ValueInt64())
+	dataApi.OptimizerMobileMaxWidth = uint64(dataTf.OptimizerSmartImageMobileMaxwidth.ValueInt64())
+	dataApi.OptimizerMobileImageQuality = uint8(dataTf.OptimizerSmartImageMobileQuality.ValueInt64())
+	dataApi.OptimizerWatermarkEnabled = dataTf.OptimizerWatermark.ValueBool()
+	dataApi.OptimizerWatermarkUrl = dataTf.OptimizerWatermarkUrl.ValueString()
+	dataApi.OptimizerWatermarkPosition = mapValueToKey(pullzoneOptimizerWatermarkPositionMap, dataTf.OptimizerWatermarkPosition.ValueString())
+	dataApi.OptimizerWatermarkOffset = dataTf.OptimizerWatermarkBorderoffset.ValueFloat64()
+	dataApi.OptimizerWatermarkMinImageSize = uint64(dataTf.OptimizerWatermarkMinsize.ValueInt64())
+
 	return dataApi
 }
 
@@ -227,7 +412,24 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	dataTf := PullzoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
+	dataTf.OptimizerEnabled = types.BoolValue(dataApi.OptimizerEnabled)
+	dataTf.OptimizerMinifyCss = types.BoolValue(dataApi.OptimizerMinifyCss)
+	dataTf.OptimizerMinifyJs = types.BoolValue(dataApi.OptimizerMinifyJs)
+	dataTf.OptimizerWebp = types.BoolValue(dataApi.OptimizerWebp)
+	dataTf.OptimizerClassesForce = types.BoolValue(dataApi.OptimizerForceClasses)
+	dataTf.OptimizerDynamicImageApi = types.BoolValue(dataApi.OptimizerImageOptimization)
+	dataTf.OptimizerSmartImage = types.BoolValue(dataApi.OptimizerAutomaticOptimizationEnabled)
+	dataTf.OptimizerSmartImageDesktopMaxwidth = types.Int64Value(int64(dataApi.OptimizerDesktopMaxWidth))
+	dataTf.OptimizerSmartImageDesktopQuality = types.Int64Value(int64(dataApi.OptimizerImageQuality))
+	dataTf.OptimizerSmartImageMobileMaxwidth = types.Int64Value(int64(dataApi.OptimizerMobileMaxWidth))
+	dataTf.OptimizerSmartImageMobileQuality = types.Int64Value(int64(dataApi.OptimizerMobileImageQuality))
+	dataTf.OptimizerWatermark = types.BoolValue(dataApi.OptimizerWatermarkEnabled)
+	dataTf.OptimizerWatermarkUrl = types.StringValue(dataApi.OptimizerWatermarkUrl)
+	dataTf.OptimizerWatermarkPosition = types.StringValue(mapKeyToValue(pullzoneOptimizerWatermarkPositionMap, dataApi.OptimizerWatermarkPosition))
+	dataTf.OptimizerWatermarkBorderoffset = types.Float64Value(dataApi.OptimizerWatermarkOffset)
+	dataTf.OptimizerWatermarkMinsize = types.Int64Value(int64(dataApi.OptimizerWatermarkMinImageSize))
 
+	// origin
 	originValues := map[string]attr.Value{
 		"type": types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
 	}
