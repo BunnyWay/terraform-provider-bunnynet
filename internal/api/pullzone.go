@@ -10,8 +10,20 @@ import (
 )
 
 type Pullzone struct {
-	Id   int64  `json:"Id,omitempty"`
-	Name string `json:"Name,omitempty"`
+	Id                                  int64    `json:"Id,omitempty"`
+	Name                                string   `json:"Name,omitempty"`
+	EnableAccessControlOriginHeader     bool     `json:"EnableAccessControlOriginHeader"`
+	AccessControlOriginHeaderExtensions []string `json:"AccessControlOriginHeaderExtensions"`
+
+	// safe hop
+	EnableSafeHop                bool   `json:"EnableSafeHop"`
+	OriginRetries                uint8  `json:"OriginRetries"`
+	OriginRetryDelay             uint64 `json:"OriginRetryDelay"`
+	OriginRetryConnectionTimeout bool   `json:"OriginRetryConnectionTimeout"`
+	OriginRetry5XXResponses      bool   `json:"OriginRetry5XXResponses"`
+	OriginRetryResponseTimeout   bool   `json:"OriginRetryResponseTimeout"`
+	OriginConnectTimeout         uint64 `json:"OriginConnectTimeout"`
+	OriginResponseTimeout        uint64 `json:"OriginResponseTimeout"`
 
 	// sub-resources
 	Edgerules        []PullzoneEdgerule       `json:"Edgerules"`
@@ -52,6 +64,14 @@ type Pullzone struct {
 	OptimizerWatermarkPosition            uint8   `json:"OptimizerWatermarkPosition"`
 	OptimizerWatermarkOffset              float64 `json:"OptimizerWatermarkOffset"`
 	OptimizerWatermarkMinImageSize        uint64  `json:"OptimizerWatermarkMinImageSize"`
+
+	// limits
+	LimitRatePerSecond        float64 `json:"LimitRatePerSecond"`
+	RequestLimit              uint64  `json:"RequestLimit"`
+	LimitRateAfter            float64 `json:"LimitRateAfter"`
+	BurstSize                 uint64  `json:"BurstSize"`
+	ConnectionLimitPerIPCount uint64  `json:"ConnectionLimitPerIPCount"`
+	MonthlyBandwidthLimit     uint64  `json:"MonthlyBandwidthLimit"`
 }
 
 func (c *Client) GetPullzone(id int64) (Pullzone, error) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -23,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/slices"
 	"strconv"
 )
 
@@ -41,8 +43,16 @@ type PullzoneResource struct {
 type PullzoneResourceModel struct {
 	Id                                 types.Int64   `tfsdk:"id"`
 	Name                               types.String  `tfsdk:"name"`
+	CorsEnabled                        types.Bool    `tfsdk:"cors_enabled"`
+	CorsExtensions                     types.Set     `tfsdk:"cors_extensions"`
 	Origin                             types.Object  `tfsdk:"origin"`
 	Routing                            types.Object  `tfsdk:"routing"`
+	LimitDownloadSpeed                 types.Float64 `tfsdk:"limit_download_speed"`
+	LimitRequests                      types.Int64   `tfsdk:"limit_requests"`
+	LimitAfter                         types.Float64 `tfsdk:"limit_after"`
+	LimitBurst                         types.Int64   `tfsdk:"limit_burst"`
+	LimitConnections                   types.Int64   `tfsdk:"limit_connections"`
+	LimitBandwidth                     types.Int64   `tfsdk:"limit_bandwidth"`
 	OptimizerEnabled                   types.Bool    `tfsdk:"optimizer_enabled"`
 	OptimizerMinifyCss                 types.Bool    `tfsdk:"optimizer_minify_css"`
 	OptimizerMinifyJs                  types.Bool    `tfsdk:"optimizer_minify_js"`
@@ -59,6 +69,12 @@ type PullzoneResourceModel struct {
 	OptimizerWatermarkPosition         types.String  `tfsdk:"optimizer_watermark_position"`
 	OptimizerWatermarkBorderoffset     types.Float64 `tfsdk:"optimizer_watermark_borderoffset"`
 	OptimizerWatermarkMinsize          types.Int64   `tfsdk:"optimizer_watermark_minsize"`
+	SafehopEnabled                     types.Bool    `tfsdk:"safehop_enabled"`
+	SafehopRetryCount                  types.Int64   `tfsdk:"safehop_retry_count"`
+	SafehopRetryDelay                  types.Int64   `tfsdk:"safehop_retry_delay"`
+	SafehopRetryReasons                types.Set     `tfsdk:"safehop_retry_reasons"`
+	SafehopConnectionTimeout           types.Int64   `tfsdk:"safehop_connection_timeout"`
+	SafehopResponseTimeout             types.Int64   `tfsdk:"safehop_response_timeout"`
 }
 
 var pullzoneOriginTypes = map[string]attr.Type{
@@ -104,6 +120,18 @@ func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRe
 }
 
 func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	pullzoneCorsExtensionsDefault, diags := types.SetValue(types.StringType, []attr.Value{
+		types.StringValue("eot"),
+		types.StringValue("ttf"),
+		types.StringValue("woff"),
+		types.StringValue("woff2"),
+	})
+
+	if diags != nil {
+		resp.Diagnostics = append(resp.Diagnostics, diags...)
+		return
+	}
+
 	pullzoneRoutingZonesDefault, diags := types.SetValue(types.StringType, []attr.Value{
 		types.StringValue("AF"),
 		types.StringValue("ASIA"),
@@ -126,6 +154,16 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 		return
 	}
 
+	pullzoneSafehopRetryReasonsDefault, diags := types.SetValue(types.StringType, []attr.Value{
+		types.StringValue("connectionTimeout"),
+		types.StringValue("responseTimeout"),
+	})
+
+	if diags != nil {
+		resp.Diagnostics = append(resp.Diagnostics, diags...)
+		return
+	}
+
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Pullzone",
 
@@ -140,6 +178,71 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"cors_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cors_extensions": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(pullzoneCorsExtensionsDefault),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"limit_download_speed": schema.Float64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  float64default.StaticFloat64(0.0),
+				PlanModifiers: []planmodifier.Float64{
+					float64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"limit_requests": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"limit_after": schema.Float64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  float64default.StaticFloat64(0.0),
+				PlanModifiers: []planmodifier.Float64{
+					float64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"limit_burst": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"limit_connections": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"limit_bandwidth": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"optimizer_classes_force": schema.BoolAttribute{
@@ -268,6 +371,61 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"safehop_enabled": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"safehop_retry_count": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 2),
+				},
+			},
+			"safehop_retry_delay": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.OneOf(0, 1, 3, 5, 10),
+				},
+			},
+			"safehop_retry_reasons": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(pullzoneSafehopRetryReasonsDefault),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"safehop_connection_timeout": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(10),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"safehop_response_timeout": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(60),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 		},
@@ -479,6 +637,26 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.Name = dataTf.Name.ValueString()
 
+	// cors
+	{
+		values := []string{}
+		for _, extension := range dataTf.CorsExtensions.Elements() {
+			values = append(values, extension.(types.String).ValueString())
+		}
+		slices.Sort(values)
+
+		dataApi.EnableAccessControlOriginHeader = dataTf.CorsEnabled.ValueBool()
+		dataApi.AccessControlOriginHeaderExtensions = values
+	}
+
+	// limits
+	dataApi.LimitRatePerSecond = dataTf.LimitDownloadSpeed.ValueFloat64()
+	dataApi.RequestLimit = uint64(dataTf.LimitRequests.ValueInt64())
+	dataApi.LimitRateAfter = dataTf.LimitAfter.ValueFloat64()
+	dataApi.BurstSize = uint64(dataTf.LimitBurst.ValueInt64())
+	dataApi.ConnectionLimitPerIPCount = uint64(dataTf.LimitConnections.ValueInt64())
+	dataApi.MonthlyBandwidthLimit = uint64(dataTf.LimitBandwidth.ValueInt64())
+
 	// optimizer
 	dataApi.OptimizerEnabled = dataTf.OptimizerEnabled.ValueBool()
 	dataApi.OptimizerMinifyCss = dataTf.OptimizerMinifyCss.ValueBool()
@@ -540,6 +718,28 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.RoutingFilters = values
 	}
 
+	// safe hop
+	{
+		dataApi.EnableSafeHop = dataTf.SafehopEnabled.ValueBool()
+		dataApi.OriginRetries = uint8(dataTf.SafehopRetryCount.ValueInt64())
+		dataApi.OriginRetryDelay = uint64(dataTf.SafehopRetryDelay.ValueInt64())
+		dataApi.OriginConnectTimeout = uint64(dataTf.SafehopConnectionTimeout.ValueInt64())
+		dataApi.OriginResponseTimeout = uint64(dataTf.SafehopResponseTimeout.ValueInt64())
+
+		reasons := dataTf.SafehopRetryReasons.Elements()
+		for _, reason := range reasons {
+			if reason.(types.String).ValueString() == "connectionTimeout" {
+				dataApi.OriginRetryConnectionTimeout = true
+			}
+			if reason.(types.String).ValueString() == "5xxResponse" {
+				dataApi.OriginRetry5XXResponses = true
+			}
+			if reason.(types.String).ValueString() == "responseTimeout" {
+				dataApi.OriginRetryResponseTimeout = true
+			}
+		}
+	}
+
 	return dataApi
 }
 
@@ -547,6 +747,30 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	dataTf := PullzoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
+
+	// cors
+	{
+		var extensionValues []attr.Value
+		for _, extension := range dataApi.AccessControlOriginHeaderExtensions {
+			extensionValues = append(extensionValues, types.StringValue(extension))
+		}
+
+		extensions, diags := types.SetValue(types.StringType, extensionValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		dataTf.CorsEnabled = types.BoolValue(dataApi.EnableAccessControlOriginHeader)
+		dataTf.CorsExtensions = extensions
+	}
+
+	// limits
+	dataTf.LimitDownloadSpeed = types.Float64Value(dataApi.LimitRatePerSecond)
+	dataTf.LimitRequests = types.Int64Value(int64(dataApi.RequestLimit))
+	dataTf.LimitAfter = types.Float64Value(dataApi.LimitRateAfter)
+	dataTf.LimitBurst = types.Int64Value(int64(dataApi.BurstSize))
+	dataTf.LimitConnections = types.Int64Value(int64(dataApi.ConnectionLimitPerIPCount))
+	dataTf.LimitBandwidth = types.Int64Value(int64(dataApi.MonthlyBandwidthLimit))
 
 	// optimizer
 	dataTf.OptimizerEnabled = types.BoolValue(dataApi.OptimizerEnabled)
@@ -654,6 +878,35 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		}
 
 		dataTf.Routing = routing
+	}
+
+	// safe hop
+	{
+		dataTf.SafehopEnabled = types.BoolValue(dataApi.EnableSafeHop)
+		dataTf.SafehopRetryCount = types.Int64Value(int64(dataApi.OriginRetries))
+		dataTf.SafehopRetryDelay = types.Int64Value(int64(dataApi.OriginRetryDelay))
+		dataTf.SafehopConnectionTimeout = types.Int64Value(int64(dataApi.OriginConnectTimeout))
+		dataTf.SafehopResponseTimeout = types.Int64Value(int64(dataApi.OriginResponseTimeout))
+
+		var reasonsValues []attr.Value
+		if dataApi.OriginRetryConnectionTimeout {
+			reasonsValues = append(reasonsValues, types.StringValue("connectionTimeout"))
+		}
+
+		if dataApi.OriginRetry5XXResponses {
+			reasonsValues = append(reasonsValues, types.StringValue("5xxResponse"))
+		}
+
+		if dataApi.OriginRetryResponseTimeout {
+			reasonsValues = append(reasonsValues, types.StringValue("responseTimeout"))
+		}
+
+		reasons, diags := types.SetValue(types.StringType, reasonsValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		dataTf.SafehopRetryReasons = reasons
 	}
 
 	return dataTf, nil
