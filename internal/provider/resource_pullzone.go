@@ -43,6 +43,17 @@ type PullzoneResource struct {
 type PullzoneResourceModel struct {
 	Id                                 types.Int64   `tfsdk:"id"`
 	Name                               types.String  `tfsdk:"name"`
+	CacheEnabled                       types.Bool    `tfsdk:"cache_enabled"`
+	CacheExpirationTime                types.Int64   `tfsdk:"cache_expiration_time"`
+	CacheExpirationTimeBrowser         types.Int64   `tfsdk:"cache_expiration_time_browser"`
+	SortQueryString                    types.Bool    `tfsdk:"sort_querystring"`
+	CacheErrors                        types.Bool    `tfsdk:"cache_errors"`
+	CacheVary                          types.Set     `tfsdk:"cache_vary"`
+	CacheVaryQueryStringValues         types.Set     `tfsdk:"cache_vary_querystring"`
+	CacheVaryCookieValues              types.Set     `tfsdk:"cache_vary_cookie"`
+	StripCookies                       types.Bool    `tfsdk:"strip_cookies"`
+	CacheChunked                       types.Bool    `tfsdk:"cache_chunked"`
+	CacheStale                         types.Set     `tfsdk:"cache_stale"`
 	CorsEnabled                        types.Bool    `tfsdk:"cors_enabled"`
 	CorsExtensions                     types.Set     `tfsdk:"cors_extensions"`
 	Origin                             types.Object  `tfsdk:"origin"`
@@ -121,6 +132,7 @@ func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	pullzoneCorsExtensionsDefault, diags := types.SetValue(types.StringType, []attr.Value{
+		types.StringValue("css"),
 		types.StringValue("eot"),
 		types.StringValue("ttf"),
 		types.StringValue("woff"),
@@ -178,6 +190,104 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"cache_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_expiration_time": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(-1),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(-1, 31919000), // -1 to 1y
+				},
+			},
+			"cache_expiration_time_browser": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(-1),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(-1, 31919000), // -1 to 1y
+				},
+			},
+			"sort_querystring": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_errors": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_vary": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_vary_querystring": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_vary_cookie": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"strip_cookies": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_chunked": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"cache_stale": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"cors_enabled": schema.BoolAttribute{
@@ -256,7 +366,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 			"optimizer_dynamic_image_api": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -272,7 +382,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 			"optimizer_minify_css": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -280,7 +390,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 			"optimizer_minify_js": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -288,7 +398,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 			"optimizer_smartimage": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -368,7 +478,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 			"optimizer_webp": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -637,6 +747,69 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.Name = dataTf.Name.ValueString()
 
+	// caching
+	{
+		// CacheVary
+		vary := dataTf.CacheVary.Elements()
+		dataApi.IgnoreQueryStrings = true
+		for _, v := range vary {
+			if v.(types.String).ValueString() == "querystring" {
+				dataApi.IgnoreQueryStrings = false
+			}
+			if v.(types.String).ValueString() == "webp" {
+				dataApi.EnableWebPVary = true
+			}
+			if v.(types.String).ValueString() == "country" {
+				dataApi.EnableCountryCodeVary = true
+			}
+			if v.(types.String).ValueString() == "hostname" {
+				dataApi.EnableHostnameVary = true
+			}
+			if v.(types.String).ValueString() == "mobile" {
+				dataApi.EnableMobileVary = true
+			}
+			if v.(types.String).ValueString() == "avif" {
+				dataApi.EnableAvifVary = true
+			}
+			if v.(types.String).ValueString() == "cookie" {
+				dataApi.EnableCookieVary = true
+			}
+		}
+
+		// CacheVaryQueryStringValues
+		varyQueryString := []string{}
+		for _, v := range dataTf.CacheVaryQueryStringValues.Elements() {
+			varyQueryString = append(varyQueryString, v.(types.String).ValueString())
+		}
+
+		// CacheVaryCookieValues
+		varyCookie := []string{}
+		for _, v := range dataTf.CacheVaryCookieValues.Elements() {
+			varyCookie = append(varyCookie, v.(types.String).ValueString())
+		}
+
+		// CacheStale
+		stale := dataTf.CacheStale.Elements()
+		for _, v := range stale {
+			if v.(types.String).ValueString() == "offline" {
+				dataApi.UseStaleWhileOffline = true
+			}
+			if v.(types.String).ValueString() == "updating" {
+				dataApi.UseStaleWhileUpdating = true
+			}
+		}
+
+		dataApi.EnableSmartCache = dataTf.CacheEnabled.ValueBool()
+		dataApi.CacheControlMaxAgeOverride = dataTf.CacheExpirationTime.ValueInt64()
+		dataApi.CacheControlPublicMaxAgeOverride = dataTf.CacheExpirationTimeBrowser.ValueInt64()
+		dataApi.EnableQueryStringOrdering = dataTf.SortQueryString.ValueBool()
+		dataApi.CacheErrorResponses = dataTf.CacheErrors.ValueBool()
+		dataApi.QueryStringVaryParameters = varyQueryString
+		dataApi.CookieVaryParameters = varyCookie
+		dataApi.DisableCookies = dataTf.StripCookies.ValueBool()
+		dataApi.EnableCacheSlice = dataTf.CacheChunked.ValueBool()
+	}
+
 	// cors
 	{
 		values := []string{}
@@ -747,6 +920,93 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	dataTf := PullzoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
+
+	// caching
+	{
+		// CacheVary
+		var varyValues []attr.Value
+		if !dataApi.IgnoreQueryStrings {
+			varyValues = append(varyValues, types.StringValue("querystring"))
+		}
+
+		if dataApi.EnableWebPVary {
+			varyValues = append(varyValues, types.StringValue("webp"))
+		}
+
+		if dataApi.EnableCountryCodeVary {
+			varyValues = append(varyValues, types.StringValue("country"))
+		}
+
+		if dataApi.EnableHostnameVary {
+			varyValues = append(varyValues, types.StringValue("hostname"))
+		}
+
+		if dataApi.EnableMobileVary {
+			varyValues = append(varyValues, types.StringValue("mobile"))
+		}
+
+		if dataApi.EnableAvifVary {
+			varyValues = append(varyValues, types.StringValue("avif"))
+		}
+
+		if dataApi.EnableCookieVary {
+			varyValues = append(varyValues, types.StringValue("cookie"))
+		}
+
+		vary, diags := types.SetValue(types.StringType, varyValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		// CacheVaryQueryStringParams
+		var varyQueryStringValues []attr.Value
+		for _, qsParam := range dataApi.QueryStringVaryParameters {
+			varyQueryStringValues = append(varyQueryStringValues, types.StringValue(qsParam))
+		}
+
+		varyQueryString, diags := types.SetValue(types.StringType, varyQueryStringValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		// CacheVaryCookieParams
+		var varyCookieValues []attr.Value
+		for _, cookieParam := range dataApi.CookieVaryParameters {
+			varyCookieValues = append(varyCookieValues, types.StringValue(cookieParam))
+		}
+
+		varyCookie, diags := types.SetValue(types.StringType, varyCookieValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		// CacheStale
+		var staleValues []attr.Value
+		if dataApi.UseStaleWhileOffline {
+			staleValues = append(staleValues, types.StringValue("offline"))
+		}
+
+		if dataApi.UseStaleWhileUpdating {
+			staleValues = append(staleValues, types.StringValue("updating"))
+		}
+
+		stale, diags := types.SetValue(types.StringType, staleValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		dataTf.CacheEnabled = types.BoolValue(dataApi.EnableSmartCache)
+		dataTf.CacheExpirationTime = types.Int64Value(dataApi.CacheControlMaxAgeOverride)
+		dataTf.CacheExpirationTimeBrowser = types.Int64Value(dataApi.CacheControlPublicMaxAgeOverride)
+		dataTf.SortQueryString = types.BoolValue(dataApi.EnableQueryStringOrdering)
+		dataTf.CacheErrors = types.BoolValue(dataApi.CacheErrorResponses)
+		dataTf.CacheVary = vary
+		dataTf.CacheVaryQueryStringValues = varyQueryString
+		dataTf.CacheVaryCookieValues = varyCookie
+		dataTf.StripCookies = types.BoolValue(dataApi.DisableCookies)
+		dataTf.CacheChunked = types.BoolValue(dataApi.EnableCacheSlice)
+		dataTf.CacheStale = stale
+	}
 
 	// cors
 	{

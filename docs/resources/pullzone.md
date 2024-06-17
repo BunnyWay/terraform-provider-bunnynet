@@ -60,6 +60,29 @@ resource "bunny_pullzone" "test" {
   safehop_retry_reasons      = ["connectionTimeout", "5xxResponse", "responseTimeout"]
   safehop_connection_timeout = 10
   safehop_response_timeout   = 60
+
+  cache_enabled                 = true
+  cache_expiration_time         = -1
+  cache_expiration_time_browser = -1
+  sort_querystring              = true
+  cache_errors                  = false
+  cache_vary = [
+    "querystring",
+    "webp",
+    "country",
+    "hostname",
+    "mobile",
+    "avif",
+    "cookie",
+  ]
+  cache_vary_querystring = ["ver", "q"]
+  cache_vary_cookie      = ["JSESSIONID"]
+  strip_cookies          = true
+  cache_chunked          = false
+  cache_stale = [
+    "offline",
+    "updating",
+  ]
 }
 ```
 
@@ -72,6 +95,15 @@ resource "bunny_pullzone" "test" {
 
 ### Optional
 
+- `cache_chunked` (Boolean)
+- `cache_enabled` (Boolean)
+- `cache_errors` (Boolean)
+- `cache_expiration_time` (Number)
+- `cache_expiration_time_browser` (Number)
+- `cache_stale` (Set of String)
+- `cache_vary` (Set of String)
+- `cache_vary_cookie` (Set of String)
+- `cache_vary_querystring` (Set of String)
 - `cors_enabled` (Boolean)
 - `cors_extensions` (Set of String)
 - `limit_after` (Number)
@@ -104,6 +136,8 @@ resource "bunny_pullzone" "test" {
 - `safehop_retry_count` (Number)
 - `safehop_retry_delay` (Number)
 - `safehop_retry_reasons` (Set of String)
+- `sort_querystring` (Boolean)
+- `strip_cookies` (Boolean)
 
 ### Read-Only
 

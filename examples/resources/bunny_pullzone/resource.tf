@@ -45,4 +45,27 @@ resource "bunny_pullzone" "test" {
   safehop_retry_reasons      = ["connectionTimeout", "5xxResponse", "responseTimeout"]
   safehop_connection_timeout = 10
   safehop_response_timeout   = 60
+
+  cache_enabled                 = true
+  cache_expiration_time         = -1
+  cache_expiration_time_browser = -1
+  sort_querystring              = true
+  cache_errors                  = false
+  cache_vary = [
+    "querystring",
+    "webp",
+    "country",
+    "hostname",
+    "mobile",
+    "avif",
+    "cookie",
+  ]
+  cache_vary_querystring = ["ver", "q"]
+  cache_vary_cookie      = ["JSESSIONID"]
+  strip_cookies          = true
+  cache_chunked          = false
+  cache_stale = [
+    "offline",
+    "updating",
+  ]
 }
