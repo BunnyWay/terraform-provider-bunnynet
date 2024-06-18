@@ -16,24 +16,30 @@ type Pullzone struct {
 	AccessControlOriginHeaderExtensions []string `json:"AccessControlOriginHeaderExtensions"`
 
 	// caching
-	EnableSmartCache                 bool     `json:"EnableSmartCache"`
-	CacheControlMaxAgeOverride       int64    `json:"CacheControlMaxAgeOverride"`
-	CacheControlPublicMaxAgeOverride int64    `json:"CacheControlPublicMaxAgeOverride"`
-	EnableQueryStringOrdering        bool     `json:"EnableQueryStringOrdering"`
-	CacheErrorResponses              bool     `json:"CacheErrorResponses"`
-	IgnoreQueryStrings               bool     `json:"IgnoreQueryStrings"`
-	EnableWebPVary                   bool     `json:"EnableWebPVary"`
-	EnableCountryCodeVary            bool     `json:"EnableCountryCodeVary"`
-	EnableHostnameVary               bool     `json:"EnableHostnameVary"`
-	EnableMobileVary                 bool     `json:"EnableMobileVary"`
-	EnableAvifVary                   bool     `json:"EnableAvifVary"`
-	EnableCookieVary                 bool     `json:"EnableCookieVary"`
-	QueryStringVaryParameters        []string `json:"QueryStringVaryParameters"`
-	CookieVaryParameters             []string `json:"CookieVaryParameters"`
-	DisableCookies                   bool     `json:"DisableCookies"`
-	EnableCacheSlice                 bool     `json:"EnableCacheSlice"`
-	UseStaleWhileUpdating            bool     `json:"UseStaleWhileUpdating"`
-	UseStaleWhileOffline             bool     `json:"UseStaleWhileOffline"`
+	EnableSmartCache                   bool     `json:"EnableSmartCache"`
+	CacheControlMaxAgeOverride         int64    `json:"CacheControlMaxAgeOverride"`
+	CacheControlPublicMaxAgeOverride   int64    `json:"CacheControlPublicMaxAgeOverride"`
+	EnableQueryStringOrdering          bool     `json:"EnableQueryStringOrdering"`
+	CacheErrorResponses                bool     `json:"CacheErrorResponses"`
+	IgnoreQueryStrings                 bool     `json:"IgnoreQueryStrings"`
+	EnableWebPVary                     bool     `json:"EnableWebPVary"`
+	EnableCountryCodeVary              bool     `json:"EnableCountryCodeVary"`
+	EnableHostnameVary                 bool     `json:"EnableHostnameVary"`
+	EnableMobileVary                   bool     `json:"EnableMobileVary"`
+	EnableAvifVary                     bool     `json:"EnableAvifVary"`
+	EnableCookieVary                   bool     `json:"EnableCookieVary"`
+	QueryStringVaryParameters          []string `json:"QueryStringVaryParameters"`
+	CookieVaryParameters               []string `json:"CookieVaryParameters"`
+	DisableCookies                     bool     `json:"DisableCookies"`
+	EnableCacheSlice                   bool     `json:"EnableCacheSlice"`
+	UseStaleWhileUpdating              bool     `json:"UseStaleWhileUpdating"`
+	UseStaleWhileOffline               bool     `json:"UseStaleWhileOffline"`
+	PermaCacheStorageZoneId            uint64   `json:"PermaCacheStorageZoneId"`
+	EnableOriginShield                 bool     `json:"EnableOriginShield"`
+	OriginShieldEnableConcurrencyLimit bool     `json:"OriginShieldEnableConcurrencyLimit"`
+	OriginShieldMaxConcurrentRequests  uint64   `json:"OriginShieldMaxConcurrentRequests"`
+	OriginShieldMaxQueuedRequests      uint64   `json:"OriginShieldMaxQueuedRequests"`
+	OriginShieldQueueMaxWaitTime       uint64   `json:"OriginShieldQueueMaxWaitTime"`
 
 	// safe hop
 	EnableSafeHop                bool   `json:"EnableSafeHop"`

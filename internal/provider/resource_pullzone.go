@@ -54,6 +54,12 @@ type PullzoneResourceModel struct {
 	StripCookies                       types.Bool    `tfsdk:"strip_cookies"`
 	CacheChunked                       types.Bool    `tfsdk:"cache_chunked"`
 	CacheStale                         types.Set     `tfsdk:"cache_stale"`
+	PermacacheStoragezone              types.Int64   `tfsdk:"permacache_storagezone"`
+	OriginShieldEnabled                types.Bool    `tfsdk:"originshield_enabled"`
+	OriginShieldConcurrencyLimit       types.Bool    `tfsdk:"originshield_concurrency_limit"`
+	OriginShieldConcurrencyRequests    types.Int64   `tfsdk:"originshield_concurrency_requests"`
+	OriginShieldQueueRequests          types.Int64   `tfsdk:"originshield_queue_requests"`
+	OriginShieldQueueWait              types.Int64   `tfsdk:"originshield_queue_wait"`
 	CorsEnabled                        types.Bool    `tfsdk:"cors_enabled"`
 	CorsExtensions                     types.Set     `tfsdk:"cors_extensions"`
 	Origin                             types.Object  `tfsdk:"origin"`
@@ -288,6 +294,57 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"permacache_storagezone": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"originshield_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"originshield_concurrency_limit": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"originshield_concurrency_requests": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(200),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"originshield_queue_requests": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(5000),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"originshield_queue_wait": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(30),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.OneOf(3, 5, 15, 30, 45),
 				},
 			},
 			"cors_enabled": schema.BoolAttribute{
@@ -808,6 +865,12 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.CookieVaryParameters = varyCookie
 		dataApi.DisableCookies = dataTf.StripCookies.ValueBool()
 		dataApi.EnableCacheSlice = dataTf.CacheChunked.ValueBool()
+		dataApi.PermaCacheStorageZoneId = uint64(dataTf.PermacacheStoragezone.ValueInt64())
+		dataApi.EnableOriginShield = dataTf.OriginShieldEnabled.ValueBool()
+		dataApi.OriginShieldEnableConcurrencyLimit = dataTf.OriginShieldConcurrencyLimit.ValueBool()
+		dataApi.OriginShieldMaxConcurrentRequests = uint64(dataTf.OriginShieldConcurrencyRequests.ValueInt64())
+		dataApi.OriginShieldMaxQueuedRequests = uint64(dataTf.OriginShieldQueueRequests.ValueInt64())
+		dataApi.OriginShieldQueueMaxWaitTime = uint64(dataTf.OriginShieldQueueWait.ValueInt64())
 	}
 
 	// cors
@@ -1006,6 +1069,12 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.StripCookies = types.BoolValue(dataApi.DisableCookies)
 		dataTf.CacheChunked = types.BoolValue(dataApi.EnableCacheSlice)
 		dataTf.CacheStale = stale
+		dataTf.PermacacheStoragezone = types.Int64Value(int64(dataApi.PermaCacheStorageZoneId))
+		dataTf.OriginShieldEnabled = types.BoolValue(dataApi.EnableOriginShield)
+		dataTf.OriginShieldConcurrencyLimit = types.BoolValue(dataApi.OriginShieldEnableConcurrencyLimit)
+		dataTf.OriginShieldConcurrencyRequests = types.Int64Value(int64(dataApi.OriginShieldMaxConcurrentRequests))
+		dataTf.OriginShieldQueueRequests = types.Int64Value(int64(dataApi.OriginShieldMaxQueuedRequests))
+		dataTf.OriginShieldQueueWait = types.Int64Value(int64(dataApi.OriginShieldQueueMaxWaitTime))
 	}
 
 	// cors

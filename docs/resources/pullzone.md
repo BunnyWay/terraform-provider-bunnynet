@@ -83,6 +83,14 @@ resource "bunny_pullzone" "test" {
     "offline",
     "updating",
   ]
+
+  permacache_storagezone = bunny_storage.test.id
+
+  originshield_enabled              = true
+  originshield_concurrency_limit    = true
+  originshield_concurrency_requests = 200
+  originshield_queue_requests       = 5000
+  originshield_queue_wait           = 45
 }
 ```
 
@@ -129,6 +137,12 @@ resource "bunny_pullzone" "test" {
 - `optimizer_watermark_url` (String)
 - `optimizer_webp` (Boolean)
 - `origin` (Block, Optional) (see [below for nested schema](#nestedblock--origin))
+- `originshield_concurrency_limit` (Boolean)
+- `originshield_concurrency_requests` (Number)
+- `originshield_enabled` (Boolean)
+- `originshield_queue_requests` (Number)
+- `originshield_queue_wait` (Number)
+- `permacache_storagezone` (Number)
 - `routing` (Block, Optional) (see [below for nested schema](#nestedblock--routing))
 - `safehop_connection_timeout` (Number)
 - `safehop_enabled` (Boolean)
