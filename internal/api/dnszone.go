@@ -10,15 +10,16 @@ import (
 )
 
 type DnsZone struct {
-	Id                            int64  `json:"Id,omitempty"`
-	Domain                        string `json:"Domain"`
-	CustomNameserversEnabled      bool   `json:"CustomNameserversEnabled"`
-	Nameserver1                   string `json:"Nameserver1"`
-	Nameserver2                   string `json:"Nameserver2"`
-	SoaEmail                      string `json:"SoaEmail"`
-	LoggingEnabled                bool   `json:"LoggingEnabled"`
-	LoggingIPAnonymizationEnabled bool   `json:"LoggingIPAnonymizationEnabled"`
-	LogAnonymizationType          uint8  `json:"LogAnonymizationType"`
+	Id                            int64       `json:"Id,omitempty"`
+	Domain                        string      `json:"Domain"`
+	CustomNameserversEnabled      bool        `json:"CustomNameserversEnabled"`
+	Nameserver1                   string      `json:"Nameserver1"`
+	Nameserver2                   string      `json:"Nameserver2"`
+	SoaEmail                      string      `json:"SoaEmail"`
+	LoggingEnabled                bool        `json:"LoggingEnabled"`
+	LoggingIPAnonymizationEnabled bool        `json:"LoggingIPAnonymizationEnabled"`
+	LogAnonymizationType          uint8       `json:"LogAnonymizationType"`
+	Records                       []DnsRecord `json:"Records"`
 }
 
 func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
