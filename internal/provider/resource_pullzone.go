@@ -60,6 +60,8 @@ type PullzoneResourceModel struct {
 	OriginShieldConcurrencyRequests    types.Int64   `tfsdk:"originshield_concurrency_requests"`
 	OriginShieldQueueRequests          types.Int64   `tfsdk:"originshield_queue_requests"`
 	OriginShieldQueueWait              types.Int64   `tfsdk:"originshield_queue_wait"`
+	RequestCoalescingEnabled           types.Bool    `tfsdk:"request_coalescing_enabled"`
+	RequestCoalescingTimeout           types.Int64   `tfsdk:"request_coalescing_timeout"`
 	CorsEnabled                        types.Bool    `tfsdk:"cors_enabled"`
 	CorsExtensions                     types.Set     `tfsdk:"cors_extensions"`
 	Origin                             types.Object  `tfsdk:"origin"`
@@ -345,6 +347,25 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Validators: []validator.Int64{
 					int64validator.OneOf(3, 5, 15, 30, 45),
+				},
+			},
+			"request_coalescing_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"request_coalescing_timeout": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(30),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.OneOf(3, 5, 10, 15, 30, 60),
 				},
 			},
 			"cors_enabled": schema.BoolAttribute{
@@ -871,6 +892,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.OriginShieldMaxConcurrentRequests = uint64(dataTf.OriginShieldConcurrencyRequests.ValueInt64())
 		dataApi.OriginShieldMaxQueuedRequests = uint64(dataTf.OriginShieldQueueRequests.ValueInt64())
 		dataApi.OriginShieldQueueMaxWaitTime = uint64(dataTf.OriginShieldQueueWait.ValueInt64())
+		dataApi.EnableRequestCoalescing = dataTf.RequestCoalescingEnabled.ValueBool()
+		dataApi.RequestCoalescingTimeout = uint64(dataTf.RequestCoalescingTimeout.ValueInt64())
 	}
 
 	// cors
@@ -1075,6 +1098,8 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.OriginShieldConcurrencyRequests = types.Int64Value(int64(dataApi.OriginShieldMaxConcurrentRequests))
 		dataTf.OriginShieldQueueRequests = types.Int64Value(int64(dataApi.OriginShieldMaxQueuedRequests))
 		dataTf.OriginShieldQueueWait = types.Int64Value(int64(dataApi.OriginShieldQueueMaxWaitTime))
+		dataTf.RequestCoalescingEnabled = types.BoolValue(dataApi.EnableRequestCoalescing)
+		dataTf.RequestCoalescingTimeout = types.Int64Value(int64(dataApi.RequestCoalescingTimeout))
 	}
 
 	// cors

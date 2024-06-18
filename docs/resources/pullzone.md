@@ -91,6 +91,9 @@ resource "bunny_pullzone" "test" {
   originshield_concurrency_requests = 200
   originshield_queue_requests       = 5000
   originshield_queue_wait           = 45
+
+  request_coalescing_enabled = true
+  request_coalescing_timeout = 15
 }
 ```
 
@@ -143,6 +146,8 @@ resource "bunny_pullzone" "test" {
 - `originshield_queue_requests` (Number)
 - `originshield_queue_wait` (Number)
 - `permacache_storagezone` (Number)
+- `request_coalescing_enabled` (Boolean)
+- `request_coalescing_timeout` (Number)
 - `routing` (Block, Optional) (see [below for nested schema](#nestedblock--routing))
 - `safehop_connection_timeout` (Number)
 - `safehop_enabled` (Boolean)

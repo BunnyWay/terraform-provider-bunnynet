@@ -76,4 +76,7 @@ resource "bunny_pullzone" "test" {
   originshield_concurrency_requests = 200
   originshield_queue_requests       = 5000
   originshield_queue_wait           = 45
+
+  request_coalescing_enabled = true
+  request_coalescing_timeout = 15
 }

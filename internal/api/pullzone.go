@@ -40,6 +40,8 @@ type Pullzone struct {
 	OriginShieldMaxConcurrentRequests  uint64   `json:"OriginShieldMaxConcurrentRequests"`
 	OriginShieldMaxQueuedRequests      uint64   `json:"OriginShieldMaxQueuedRequests"`
 	OriginShieldQueueMaxWaitTime       uint64   `json:"OriginShieldQueueMaxWaitTime"`
+	EnableRequestCoalescing            bool     `json:"EnableRequestCoalescing"`
+	RequestCoalescingTimeout           uint64   `json:"RequestCoalescingTimeout"`
 
 	// safe hop
 	EnableSafeHop                bool   `json:"EnableSafeHop"`
