@@ -94,6 +94,40 @@ resource "bunny_pullzone" "test" {
 
   request_coalescing_enabled = true
   request_coalescing_timeout = 15
+
+  block_root_path     = true
+  block_post_requests = true
+  allow_referers      = ["*.example.com", "example.com"]
+  block_referers      = ["example.org", "*.example.org"]
+  block_ips           = ["1.1.1.1", "192.0.2.*"]
+
+  log_enabled          = true
+  log_anonymized       = true
+  log_anonymized_style = "Drop"
+  log_forward_enabled  = true
+  log_forward_server   = "192.0.2.254"
+  log_forward_port     = 1234
+  log_forward_token    = "my-log-secret"
+  log_forward_protocol = "udp|tcp|tcp_encrypted|datadog"
+  log_forward_format   = "json|plain"
+  log_storage_enabled  = true
+  log_storage_zone     = bunny_storagezone.logs.id
+
+  tls_support = ["TLSv1.0", "TLSv1.1"]
+
+  errorpage_whitelabel         = true
+  errorpage_statuspage_enabled = true
+  errorpage_statuspage_code    = "abc1234d"
+  errorpage_custom_enabled     = true
+  errorpage_custom_content     = "error {{status_code}}"
+
+  s3_auth_enabled = true
+  s3_auth_key     = "key-goes-here"
+  s3_auth_secret  = "secret-goes-here"
+  s3_auth_region  = "us-east-1"
+
+  token_auth_enabled       = true
+  token_auth_ip_validation = true
 }
 ```
 
@@ -106,6 +140,11 @@ resource "bunny_pullzone" "test" {
 
 ### Optional
 
+- `allow_referers` (Set of String)
+- `block_ips` (Set of String)
+- `block_post_requests` (Boolean)
+- `block_referers` (Set of String)
+- `block_root_path` (Boolean)
 - `cache_chunked` (Boolean)
 - `cache_enabled` (Boolean)
 - `cache_errors` (Boolean)
@@ -117,12 +156,28 @@ resource "bunny_pullzone" "test" {
 - `cache_vary_querystring` (Set of String)
 - `cors_enabled` (Boolean)
 - `cors_extensions` (Set of String)
+- `errorpage_custom_content` (String)
+- `errorpage_custom_enabled` (Boolean)
+- `errorpage_statuspage_code` (String)
+- `errorpage_statuspage_enabled` (Boolean)
+- `errorpage_whitelabel` (Boolean)
 - `limit_after` (Number)
 - `limit_bandwidth` (Number)
 - `limit_burst` (Number)
 - `limit_connections` (Number)
 - `limit_download_speed` (Number)
 - `limit_requests` (Number)
+- `log_anonymized` (Boolean)
+- `log_anonymized_style` (String)
+- `log_enabled` (Boolean)
+- `log_forward_enabled` (Boolean)
+- `log_forward_format` (String)
+- `log_forward_port` (Number)
+- `log_forward_protocol` (String)
+- `log_forward_server` (String)
+- `log_forward_token` (String)
+- `log_storage_enabled` (Boolean)
+- `log_storage_zone` (Number)
 - `optimizer_classes_force` (Boolean)
 - `optimizer_dynamic_image_api` (Boolean)
 - `optimizer_enabled` (Boolean)
@@ -149,6 +204,10 @@ resource "bunny_pullzone" "test" {
 - `request_coalescing_enabled` (Boolean)
 - `request_coalescing_timeout` (Number)
 - `routing` (Block, Optional) (see [below for nested schema](#nestedblock--routing))
+- `s3_auth_enabled` (Boolean)
+- `s3_auth_key` (String)
+- `s3_auth_region` (String)
+- `s3_auth_secret` (String)
 - `safehop_connection_timeout` (Number)
 - `safehop_enabled` (Boolean)
 - `safehop_response_timeout` (Number)
@@ -157,10 +216,14 @@ resource "bunny_pullzone" "test" {
 - `safehop_retry_reasons` (Set of String)
 - `sort_querystring` (Boolean)
 - `strip_cookies` (Boolean)
+- `tls_support` (Set of String)
+- `token_auth_enabled` (Boolean)
+- `token_auth_ip_validation` (Boolean)
 
 ### Read-Only
 
 - `id` (Number) The ID of this resource.
+- `token_auth_key` (String, Sensitive)
 
 <a id="nestedblock--origin"></a>
 ### Nested Schema for `origin`

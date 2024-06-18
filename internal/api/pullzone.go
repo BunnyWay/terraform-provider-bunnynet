@@ -43,6 +43,38 @@ type Pullzone struct {
 	EnableRequestCoalescing            bool     `json:"EnableRequestCoalescing"`
 	RequestCoalescingTimeout           uint64   `json:"RequestCoalescingTimeout"`
 
+	// security
+	BlockRootPathAccess             bool     `json:"BlockRootPathAccess"`
+	BlockPostRequests               bool     `json:"BlockPostRequests"`
+	AllowedReferrers                []string `json:"AllowedReferrers"`
+	BlockedReferrers                []string `json:"BlockedReferrers"`
+	BlockedIps                      []string `json:"BlockedIps"`
+	EnableLogging                   bool     `json:"EnableLogging"`
+	LoggingIPAnonymizationEnabled   bool     `json:"LoggingIPAnonymizationEnabled"`
+	LogAnonymizationType            uint8    `json:"LogAnonymizationType"`
+	LogForwardingEnabled            bool     `json:"LogForwardingEnabled"`
+	LogForwardingHostname           string   `json:"LogForwardingHostname"`
+	LogForwardingPort               uint16   `json:"LogForwardingPort"`
+	LogForwardingToken              string   `json:"LogForwardingToken"`
+	LogForwardingProtocol           uint8    `json:"LogForwardingProtocol"`
+	LogForwardingFormat             uint8    `json:"LogForwardingFormat"`
+	LoggingSaveToStorage            bool     `json:"LoggingSaveToStorage"`
+	LoggingStorageZoneId            uint64   `json:"LoggingStorageZoneId"`
+	EnableTLS1                      bool     `json:"EnableTLS1"`
+	EnableTLS1_1                    bool     `json:"EnableTLS1_1"`
+	ErrorPageWhitelabel             bool     `json:"ErrorPageWhitelabel"`
+	ErrorPageEnableStatuspageWidget bool     `json:"ErrorPageEnableStatuspageWidget"`
+	ErrorPageStatuspageCode         string   `json:"ErrorPageStatuspageCode"`
+	ErrorPageEnableCustomCode       bool     `json:"ErrorPageEnableCustomCode"`
+	ErrorPageCustomCode             string   `json:"ErrorPageCustomCode"`
+	AWSSigningEnabled               bool     `json:"AWSSigningEnabled"`
+	AWSSigningKey                   string   `json:"AWSSigningKey"`
+	AWSSigningSecret                string   `json:"AWSSigningSecret"`
+	AWSSigningRegionName            string   `json:"AWSSigningRegionName"`
+	ZoneSecurityEnabled             bool     `json:"ZoneSecurityEnabled"`
+	ZoneSecurityIncludeHashRemoteIP bool     `json:"ZoneSecurityIncludeHashRemoteIp"`
+	ZoneSecurityKey                 string   `json:"ZoneSecurityKey"`
+
 	// safe hop
 	EnableSafeHop                bool   `json:"EnableSafeHop"`
 	OriginRetries                uint8  `json:"OriginRetries"`

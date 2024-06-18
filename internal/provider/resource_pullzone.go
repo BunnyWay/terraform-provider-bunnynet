@@ -6,6 +6,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -24,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 	"strconv"
 )
@@ -94,6 +96,35 @@ type PullzoneResourceModel struct {
 	SafehopRetryReasons                types.Set     `tfsdk:"safehop_retry_reasons"`
 	SafehopConnectionTimeout           types.Int64   `tfsdk:"safehop_connection_timeout"`
 	SafehopResponseTimeout             types.Int64   `tfsdk:"safehop_response_timeout"`
+	BlockRootPath                      types.Bool    `tfsdk:"block_root_path"`
+	BlockPostRequests                  types.Bool    `tfsdk:"block_post_requests"`
+	ReferersAllowed                    types.Set     `tfsdk:"allow_referers"`
+	ReferersBlocked                    types.Set     `tfsdk:"block_referers"`
+	IPsBlocked                         types.Set     `tfsdk:"block_ips"`
+	LogEnabled                         types.Bool    `tfsdk:"log_enabled"`
+	LogAnonymized                      types.Bool    `tfsdk:"log_anonymized"`
+	LogAnonymizedStyle                 types.String  `tfsdk:"log_anonymized_style"`
+	LogForwardEnabled                  types.Bool    `tfsdk:"log_forward_enabled"`
+	LogForwardServer                   types.String  `tfsdk:"log_forward_server"`
+	LogForwardPort                     types.Int64   `tfsdk:"log_forward_port"`
+	LogForwardToken                    types.String  `tfsdk:"log_forward_token"`
+	LogForwardProtocol                 types.String  `tfsdk:"log_forward_protocol"`
+	LogForwardFormat                   types.String  `tfsdk:"log_forward_format"`
+	LogStorageEnabled                  types.Bool    `tfsdk:"log_storage_enabled"`
+	LogStorageZone                     types.Int64   `tfsdk:"log_storage_zone"`
+	TlsSupport                         types.Set     `tfsdk:"tls_support"`
+	ErrorPageWhitelabel                types.Bool    `tfsdk:"errorpage_whitelabel"`
+	ErrorPageStatuspageEnabled         types.Bool    `tfsdk:"errorpage_statuspage_enabled"`
+	ErrorPageStatuspageCode            types.String  `tfsdk:"errorpage_statuspage_code"`
+	ErrorPageCustomEnabled             types.Bool    `tfsdk:"errorpage_custom_enabled"`
+	ErrorPageCustomContent             types.String  `tfsdk:"errorpage_custom_content"`
+	S3AuthEnabled                      types.Bool    `tfsdk:"s3_auth_enabled"`
+	S3AuthKey                          types.String  `tfsdk:"s3_auth_key"`
+	S3AuthSecret                       types.String  `tfsdk:"s3_auth_secret"`
+	S3AuthRegion                       types.String  `tfsdk:"s3_auth_region"`
+	TokenAuthEnabled                   types.Bool    `tfsdk:"token_auth_enabled"`
+	TokenAuthIpValidation              types.Bool    `tfsdk:"token_auth_ip_validation"`
+	TokenAuthKey                       types.String  `tfsdk:"token_auth_key"`
 }
 
 var pullzoneOriginTypes = map[string]attr.Type{
@@ -125,6 +156,23 @@ var pullzoneRoutingTierMap = map[uint8]string{
 	1: "Volume",
 }
 
+var pullzoneLogAnonymizedStyleMap = map[uint8]string{
+	0: "OneDigit",
+	1: "Drop",
+}
+
+var pullzoneLogForwardProtocolMap = map[uint8]string{
+	0: "UDP",
+	1: "TCP",
+	2: "TCPEncrypted",
+	3: "DataDog",
+}
+
+var pullzoneLogForwardFormatMap = map[uint8]string{
+	0: "Plain",
+	1: "JSON",
+}
+
 var pullzoneOptimizerWatermarkPositionMap = map[uint8]string{
 	0: "BottomLeft",
 	1: "BottomRight",
@@ -139,6 +187,16 @@ func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRe
 }
 
 func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	pullzoneTlsSupportDefault, diags := types.SetValue(types.StringType, []attr.Value{
+		types.StringValue("TLSv1.0"),
+		types.StringValue("TLSv1.1"),
+	})
+
+	if diags != nil {
+		resp.Diagnostics = append(resp.Diagnostics, diags...)
+		return
+	}
+
 	pullzoneCorsExtensionsDefault, diags := types.SetValue(types.StringType, []attr.Value{
 		types.StringValue("css"),
 		types.StringValue("eot"),
@@ -366,6 +424,244 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Validators: []validator.Int64{
 					int64validator.OneOf(3, 5, 10, 15, 30, 60),
+				},
+			},
+			"block_root_path": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"block_post_requests": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"block_referers": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"allow_referers": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"block_ips": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_anonymized": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_anonymized_style": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("OneDigit"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneLogAnonymizedStyleMap)...),
+				},
+			},
+			"log_forward_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_forward_server": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_forward_port": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_forward_token": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_forward_protocol": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("UDP"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneLogForwardProtocolMap)...),
+				},
+			},
+			"log_forward_format": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("JSON"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneLogForwardFormatMap)...),
+				},
+			},
+			"log_storage_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"log_storage_zone": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"tls_support": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(pullzoneTlsSupportDefault),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"errorpage_whitelabel": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"errorpage_statuspage_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"errorpage_statuspage_code": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"errorpage_custom_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"errorpage_custom_content": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"s3_auth_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"s3_auth_key": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"s3_auth_secret": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"s3_auth_region": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"token_auth_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"token_auth_ip_validation": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"token_auth_key": schema.StringAttribute{
+				Computed:  true,
+				Sensitive: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"cors_enabled": schema.BoolAttribute{
@@ -896,6 +1192,62 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.RequestCoalescingTimeout = uint64(dataTf.RequestCoalescingTimeout.ValueInt64())
 	}
 
+	// security
+	{
+		referersAllowed := []string{}
+		for _, v := range dataTf.ReferersAllowed.Elements() {
+			referersAllowed = append(referersAllowed, v.(types.String).ValueString())
+		}
+
+		referersBlocked := []string{}
+		for _, v := range dataTf.ReferersBlocked.Elements() {
+			referersBlocked = append(referersBlocked, v.(types.String).ValueString())
+		}
+
+		ipsBlocked := []string{}
+		for _, v := range dataTf.IPsBlocked.Elements() {
+			ipsBlocked = append(ipsBlocked, v.(types.String).ValueString())
+		}
+
+		dataApi.BlockRootPathAccess = dataTf.BlockRootPath.ValueBool()
+		dataApi.BlockPostRequests = dataTf.BlockPostRequests.ValueBool()
+		dataApi.AllowedReferrers = referersAllowed
+		dataApi.BlockedReferrers = referersBlocked
+		dataApi.BlockedIps = ipsBlocked
+		dataApi.EnableLogging = dataTf.LogEnabled.ValueBool()
+		dataApi.LoggingIPAnonymizationEnabled = dataTf.LogAnonymized.ValueBool()
+		dataApi.LogAnonymizationType = mapValueToKey(pullzoneLogAnonymizedStyleMap, dataTf.LogAnonymizedStyle.ValueString())
+		dataApi.LogForwardingEnabled = dataTf.LogForwardEnabled.ValueBool()
+		dataApi.LogForwardingHostname = dataTf.LogForwardServer.ValueString()
+		dataApi.LogForwardingPort = uint16(dataTf.LogForwardPort.ValueInt64())
+		dataApi.LogForwardingToken = dataTf.LogForwardToken.ValueString()
+		dataApi.LogForwardingProtocol = mapValueToKey(pullzoneLogForwardProtocolMap, dataTf.LogForwardProtocol.ValueString())
+		dataApi.LogForwardingFormat = mapValueToKey(pullzoneLogForwardFormatMap, dataTf.LogForwardFormat.ValueString())
+		dataApi.LoggingSaveToStorage = dataTf.LogStorageEnabled.ValueBool()
+		dataApi.LoggingStorageZoneId = uint64(dataTf.LogStorageZone.ValueInt64())
+		dataApi.ErrorPageWhitelabel = dataTf.ErrorPageWhitelabel.ValueBool()
+		dataApi.ErrorPageEnableStatuspageWidget = dataTf.ErrorPageStatuspageEnabled.ValueBool()
+		dataApi.ErrorPageStatuspageCode = dataTf.ErrorPageStatuspageCode.ValueString()
+		dataApi.ErrorPageEnableCustomCode = dataTf.ErrorPageCustomEnabled.ValueBool()
+		dataApi.ErrorPageCustomCode = dataTf.ErrorPageCustomContent.ValueString()
+		dataApi.AWSSigningEnabled = dataTf.S3AuthEnabled.ValueBool()
+		dataApi.AWSSigningKey = dataTf.S3AuthKey.ValueString()
+		dataApi.AWSSigningSecret = dataTf.S3AuthSecret.ValueString()
+		dataApi.AWSSigningRegionName = dataTf.S3AuthRegion.ValueString()
+		dataApi.ZoneSecurityEnabled = dataTf.TokenAuthEnabled.ValueBool()
+		dataApi.ZoneSecurityIncludeHashRemoteIP = dataTf.TokenAuthIpValidation.ValueBool()
+
+		tlsSupport := dataTf.TlsSupport.Elements()
+		for _, v := range tlsSupport {
+			if v.(types.String).ValueString() == "TLSv1.0" {
+				dataApi.EnableTLS1 = true
+			}
+			if v.(types.String).ValueString() == "TLSv1.1" {
+				dataApi.EnableTLS1_1 = true
+			}
+		}
+	}
+
 	// cors
 	{
 		values := []string{}
@@ -1100,6 +1452,82 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.OriginShieldQueueWait = types.Int64Value(int64(dataApi.OriginShieldQueueMaxWaitTime))
 		dataTf.RequestCoalescingEnabled = types.BoolValue(dataApi.EnableRequestCoalescing)
 		dataTf.RequestCoalescingTimeout = types.Int64Value(int64(dataApi.RequestCoalescingTimeout))
+	}
+
+	// security
+	{
+		var referersAllowedValues []attr.Value
+		for _, v := range dataApi.AllowedReferrers {
+			referersAllowedValues = append(referersAllowedValues, types.StringValue(v))
+		}
+
+		referersAllowed, diags := types.SetValue(types.StringType, referersAllowedValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		var referersBlockedValues []attr.Value
+		for _, v := range dataApi.BlockedReferrers {
+			referersBlockedValues = append(referersBlockedValues, types.StringValue(v))
+		}
+
+		referersBlocked, diags := types.SetValue(types.StringType, referersBlockedValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		var ipsBlockedValues []attr.Value
+		for _, v := range dataApi.BlockedIps {
+			ipsBlockedValues = append(ipsBlockedValues, types.StringValue(v))
+		}
+
+		ipsBlocked, diags := types.SetValue(types.StringType, ipsBlockedValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		var tlsSupportValues []attr.Value
+		if dataApi.EnableTLS1 {
+			tlsSupportValues = append(tlsSupportValues, types.StringValue("TLSv1.0"))
+		}
+		if dataApi.EnableTLS1_1 {
+			tlsSupportValues = append(tlsSupportValues, types.StringValue("TLSv1.1"))
+		}
+
+		tlsSupport, diags := types.SetValue(types.StringType, tlsSupportValues)
+		if diags != nil {
+			return dataTf, diags
+		}
+
+		dataTf.BlockRootPath = types.BoolValue(dataApi.BlockRootPathAccess)
+		dataTf.BlockPostRequests = types.BoolValue(dataApi.BlockPostRequests)
+		dataTf.ReferersAllowed = referersAllowed
+		dataTf.ReferersBlocked = referersBlocked
+		dataTf.IPsBlocked = ipsBlocked
+		dataTf.LogEnabled = types.BoolValue(dataApi.EnableLogging)
+		dataTf.LogAnonymized = types.BoolValue(dataApi.LoggingIPAnonymizationEnabled)
+		dataTf.LogAnonymizedStyle = types.StringValue(mapKeyToValue(pullzoneLogAnonymizedStyleMap, dataApi.LogAnonymizationType))
+		dataTf.LogForwardEnabled = types.BoolValue(dataApi.LogForwardingEnabled)
+		dataTf.LogForwardServer = types.StringValue(dataApi.LogForwardingHostname)
+		dataTf.LogForwardPort = types.Int64Value(int64(dataApi.LogForwardingPort))
+		dataTf.LogForwardToken = types.StringValue(dataApi.LogForwardingToken)
+		dataTf.LogForwardProtocol = types.StringValue(mapKeyToValue(pullzoneLogForwardProtocolMap, dataApi.LogForwardingProtocol))
+		dataTf.LogForwardFormat = types.StringValue(mapKeyToValue(pullzoneLogForwardFormatMap, dataApi.LogForwardingFormat))
+		dataTf.LogStorageEnabled = types.BoolValue(dataApi.LoggingSaveToStorage)
+		dataTf.LogStorageZone = types.Int64Value(int64(dataApi.LoggingStorageZoneId))
+		dataTf.TlsSupport = tlsSupport
+		dataTf.ErrorPageWhitelabel = types.BoolValue(dataApi.ErrorPageWhitelabel)
+		dataTf.ErrorPageStatuspageEnabled = types.BoolValue(dataApi.ErrorPageEnableStatuspageWidget)
+		dataTf.ErrorPageStatuspageCode = types.StringValue(dataApi.ErrorPageStatuspageCode)
+		dataTf.ErrorPageCustomEnabled = types.BoolValue(dataApi.ErrorPageEnableCustomCode)
+		dataTf.ErrorPageCustomContent = types.StringValue(dataApi.ErrorPageCustomCode)
+		dataTf.S3AuthEnabled = types.BoolValue(dataApi.AWSSigningEnabled)
+		dataTf.S3AuthKey = types.StringValue(dataApi.AWSSigningKey)
+		dataTf.S3AuthSecret = types.StringValue(dataApi.AWSSigningSecret)
+		dataTf.S3AuthRegion = types.StringValue(dataApi.AWSSigningRegionName)
+		dataTf.TokenAuthEnabled = types.BoolValue(dataApi.ZoneSecurityEnabled)
+		dataTf.TokenAuthIpValidation = types.BoolValue(dataApi.ZoneSecurityIncludeHashRemoteIP)
+		dataTf.TokenAuthKey = types.StringValue(dataApi.ZoneSecurityKey)
 	}
 
 	// cors

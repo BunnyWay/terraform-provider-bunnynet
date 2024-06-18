@@ -79,4 +79,38 @@ resource "bunny_pullzone" "test" {
 
   request_coalescing_enabled = true
   request_coalescing_timeout = 15
+
+  block_root_path     = true
+  block_post_requests = true
+  allow_referers      = ["*.example.com", "example.com"]
+  block_referers      = ["example.org", "*.example.org"]
+  block_ips           = ["1.1.1.1", "192.0.2.*"]
+
+  log_enabled          = true
+  log_anonymized       = true
+  log_anonymized_style = "Drop"
+  log_forward_enabled  = true
+  log_forward_server   = "192.0.2.254"
+  log_forward_port     = 1234
+  log_forward_token    = "my-log-secret"
+  log_forward_protocol = "udp|tcp|tcp_encrypted|datadog"
+  log_forward_format   = "json|plain"
+  log_storage_enabled  = true
+  log_storage_zone     = bunny_storagezone.logs.id
+
+  tls_support = ["TLSv1.0", "TLSv1.1"]
+
+  errorpage_whitelabel         = true
+  errorpage_statuspage_enabled = true
+  errorpage_statuspage_code    = "abc1234d"
+  errorpage_custom_enabled     = true
+  errorpage_custom_content     = "error {{status_code}}"
+
+  s3_auth_enabled = true
+  s3_auth_key     = "key-goes-here"
+  s3_auth_secret  = "secret-goes-here"
+  s3_auth_region  = "us-east-1"
+
+  token_auth_enabled       = true
+  token_auth_ip_validation = true
 }
