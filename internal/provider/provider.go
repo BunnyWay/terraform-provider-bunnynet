@@ -78,6 +78,7 @@ func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resourc
 		NewPullzoneEdgeruleResource,
 		NewPullzoneHostnameResource,
 		NewPullzoneOptimizerClassResource,
+		NewStorageFileResource,
 		NewStorageZoneResource,
 	}
 }
