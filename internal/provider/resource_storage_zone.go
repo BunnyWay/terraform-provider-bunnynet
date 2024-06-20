@@ -20,18 +20,18 @@ import (
 	"strconv"
 )
 
-var _ resource.Resource = &StorageResource{}
-var _ resource.ResourceWithImportState = &StorageResource{}
+var _ resource.Resource = &StorageZoneResource{}
+var _ resource.ResourceWithImportState = &StorageZoneResource{}
 
-func NewStorageResource() resource.Resource {
-	return &StorageResource{}
+func NewStorageZoneResource() resource.Resource {
+	return &StorageZoneResource{}
 }
 
-type StorageResource struct {
+type StorageZoneResource struct {
 	client *api.Client
 }
 
-type StorageResourceModel struct {
+type StorageZoneResourceModel struct {
 	Id                 types.Int64  `tfsdk:"id"`
 	Name               types.String `tfsdk:"name"`
 	Password           types.String `tfsdk:"password"`
@@ -50,11 +50,11 @@ var storageZoneTierMap = map[uint8]string{
 	1: "Edge",
 }
 
-func (r *StorageResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_storagezone"
+func (r *StorageZoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_storage_zone"
 }
 
-func (r *StorageResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Storage Zone",
 
@@ -128,7 +128,7 @@ func (r *StorageResource) Schema(ctx context.Context, req resource.SchemaRequest
 	}
 }
 
-func (r *StorageResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *StorageZoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -146,21 +146,21 @@ func (r *StorageResource) Configure(ctx context.Context, req resource.ConfigureR
 	r.client = client
 }
 
-func (r *StorageResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var dataTf StorageResourceModel
+func (r *StorageZoneResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var dataTf StorageZoneResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreateStoragezone(dataApi)
+	dataApi, err := r.client.CreateStorageZone(dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create storage zone", err.Error())
 		return
 	}
 
-	tflog.Trace(ctx, "created storagezone "+dataApi.Name)
+	tflog.Trace(ctx, "created storage zone "+dataApi.Name)
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
@@ -174,15 +174,15 @@ func (r *StorageResource) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *StorageResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data StorageResourceModel
+func (r *StorageZoneResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data StorageZoneResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	dataApi, err := r.client.GetStoragezone(data.Id.ValueInt64())
+	dataApi, err := r.client.GetStorageZone(data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage zone", err.Error()))
 		return
@@ -197,8 +197,8 @@ func (r *StorageResource) Read(ctx context.Context, req resource.ReadRequest, re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *StorageResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data StorageResourceModel
+func (r *StorageZoneResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data StorageZoneResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -206,7 +206,7 @@ func (r *StorageResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	// @TODO removing a region from replication_regions is not allowed
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.UpdateStoragezone(dataApi)
+	dataApi, err := r.client.UpdateStorageZone(dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating storage zone", err.Error()))
 		return
@@ -221,27 +221,27 @@ func (r *StorageResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *StorageResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data StorageResourceModel
+func (r *StorageZoneResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data StorageZoneResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err := r.client.DeleteStoragezone(data.Id.ValueInt64())
+	err := r.client.DeleteStorageZone(data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting storage zone", err.Error()))
 	}
 }
 
-func (r *StorageResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *StorageZoneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	id, err := strconv.ParseInt(req.ID, 10, 64)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error converting ID to integer", err.Error()))
 		return
 	}
 
-	dataApi, err := r.client.GetStoragezone(id)
+	dataApi, err := r.client.GetStorageZone(id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage zone", err.Error()))
 		return
@@ -260,8 +260,8 @@ func (r *StorageResource) ImportState(ctx context.Context, req resource.ImportSt
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *StorageResource) convertModelToApi(ctx context.Context, dataTf StorageResourceModel) api.Storagezone {
-	dataApi := api.Storagezone{}
+func (r *StorageZoneResource) convertModelToApi(ctx context.Context, dataTf StorageZoneResourceModel) api.StorageZone {
+	dataApi := api.StorageZone{}
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.Name = dataTf.Name.ValueString()
 	dataApi.Password = dataTf.Password.ValueString()
@@ -284,8 +284,8 @@ func (r *StorageResource) convertModelToApi(ctx context.Context, dataTf StorageR
 	return dataApi
 }
 
-func (r *StorageResource) convertApiToModel(dataApi api.Storagezone) (StorageResourceModel, diag.Diagnostics) {
-	dataTf := StorageResourceModel{}
+func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (StorageZoneResourceModel, diag.Diagnostics) {
+	dataTf := StorageZoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.Password = types.StringValue(dataApi.Password)

@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-type Storagezone struct {
+type StorageZone struct {
 	Id                 int64    `json:"Id,omitempty"`
 	Name               string   `json:"Name,omitempty"`
 	Password           string   `json:"Password,omitempty"`
@@ -23,8 +23,8 @@ type Storagezone struct {
 	DateModified       string   `json:"DateModified,omitempty"`
 }
 
-func (c *Client) GetStoragezone(id int64) (Storagezone, error) {
-	var data Storagezone
+func (c *Client) GetStorageZone(id int64) (StorageZone, error) {
+	var data StorageZone
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return data, err
@@ -61,15 +61,15 @@ func (c *Client) GetStoragezone(id int64) (Storagezone, error) {
 	return data, nil
 }
 
-func (c *Client) CreateStoragezone(data Storagezone) (Storagezone, error) {
+func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/storagezone", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 
 	req.Header.Add("AccessKey", c.apiKey)
@@ -83,13 +83,13 @@ func (c *Client) CreateStoragezone(data Storagezone) (Storagezone, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 
 	if resp.StatusCode != http.StatusCreated {
 		bodyResp, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return Storagezone{}, err
+			return StorageZone{}, err
 		}
 
 		_ = resp.Body.Close()
@@ -99,19 +99,19 @@ func (c *Client) CreateStoragezone(data Storagezone) (Storagezone, error) {
 
 		err = json.Unmarshal(bodyResp, &obj)
 		if err != nil {
-			return Storagezone{}, err
+			return StorageZone{}, err
 		}
 
-		return Storagezone{}, errors.New(obj.Message)
+		return StorageZone{}, errors.New(obj.Message)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 	_ = resp.Body.Close()
 
-	dataApiResult := Storagezone{}
+	dataApiResult := StorageZone{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
@@ -120,7 +120,7 @@ func (c *Client) CreateStoragezone(data Storagezone) (Storagezone, error) {
 	return dataApiResult, nil
 }
 
-func (c *Client) UpdateStoragezone(dataApi Storagezone) (Storagezone, error) {
+func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 	id := dataApi.Id
 
 	dataUpdate := map[string]interface{}{
@@ -135,12 +135,12 @@ func (c *Client) UpdateStoragezone(dataApi Storagezone) (Storagezone, error) {
 
 	body, err := json.Marshal(dataUpdate)
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 
 	req.Header.Add("AccessKey", c.apiKey)
@@ -154,13 +154,13 @@ func (c *Client) UpdateStoragezone(dataApi Storagezone) (Storagezone, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return Storagezone{}, err
+		return StorageZone{}, err
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
 		bodyResp, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return Storagezone{}, err
+			return StorageZone{}, err
 		}
 
 		_ = resp.Body.Close()
@@ -170,13 +170,13 @@ func (c *Client) UpdateStoragezone(dataApi Storagezone) (Storagezone, error) {
 
 		err = json.Unmarshal(bodyResp, &obj)
 		if err != nil {
-			return Storagezone{}, err
+			return StorageZone{}, err
 		}
 
-		return Storagezone{}, errors.New(obj.Message)
+		return StorageZone{}, errors.New(obj.Message)
 	}
 
-	dataApiResult, err := c.GetStoragezone(id)
+	dataApiResult, err := c.GetStorageZone(id)
 	if err != nil {
 		return dataApiResult, err
 	}
@@ -184,7 +184,7 @@ func (c *Client) UpdateStoragezone(dataApi Storagezone) (Storagezone, error) {
 	return dataApiResult, nil
 }
 
-func (c *Client) DeleteStoragezone(id int64) error {
+func (c *Client) DeleteStorageZone(id int64) error {
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err

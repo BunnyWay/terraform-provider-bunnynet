@@ -69,7 +69,7 @@ resource "bunny_pullzone" "test" {
     "updating",
   ]
 
-  permacache_storagezone = bunny_storage.test.id
+  permacache_storagezone = bunny_storage_zone.test.id
 
   originshield_enabled              = true
   originshield_concurrency_limit    = true
@@ -96,7 +96,7 @@ resource "bunny_pullzone" "test" {
   log_forward_protocol = "udp|tcp|tcp_encrypted|datadog"
   log_forward_format   = "json|plain"
   log_storage_enabled  = true
-  log_storage_zone     = bunny_storagezone.logs.id
+  log_storage_zone     = bunny_storage_zone.logs.id
 
   tls_support = ["TLSv1.0", "TLSv1.1"]
 
