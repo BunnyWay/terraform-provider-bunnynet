@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,8 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/maps"
 	"strconv"
 )
 
@@ -67,11 +70,17 @@ func (r *StorageResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"region": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
 				},
 			},
 			"replication_regions": schema.SetAttribute{
@@ -80,6 +89,9 @@ func (r *StorageResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"zone_tier": schema.StringAttribute{
 				Required: true,
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(storageZoneTierMap)...),
+				},
 			},
 			"hostname": schema.StringAttribute{
 				Computed: true,

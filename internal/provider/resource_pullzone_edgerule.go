@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,8 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/maps"
 	"strconv"
 	"strings"
 )
@@ -129,6 +132,9 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleActionMap)...),
+				},
 			},
 			"description": schema.StringAttribute{
 				Optional: true,
@@ -142,6 +148,9 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				Default:  stringdefault.StaticString("MatchAny"),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleMatchTypeMap)...),
 				},
 			},
 			"triggers": schema.ListAttribute{

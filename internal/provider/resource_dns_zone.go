@@ -72,6 +72,9 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(regexp.MustCompile("(.+)\\.(.+)"), "Invalid domain"),
+				},
 			},
 			"nameserver_custom": schema.BoolAttribute{
 				Optional: true,

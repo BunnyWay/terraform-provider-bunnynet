@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -156,6 +158,13 @@ var pullzoneRoutingTierMap = map[uint8]string{
 	1: "Volume",
 }
 
+var pullzoneCacheVaryOptions = []string{"querystring", "webp", "country", "hostname", "mobile", "avif", "cookie"}
+var pullzoneCacheStaleOptions = []string{"offline", "updating"}
+var pullzoneTlsSupportOptions = []string{"TLSv1.0", "TLSv1.1"}
+var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxResponse", "responseTimeout"}
+var pullzoneRoutingZonesOptions = []string{"AF", "ASIA", "EU", "SA", "US"}
+var pullzoneRoutingFiltersOptions = []string{"all", "eu"}
+
 var pullzoneLogAnonymizedStyleMap = map[uint8]string{
 	0: "OneDigit",
 	1: "Drop",
@@ -257,6 +266,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"cache_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -312,6 +324,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(pullzoneCacheVaryOptions...),
+					),
+				},
 			},
 			"cache_vary_querystring": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -329,6 +346,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.LengthAtLeast(1),
+					),
 				},
 			},
 			"strip_cookies": schema.BoolAttribute{
@@ -354,6 +376,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(pullzoneCacheStaleOptions...),
+					),
 				},
 			},
 			"permacache_storagezone": schema.Int64Attribute{
@@ -387,6 +414,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"originshield_queue_requests": schema.Int64Attribute{
 				Optional: true,
@@ -394,6 +424,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  int64default.StaticInt64(5000),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 			},
 			"originshield_queue_wait": schema.Int64Attribute{
@@ -450,6 +483,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.LengthAtLeast(1),
+					),
+				},
 			},
 			"allow_referers": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -459,6 +497,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.LengthAtLeast(1),
+					),
+				},
 			},
 			"block_ips": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -467,6 +510,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.LengthAtLeast(1),
+					),
 				},
 			},
 			"log_enabled": schema.BoolAttribute{
@@ -516,6 +564,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 65535),
 				},
 			},
 			"log_forward_token": schema.StringAttribute{
@@ -569,6 +620,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:     setdefault.StaticValue(pullzoneTlsSupportDefault),
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(pullzoneTlsSupportOptions...),
+					),
 				},
 			},
 			"errorpage_whitelabel": schema.BoolAttribute{
@@ -680,6 +736,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.LengthAtLeast(1),
+					),
+				},
 			},
 			"limit_download_speed": schema.Float64Attribute{
 				Optional: true,
@@ -687,6 +748,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  float64default.StaticFloat64(0.0),
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Float64{
+					float64validator.AtLeast(0.0),
 				},
 			},
 			"limit_requests": schema.Int64Attribute{
@@ -696,6 +760,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"limit_after": schema.Float64Attribute{
 				Optional: true,
@@ -703,6 +770,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  float64default.StaticFloat64(0.0),
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Float64{
+					float64validator.AtLeast(0.0),
 				},
 			},
 			"limit_burst": schema.Int64Attribute{
@@ -712,6 +782,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"limit_connections": schema.Int64Attribute{
 				Optional: true,
@@ -720,6 +793,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"limit_bandwidth": schema.Int64Attribute{
 				Optional: true,
@@ -727,6 +803,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  int64default.StaticInt64(0),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 			},
 			"optimizer_classes_force": schema.BoolAttribute{
@@ -784,6 +863,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"optimizer_smartimage_desktop_quality": schema.Int64Attribute{
 				Optional: true,
@@ -791,6 +873,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  int64default.StaticInt64(85),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 100),
 				},
 			},
 			"optimizer_smartimage_mobile_maxwidth": schema.Int64Attribute{
@@ -800,6 +885,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"optimizer_smartimage_mobile_quality": schema.Int64Attribute{
 				Optional: true,
@@ -807,6 +895,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  int64default.StaticInt64(70),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 100),
 				},
 			},
 			"optimizer_watermark": schema.BoolAttribute{
@@ -824,6 +915,10 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+					// @TODO validate URL
+				},
 			},
 			"optimizer_watermark_position": schema.StringAttribute{
 				Optional: true,
@@ -831,6 +926,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  stringdefault.StaticString("BottomLeft"),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneOptimizerWatermarkPositionMap)...),
 				},
 			},
 			"optimizer_watermark_borderoffset": schema.Float64Attribute{
@@ -847,6 +945,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  int64default.StaticInt64(300),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 			},
 			"optimizer_webp": schema.BoolAttribute{
@@ -895,6 +996,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(pullzoneSafehopRetryReasonsOptions...),
+					),
+				},
 			},
 			"safehop_connection_timeout": schema.Int64Attribute{
 				Optional: true,
@@ -902,6 +1008,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  int64default.StaticInt64(10),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 			},
 			"safehop_response_timeout": schema.Int64Attribute{
@@ -920,6 +1029,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Required: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneOriginTypeMap)...),
 						},
 					},
 					"url": schema.StringAttribute{
@@ -954,6 +1066,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneRoutingTierMap)...),
+						},
 					},
 					"zones": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -962,6 +1077,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Default:     setdefault.StaticValue(pullzoneRoutingZonesDefault),
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.Set{
+							setvalidator.ValueStringsAre(
+								stringvalidator.OneOf(pullzoneRoutingZonesOptions...),
+							),
 						},
 					},
 					"filters": schema.SetAttribute{
@@ -973,9 +1093,14 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 							setplanmodifier.UseStateForUnknown(),
 						},
 						Validators: []validator.Set{
-							setvalidator.SizeAtLeast(1),
+							setvalidator.ValueStringsAre(
+								stringvalidator.OneOf(pullzoneRoutingFiltersOptions...),
+							),
 						},
 					},
+				},
+				Validators: []validator.Object{
+					objectvalidator.IsRequired(),
 				},
 			},
 		},

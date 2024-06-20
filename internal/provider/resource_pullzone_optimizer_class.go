@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -11,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strconv"
@@ -70,6 +73,9 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"width": schema.Int64Attribute{
 				Optional: true,
@@ -94,6 +100,9 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 100),
+				},
 			},
 			"sharpen": schema.BoolAttribute{
 				Optional: true,
@@ -106,6 +115,9 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 100),
+				},
 			},
 			"crop": schema.StringAttribute{
 				Optional: true,
@@ -117,6 +129,9 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf("center", "forget", "east", "north", "south", "west", "northeast", "northwest", "southeast", "southwest"),
 				},
 			},
 			"flip": schema.BoolAttribute{
@@ -136,11 +151,17 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.Between(-100, 100),
+				},
 			},
 			"saturation": schema.Int64Attribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(-100, 100),
 				},
 			},
 			"hue": schema.Int64Attribute{
@@ -148,11 +169,17 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 100),
+				},
 			},
 			"contrast": schema.Int64Attribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(-100, 100),
 				},
 			},
 			"auto_optimize": schema.StringAttribute{
@@ -160,11 +187,17 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf("low", "medium", "high"),
+				},
 			},
 			"sepia": schema.Int64Attribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 100),
 				},
 			},
 		},

@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -16,8 +19,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/maps"
 	"strconv"
 	"strings"
 )
@@ -91,7 +96,6 @@ func (r *DnsRecordResource) Metadata(ctx context.Context, req resource.MetadataR
 }
 
 func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	// @TODO validators
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "DNS Record",
 
@@ -121,6 +125,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(dnsRecordTypeMap)...),
+				},
 			},
 			"ttl": schema.Int64Attribute{
 				Optional: true,
@@ -129,11 +136,17 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"value": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -149,6 +162,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"priority": schema.Int64Attribute{
 				Optional: true,
@@ -156,6 +172,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Default:  int64default.StaticInt64(0),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 			},
 			"port": schema.Int64Attribute{
@@ -165,6 +184,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.Between(0, 65535),
+				},
 			},
 			"flags": schema.Int64Attribute{
 				Optional: true,
@@ -172,6 +194,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Default:  int64default.StaticInt64(0),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 			},
 			"tag": schema.StringAttribute{
@@ -212,6 +237,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(dnsRecordMonitorTypeMap)...),
+				},
 			},
 			"geolocation_lat": schema.Float64Attribute{
 				Optional: true,
@@ -219,6 +247,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Default:  float64default.StaticFloat64(0.0),
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Float64{
+					float64validator.Between(-180.0, 180.0),
 				},
 			},
 			"geolocation_long": schema.Float64Attribute{
@@ -228,6 +259,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Float64{
+					float64validator.Between(-180.0, 180.0),
+				},
 			},
 			"latency_zone": schema.StringAttribute{
 				Optional: true,
@@ -236,6 +270,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
 			},
 			"smart_routing_type": schema.StringAttribute{
 				Optional: true,
@@ -243,6 +280,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Default:  stringdefault.StaticString("None"),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(dnsRecordSmartRoutingTypeMap)...),
 				},
 			},
 			"comment": schema.StringAttribute{
