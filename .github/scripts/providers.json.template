@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "limit": 15,
+    "current_offset": 0
+  },
+  "providers": [
+    {
+      "id": "bunny/bunny/{{VERSION}}",
+      "owner": "",
+      "namespace": "bunny",
+      "name": "bunny",
+      "alias": null,
+      "version": "{{VERSION}}",
+      "tag": "v{{VERSION}}",
+      "description": "terraform-provider-bunny",
+      "source": "https://github.com/bunnyway/terraform-provider-bunny",
+      "published_at": "2024-06-24T15:29:00Z",
+      "downloads": 0,
+      "tier": "community"
+    }
+  ]
+}

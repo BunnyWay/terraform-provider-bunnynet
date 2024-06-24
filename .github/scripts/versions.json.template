@@ -1,0 +1,13 @@
+{
+  "id": "bunny/bunny",
+  "versions": [
+    {
+      "version": "{{VERSION}}",
+      "protocols": [
+        "5.0"
+      ],
+      "platforms": {{PLATFORMS}}
+    }
+  ],
+  "warnings": null
+}
