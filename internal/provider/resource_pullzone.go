@@ -47,6 +47,9 @@ type PullzoneResource struct {
 type PullzoneResourceModel struct {
 	Id                                 types.Int64   `tfsdk:"id"`
 	Name                               types.String  `tfsdk:"name"`
+	CdnDomain                          types.String  `tfsdk:"cdn_domain"`
+	DisableLetsEncrypt                 types.Bool    `tfsdk:"disable_letsencrypt"`
+	UseBackgroundUpdate                types.Bool    `tfsdk:"use_background_update"`
 	CacheEnabled                       types.Bool    `tfsdk:"cache_enabled"`
 	CacheExpirationTime                types.Int64   `tfsdk:"cache_expiration_time"`
 	CacheExpirationTimeBrowser         types.Int64   `tfsdk:"cache_expiration_time_browser"`
@@ -68,6 +71,7 @@ type PullzoneResourceModel struct {
 	RequestCoalescingTimeout           types.Int64   `tfsdk:"request_coalescing_timeout"`
 	CorsEnabled                        types.Bool    `tfsdk:"cors_enabled"`
 	CorsExtensions                     types.Set     `tfsdk:"cors_extensions"`
+	AddCanonicalHeader                 types.Bool    `tfsdk:"add_canonical_header"`
 	Origin                             types.Object  `tfsdk:"origin"`
 	Routing                            types.Object  `tfsdk:"routing"`
 	LimitDownloadSpeed                 types.Float64 `tfsdk:"limit_download_speed"`
@@ -102,6 +106,7 @@ type PullzoneResourceModel struct {
 	BlockPostRequests                  types.Bool    `tfsdk:"block_post_requests"`
 	ReferersAllowed                    types.Set     `tfsdk:"allow_referers"`
 	ReferersBlocked                    types.Set     `tfsdk:"block_referers"`
+	BlockNoReferer                     types.Bool    `tfsdk:"block_no_referer"`
 	IPsBlocked                         types.Set     `tfsdk:"block_ips"`
 	LogEnabled                         types.Bool    `tfsdk:"log_enabled"`
 	LogAnonymized                      types.Bool    `tfsdk:"log_anonymized"`
@@ -134,6 +139,7 @@ var pullzoneOriginTypes = map[string]attr.Type{
 	"url":                 types.StringType,
 	"storagezone":         types.Int64Type,
 	"follow_redirects":    types.BoolType,
+	"host_header":         types.StringType,
 	"forward_host_header": types.BoolType,
 	"verify_ssl":          types.BoolType,
 }
@@ -156,6 +162,7 @@ var pullzoneRoutingTypes = map[string]attr.Type{
 
 var pullzoneOriginTypeMap = map[uint8]string{
 	0: "OriginUrl",
+	1: "DnsAccelerate",
 	2: "StorageZone",
 }
 
@@ -276,6 +283,28 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
+				},
+			},
+			"cdn_domain": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"disable_letsencrypt": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"use_background_update": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"cache_enabled": schema.BoolAttribute{
@@ -509,6 +538,14 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					setvalidator.ValueStringsAre(
 						stringvalidator.LengthAtLeast(1),
 					),
+				},
+			},
+			"block_no_referer": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"block_ips": schema.SetAttribute{
@@ -748,6 +785,14 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					setvalidator.ValueStringsAre(
 						stringvalidator.LengthAtLeast(1),
 					),
+				},
+			},
+			"add_canonical_header": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"limit_download_speed": schema.Float64Attribute{
@@ -1053,6 +1098,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Computed: true,
 						Default:  booldefault.StaticBool(false),
 					},
+					"host_header": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString(""),
+					},
 					"forward_host_header": schema.BoolAttribute{
 						Optional: true,
 						Computed: true,
@@ -1271,6 +1321,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi := api.Pullzone{}
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.Name = dataTf.Name.ValueString()
+	dataApi.DisableLetsEncrypt = dataTf.DisableLetsEncrypt.ValueBool()
+	dataApi.UseBackgroundUpdate = dataTf.UseBackgroundUpdate.ValueBool()
 
 	// caching
 	{
@@ -1364,6 +1416,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.BlockPostRequests = dataTf.BlockPostRequests.ValueBool()
 		dataApi.AllowedReferrers = referersAllowed
 		dataApi.BlockedReferrers = referersBlocked
+		dataApi.BlockNoneReferrer = dataTf.BlockNoReferer.ValueBool()
 		dataApi.BlockedIps = ipsBlocked
 		dataApi.EnableLogging = dataTf.LogEnabled.ValueBool()
 		dataApi.LoggingIPAnonymizationEnabled = dataTf.LogAnonymized.ValueBool()
@@ -1399,7 +1452,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		}
 	}
 
-	// cors
+	// headers
 	{
 		values := []string{}
 		for _, extension := range dataTf.CorsExtensions.Elements() {
@@ -1409,6 +1462,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 		dataApi.EnableAccessControlOriginHeader = dataTf.CorsEnabled.ValueBool()
 		dataApi.AccessControlOriginHeaderExtensions = values
+		dataApi.AddCanonicalHeader = dataTf.AddCanonicalHeader.ValueBool()
 	}
 
 	// limits
@@ -1441,6 +1495,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.OriginType = mapValueToKey(pullzoneOriginTypeMap, origin["type"].(types.String).ValueString())
 	dataApi.OriginUrl = origin["url"].(types.String).ValueString()
 	dataApi.StorageZoneId = origin["storagezone"].(types.Int64).ValueInt64()
+	dataApi.OriginHostHeader = origin["host_header"].(types.String).ValueString()
 	dataApi.AddHostHeader = origin["forward_host_header"].(types.Bool).ValueBool()
 	dataApi.VerifyOriginSSL = origin["verify_ssl"].(types.Bool).ValueBool()
 	dataApi.FollowRedirects = origin["follow_redirects"].(types.Bool).ValueBool()
@@ -1502,6 +1557,9 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	dataTf := PullzoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
+	dataTf.CdnDomain = types.StringValue(dataApi.CnameDomain)
+	dataTf.DisableLetsEncrypt = types.BoolValue(dataApi.DisableLetsEncrypt)
+	dataTf.UseBackgroundUpdate = types.BoolValue(dataApi.UseBackgroundUpdate)
 
 	// caching
 	{
@@ -1647,6 +1705,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.BlockPostRequests = types.BoolValue(dataApi.BlockPostRequests)
 		dataTf.ReferersAllowed = referersAllowed
 		dataTf.ReferersBlocked = referersBlocked
+		dataTf.BlockNoReferer = types.BoolValue(dataApi.BlockNoneReferrer)
 		dataTf.IPsBlocked = ipsBlocked
 		dataTf.LogEnabled = types.BoolValue(dataApi.EnableLogging)
 		dataTf.LogAnonymized = types.BoolValue(dataApi.LoggingIPAnonymizationEnabled)
@@ -1674,7 +1733,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.TokenAuthKey = types.StringValue(dataApi.ZoneSecurityKey)
 	}
 
-	// cors
+	// headers
 	{
 		var extensionValues []attr.Value
 		for _, extension := range dataApi.AccessControlOriginHeaderExtensions {
@@ -1688,6 +1747,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		dataTf.CorsEnabled = types.BoolValue(dataApi.EnableAccessControlOriginHeader)
 		dataTf.CorsExtensions = extensions
+		dataTf.AddCanonicalHeader = types.BoolValue(dataApi.AddCanonicalHeader)
 	}
 
 	// limits
@@ -1735,6 +1795,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		}
 
 		originValues["follow_redirects"] = types.BoolValue(dataApi.FollowRedirects)
+		originValues["host_header"] = types.StringValue(dataApi.OriginHostHeader)
 		originValues["forward_host_header"] = types.BoolValue(dataApi.AddHostHeader)
 		originValues["verify_ssl"] = types.BoolValue(dataApi.VerifyOriginSSL)
 

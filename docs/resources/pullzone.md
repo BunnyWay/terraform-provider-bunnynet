@@ -143,8 +143,10 @@ resource "bunny_pullzone" "test" {
 
 ### Optional
 
+- `add_canonical_header` (Boolean)
 - `allow_referers` (Set of String)
 - `block_ips` (Set of String)
+- `block_no_referer` (Boolean)
 - `block_post_requests` (Boolean)
 - `block_referers` (Set of String)
 - `block_root_path` (Boolean)
@@ -159,6 +161,7 @@ resource "bunny_pullzone" "test" {
 - `cache_vary_querystring` (Set of String)
 - `cors_enabled` (Boolean)
 - `cors_extensions` (Set of String)
+- `disable_letsencrypt` (Boolean)
 - `errorpage_custom_content` (String)
 - `errorpage_custom_enabled` (Boolean)
 - `errorpage_statuspage_code` (String)
@@ -222,9 +225,11 @@ resource "bunny_pullzone" "test" {
 - `tls_support` (Set of String)
 - `token_auth_enabled` (Boolean)
 - `token_auth_ip_validation` (Boolean)
+- `use_background_update` (Boolean)
 
 ### Read-Only
 
+- `cdn_domain` (String)
 - `id` (Number) The ID of this resource.
 - `token_auth_key` (String, Sensitive)
 
@@ -239,6 +244,7 @@ Optional:
 
 - `follow_redirects` (Boolean)
 - `forward_host_header` (Boolean)
+- `host_header` (String)
 - `storagezone` (Number)
 - `url` (String)
 - `verify_ssl` (Boolean)

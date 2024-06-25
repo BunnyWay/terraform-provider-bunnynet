@@ -10,10 +10,16 @@ import (
 )
 
 type Pullzone struct {
-	Id                                  int64    `json:"Id,omitempty"`
-	Name                                string   `json:"Name,omitempty"`
+	Id                  int64  `json:"Id,omitempty"`
+	Name                string `json:"Name,omitempty"`
+	CnameDomain         string `json:"CnameDomain,omitempty"`
+	DisableLetsEncrypt  bool   `json:"DisableLetsEncrypt"`
+	UseBackgroundUpdate bool   `json:"UseBackgroundUpdate"`
+
+	// headers
 	EnableAccessControlOriginHeader     bool     `json:"EnableAccessControlOriginHeader"`
 	AccessControlOriginHeaderExtensions []string `json:"AccessControlOriginHeaderExtensions"`
+	AddCanonicalHeader                  bool     `json:"AddCanonicalHeader"`
 
 	// caching
 	EnableSmartCache                   bool     `json:"EnableSmartCache"`
@@ -48,6 +54,7 @@ type Pullzone struct {
 	BlockPostRequests               bool     `json:"BlockPostRequests"`
 	AllowedReferrers                []string `json:"AllowedReferrers"`
 	BlockedReferrers                []string `json:"BlockedReferrers"`
+	BlockNoneReferrer               bool     `json:"BlockNoneReferrer"`
 	BlockedIps                      []string `json:"BlockedIps"`
 	EnableLogging                   bool     `json:"EnableLogging"`
 	LoggingIPAnonymizationEnabled   bool     `json:"LoggingIPAnonymizationEnabled"`
@@ -91,12 +98,13 @@ type Pullzone struct {
 	OptimizerClasses []PullzoneOptimizerClass `json:"OptimizerClasses"`
 
 	// origin
-	OriginType      uint8  `json:"OriginType"`
-	OriginUrl       string `json:"OriginUrl,omitempty"`
-	StorageZoneId   int64  `json:"StorageZoneId,omitempty"`
-	AddHostHeader   bool   `json:"AddHostHeader"`
-	VerifyOriginSSL bool   `json:"VerifyOriginSSL"`
-	FollowRedirects bool   `json:"FollowRedirects"`
+	OriginType       uint8  `json:"OriginType"`
+	OriginUrl        string `json:"OriginUrl,omitempty"`
+	StorageZoneId    int64  `json:"StorageZoneId,omitempty"`
+	OriginHostHeader string `json:"OriginHostHeader,omitempty"`
+	AddHostHeader    bool   `json:"AddHostHeader"`
+	VerifyOriginSSL  bool   `json:"VerifyOriginSSL"`
+	FollowRedirects  bool   `json:"FollowRedirects"`
 
 	// routing
 	Type                      uint8    `json:"Type"`
