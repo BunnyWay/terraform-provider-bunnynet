@@ -128,6 +128,9 @@ resource "bunny_pullzone" "test" {
 
   token_auth_enabled       = true
   token_auth_ip_validation = true
+
+  blocked_countries    = ["KP"]
+  redirected_countries = ["CN"]
 }
 ```
 
@@ -246,6 +249,8 @@ Optional:
 
 Optional:
 
+- `blocked_countries` (Set of String)
 - `filters` (Set of String)
+- `redirected_countries` (Set of String)
 - `tier` (String)
 - `zones` (Set of String)

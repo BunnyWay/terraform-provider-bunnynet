@@ -146,6 +146,12 @@ var pullzoneRoutingTypes = map[string]attr.Type{
 	"filters": types.SetType{
 		ElemType: types.StringType,
 	},
+	"blocked_countries": types.SetType{
+		ElemType: types.StringType,
+	},
+	"redirected_countries": types.SetType{
+		ElemType: types.StringType,
+	},
 }
 
 var pullzoneOriginTypeMap = map[uint8]string{
@@ -196,6 +202,8 @@ func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRe
 }
 
 func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	emptySetDefault := types.SetValueMust(types.StringType, []attr.Value{})
+
 	pullzoneTlsSupportDefault, diags := types.SetValue(types.StringType, []attr.Value{
 		types.StringValue("TLSv1.0"),
 		types.StringValue("TLSv1.1"),
@@ -1098,6 +1106,24 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 							),
 						},
 					},
+					"blocked_countries": schema.SetAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+						Computed:    true,
+						Default:     setdefault.StaticValue(emptySetDefault),
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"redirected_countries": schema.SetAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+						Computed:    true,
+						Default:     setdefault.StaticValue(emptySetDefault),
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
 				},
 				Validators: []validator.Object{
 					objectvalidator.IsRequired(),
@@ -1421,6 +1447,9 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 	// routing
 	dataApi.Type = mapValueToKey(pullzoneRoutingTierMap, routing["tier"].(types.String).ValueString())
+	dataApi.RoutingFilters = convertSetToStringSlice(routing["filters"].(types.Set))
+	dataApi.BlockedCountries = convertSetToStringSlice(routing["blocked_countries"].(types.Set))
+	dataApi.BudgetRedirectedCountries = convertSetToStringSlice(routing["redirected_countries"].(types.Set))
 
 	// routing.zones
 	{
@@ -1442,16 +1471,6 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 				dataApi.EnableGeoZoneUS = true
 			}
 		}
-	}
-
-	// routing.filters
-	{
-		filters := routing["filters"].(types.Set).Elements()
-		values := make([]string, len(filters))
-		for i, filter := range filters {
-			values[i] = filter.(types.String).ValueString()
-		}
-		dataApi.RoutingFilters = values
 	}
 
 	// safe hop
@@ -1766,17 +1785,29 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		// filters
 		{
-			filtersValues := make([]attr.Value, len(dataApi.RoutingFilters))
-			for i, v := range dataApi.RoutingFilters {
-				filtersValues[i] = types.StringValue(v)
-			}
-
-			filters, diags := types.SetValue(types.StringType, filtersValues)
+			filters, diags := convertStringSliceToSet(dataApi.RoutingFilters)
 			if diags != nil {
 				return dataTf, diags
 			}
-
 			routingValues["filters"] = filters
+		}
+
+		// blocked countries
+		{
+			blockedCountries, diags := convertStringSliceToSet(dataApi.BlockedCountries)
+			if diags != nil {
+				return dataTf, diags
+			}
+			routingValues["blocked_countries"] = blockedCountries
+		}
+
+		// redirected countries
+		{
+			redirectedCountries, diags := convertStringSliceToSet(dataApi.BudgetRedirectedCountries)
+			if diags != nil {
+				return dataTf, diags
+			}
+			routingValues["redirected_countries"] = redirectedCountries
 		}
 
 		routing, diags := types.ObjectValue(pullzoneRoutingTypes, routingValues)

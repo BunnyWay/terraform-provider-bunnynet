@@ -99,13 +99,15 @@ type Pullzone struct {
 	FollowRedirects bool   `json:"FollowRedirects"`
 
 	// routing
-	Type              uint8    `json:"Type"`
-	EnableGeoZoneAF   bool     `json:"EnableGeoZoneAF"`
-	EnableGeoZoneASIA bool     `json:"EnableGeoZoneASIA"`
-	EnableGeoZoneEU   bool     `json:"EnableGeoZoneEU"`
-	EnableGeoZoneSA   bool     `json:"EnableGeoZoneSA"`
-	EnableGeoZoneUS   bool     `json:"EnableGeoZoneUS"`
-	RoutingFilters    []string `json:"RoutingFilters"`
+	Type                      uint8    `json:"Type"`
+	EnableGeoZoneAF           bool     `json:"EnableGeoZoneAF"`
+	EnableGeoZoneASIA         bool     `json:"EnableGeoZoneASIA"`
+	EnableGeoZoneEU           bool     `json:"EnableGeoZoneEU"`
+	EnableGeoZoneSA           bool     `json:"EnableGeoZoneSA"`
+	EnableGeoZoneUS           bool     `json:"EnableGeoZoneUS"`
+	RoutingFilters            []string `json:"RoutingFilters"`
+	BudgetRedirectedCountries []string `json:"BudgetRedirectedCountries"`
+	BlockedCountries          []string `json:"BlockedCountries"`
 
 	// optimizer
 	OptimizerEnabled                      bool    `json:"OptimizerEnabled"`
