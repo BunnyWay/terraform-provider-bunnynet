@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -67,7 +68,8 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		data.ApiUrl = types.StringValue("https://api.bunny.net")
 	}
 
-	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString())
+	userAgent := fmt.Sprintf("Terraform/%s BunnyProvider/%s", req.TerraformVersion, p.version)
+	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString(), userAgent)
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
 }

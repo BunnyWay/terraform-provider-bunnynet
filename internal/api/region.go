@@ -21,18 +21,7 @@ type Region struct {
 }
 
 func (c *Client) GetRegion(regionCode string) (Region, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/region", c.apiUrl), nil)
-	if err != nil {
-		return Region{}, err
-	}
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/region", c.apiUrl), nil)
 	if err != nil {
 		return Region{}, err
 	}

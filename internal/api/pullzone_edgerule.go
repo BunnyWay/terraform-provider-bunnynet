@@ -37,21 +37,7 @@ func (c *Client) CreatePullzoneEdgerule(data PullzoneEdgerule) (PullzoneEdgerule
 		return PullzoneEdgerule{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/edgerules/addOrUpdate", c.apiUrl, data.PullzoneId), bytes.NewReader(body))
-	if err != nil {
-		return PullzoneEdgerule{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/edgerules/addOrUpdate", c.apiUrl, data.PullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return PullzoneEdgerule{}, err
 	}
@@ -94,19 +80,7 @@ func (c *Client) GetPullzoneEdgerule(pullzoneId int64, guid string) (PullzoneEdg
 }
 
 func (c *Client) DeletePullzoneEdgerule(pullzoneId int64, guid string) error {
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d/edgerules/%s", c.apiUrl, pullzoneId, guid), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d/edgerules/%s", c.apiUrl, pullzoneId, guid), nil)
 	if err != nil {
 		return err
 	}

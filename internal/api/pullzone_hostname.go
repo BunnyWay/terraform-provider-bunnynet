@@ -29,21 +29,7 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 		return PullzoneHostname{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/addHostname", c.apiUrl, pullzoneId), bytes.NewReader(body))
-	if err != nil {
-		return PullzoneHostname{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/addHostname", c.apiUrl, pullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return PullzoneHostname{}, err
 	}
@@ -84,21 +70,7 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 		return PullzoneHostname{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/setForceSSL", c.apiUrl, pullzoneId), bytes.NewReader(body))
-	if err != nil {
-		return PullzoneHostname{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/setForceSSL", c.apiUrl, pullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return PullzoneHostname{}, err
 	}
@@ -135,21 +107,7 @@ func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d/removeHostname", c.apiUrl, pullzoneId), bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d/removeHostname", c.apiUrl, pullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}

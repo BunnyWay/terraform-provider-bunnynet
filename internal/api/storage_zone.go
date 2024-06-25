@@ -25,20 +25,7 @@ type StorageZone struct {
 
 func (c *Client) GetStorageZone(id int64) (StorageZone, error) {
 	var data StorageZone
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return data, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return data, err
 	}
@@ -67,21 +54,7 @@ func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
 		return StorageZone{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/storagezone", c.apiUrl), bytes.NewReader(body))
-	if err != nil {
-		return StorageZone{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/storagezone", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
 		return StorageZone{}, err
 	}
@@ -138,21 +111,7 @@ func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 		return StorageZone{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), bytes.NewReader(body))
-	if err != nil {
-		return StorageZone{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
 		return StorageZone{}, err
 	}
@@ -185,19 +144,7 @@ func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 }
 
 func (c *Client) DeleteStorageZone(id int64) error {
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}

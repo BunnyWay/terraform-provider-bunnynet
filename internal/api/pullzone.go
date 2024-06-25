@@ -138,20 +138,7 @@ type Pullzone struct {
 
 func (c *Client) GetPullzone(id int64) (Pullzone, error) {
 	var data Pullzone
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return data, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return data, err
 	}
@@ -180,21 +167,7 @@ func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
 		return Pullzone{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone", c.apiUrl), bytes.NewReader(body))
-	if err != nil {
-		return Pullzone{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
 		return Pullzone{}, err
 	}
@@ -241,21 +214,7 @@ func (c *Client) UpdatePullzone(dataApi Pullzone) (Pullzone, error) {
 		return Pullzone{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), bytes.NewReader(body))
-	if err != nil {
-		return Pullzone{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
 		return Pullzone{}, err
 	}
@@ -288,19 +247,7 @@ func (c *Client) UpdatePullzone(dataApi Pullzone) (Pullzone, error) {
 }
 
 func (c *Client) DeletePullzone(id int64) error {
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}

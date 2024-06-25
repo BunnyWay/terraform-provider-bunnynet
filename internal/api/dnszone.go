@@ -24,20 +24,7 @@ type DnsZone struct {
 
 func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
 	var data DnsZone
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return data, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return data, err
 	}
@@ -66,21 +53,7 @@ func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
 		return DnsZone{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/dnszone", c.apiUrl), bytes.NewReader(body))
-	if err != nil {
-		return DnsZone{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
 		return DnsZone{}, err
 	}
@@ -127,21 +100,7 @@ func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
 		return DnsZone{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), bytes.NewReader(body))
-	if err != nil {
-		return DnsZone{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
 		return DnsZone{}, err
 	}
@@ -174,19 +133,7 @@ func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
 }
 
 func (c *Client) DeleteDnsZone(id int64) error {
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}

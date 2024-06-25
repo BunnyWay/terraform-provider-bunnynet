@@ -61,21 +61,7 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 		return DnsRecord{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/dnszone/%d/records", c.apiUrl, dnsZoneId), bytes.NewReader(body))
-	if err != nil {
-		return DnsRecord{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPut, fmt.Sprintf("%s/dnszone/%d/records", c.apiUrl, dnsZoneId), bytes.NewReader(body))
 	if err != nil {
 		return DnsRecord{}, err
 	}
@@ -125,21 +111,7 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 		return DnsRecord{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d/records/%d", c.apiUrl, zoneId, id), bytes.NewReader(body))
-	if err != nil {
-		return DnsRecord{}, err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d/records/%d", c.apiUrl, zoneId, id), bytes.NewReader(body))
 	if err != nil {
 		return DnsRecord{}, err
 	}
@@ -172,19 +144,7 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 }
 
 func (c *Client) DeleteDnsRecord(zoneId int64, id int64) error {
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d/records/%d", c.apiUrl, zoneId, id), nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("AccessKey", c.apiKey)
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d/records/%d", c.apiUrl, zoneId, id), nil)
 	if err != nil {
 		return err
 	}

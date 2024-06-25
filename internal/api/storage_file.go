@@ -66,13 +66,7 @@ func (c *Client) CreateStorageFile(data StorageFile) (StorageFile, error) {
 		req.Header.Add("Override-Content-Type", data.ContentType)
 	}
 
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return StorageFile{}, err
 	}
