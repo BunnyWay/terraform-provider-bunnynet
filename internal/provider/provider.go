@@ -112,6 +112,7 @@ func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resourc
 		NewStorageZoneResource,
 		NewStreamCollectionResource,
 		NewStreamLibraryResource,
+		NewStreamVideoResource,
 	}
 }
 

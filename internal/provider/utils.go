@@ -1,7 +1,12 @@
 package provider
 
 import (
+	"errors"
+	"fmt"
 	"golang.org/x/exp/constraints"
+	"math"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -63,4 +68,30 @@ func (p *pullzoneMutex) Unlock(id int64) {
 		delete(p.pullzones, id)
 	}
 	p.mu.Unlock()
+}
+
+func convertTimestampToSeconds(timestamp string) (uint64, error) {
+	parts := strings.Split(timestamp, ":")
+	if len(parts) != 2 {
+		return 0, errors.New("Invalid timestamp format, expected \"00:00\"")
+	}
+
+	minutes, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	seconds, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(seconds + minutes*60), nil
+}
+
+func convertSecondsToTimestamp(seconds uint64) string {
+	minutes := math.Floor(float64(seconds / 60))
+	remainder := math.Mod(float64(seconds), 60)
+
+	return fmt.Sprintf("%02d:%02d", int64(minutes), int64(remainder))
 }
