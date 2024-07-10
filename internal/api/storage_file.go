@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,12 +15,13 @@ type StorageFile struct {
 	Id          string
 	Zone        int64
 	Path        string
-	Content     string
 	Length      uint64
 	ContentType string
 	DateCreated string
 	LastChanged string
 	Checksum    string
+
+	FileContents io.Reader
 }
 
 func (c *Client) GetStorageFile(zoneId int64, path string) (StorageFile, error) {
@@ -35,12 +35,6 @@ func (c *Client) GetStorageFile(zoneId int64, path string) (StorageFile, error) 
 		return StorageFile{}, err
 	}
 
-	content, err := getStorageFileContents(zone, path)
-	if err != nil {
-		return StorageFile{}, err
-	}
-
-	info.Content = string(content)
 	return info, nil
 }
 
@@ -50,12 +44,17 @@ func (c *Client) CreateStorageFile(data StorageFile) (StorageFile, error) {
 		return StorageFile{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("https://%s/%s/%s", zone.StorageHostname, zone.Name, data.Path), bytes.NewBufferString(data.Content))
+	body, err := io.ReadAll(data.FileContents)
 	if err != nil {
 		return StorageFile{}, err
 	}
 
-	checksum, err := storageFileGenerateChecksum(data.Content)
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("https://%s/%s/%s", zone.StorageHostname, zone.Name, data.Path), bytes.NewReader(body))
+	if err != nil {
+		return StorageFile{}, err
+	}
+
+	checksum, err := storageFileGenerateChecksum(body)
 	if err != nil {
 		return StorageFile{}, err
 	}
@@ -208,12 +207,12 @@ func getStorageFileInfo(zone StorageZone, path string) (StorageFile, error) {
 	return dataResult, nil
 }
 
-func storageFileGenerateChecksum(content string) (string, error) {
+func storageFileGenerateChecksum(content []byte) (string, error) {
 	hasher := sha256.New()
-	_, err := hasher.Write([]byte(content))
+	_, err := hasher.Write(content)
 	if err != nil {
 		return "", err
 	}
 
-	return strings.ToUpper(hex.EncodeToString(hasher.Sum(nil))), nil
+	return strings.ToUpper(fmt.Sprintf("%x", hasher.Sum(nil))), nil
 }
