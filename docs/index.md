@@ -26,3 +26,4 @@ provider "bunny" {
 
 - `api_key` (String) API key
 - `api_url` (String) API URL
+- `stream_api_url` (String) Stream API URL

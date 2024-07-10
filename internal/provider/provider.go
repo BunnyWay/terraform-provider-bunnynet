@@ -22,8 +22,9 @@ type BunnyProvider struct {
 }
 
 type BunnyProviderModel struct {
-	ApiKey types.String `tfsdk:"api_key"`
-	ApiUrl types.String `tfsdk:"api_url"`
+	ApiKey       types.String `tfsdk:"api_key"`
+	ApiUrl       types.String `tfsdk:"api_url"`
+	StreamApiUrl types.String `tfsdk:"stream_api_url"`
 }
 
 func (p *BunnyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -40,6 +41,10 @@ func (p *BunnyProvider) Schema(ctx context.Context, req provider.SchemaRequest, 
 			},
 			"api_url": schema.StringAttribute{
 				MarkdownDescription: "API URL",
+				Optional:            true,
+			},
+			"stream_api_url": schema.StringAttribute{
+				MarkdownDescription: "Stream API URL",
 				Optional:            true,
 			},
 		},
@@ -68,8 +73,17 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		data.ApiUrl = types.StringValue("https://api.bunny.net")
 	}
 
+	envStreamApiUrl := os.Getenv("BUNNY_STREAM_API_URL")
+	if envStreamApiUrl != "" {
+		data.StreamApiUrl = types.StringValue(envStreamApiUrl)
+	}
+
+	if data.StreamApiUrl.IsNull() {
+		data.StreamApiUrl = types.StringValue("https://video.bunnycdn.com")
+	}
+
 	userAgent := fmt.Sprintf("Terraform/%s BunnyProvider/%s", req.TerraformVersion, p.version)
-	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString(), userAgent)
+	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString(), data.StreamApiUrl.ValueString(), userAgent)
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
 }
@@ -84,6 +98,7 @@ func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resourc
 		NewPullzoneOptimizerClassResource,
 		NewStorageFileResource,
 		NewStorageZoneResource,
+		NewStreamCollectionResource,
 		NewStreamLibraryResource,
 	}
 }

@@ -535,7 +535,7 @@ func (r *StreamLibraryResource) Create(ctx context.Context, req resource.CreateR
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	dataApi, err := r.client.CreateStreamLibrary(dataApi)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create video library", err.Error())
+		resp.Diagnostics.AddError("Unable to create stream library", err.Error())
 		return
 	}
 
@@ -559,7 +559,7 @@ func (r *StreamLibraryResource) Read(ctx context.Context, req resource.ReadReque
 
 	dataApi, err := r.client.GetStreamLibrary(data.Id.ValueInt64())
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching video library", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching stream library", err.Error()))
 		return
 	}
 
@@ -583,7 +583,7 @@ func (r *StreamLibraryResource) Update(ctx context.Context, req resource.UpdateR
 	dataApi, err := r.client.UpdateStreamLibrary(dataApi)
 
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating video library", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating stream library", err.Error()))
 		return
 	}
 
@@ -607,7 +607,7 @@ func (r *StreamLibraryResource) Delete(ctx context.Context, req resource.DeleteR
 
 	err := r.client.DeleteStreamLibrary(data.Id.ValueInt64())
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting video library", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting stream library", err.Error()))
 	}
 }
 
@@ -620,7 +620,7 @@ func (r *StreamLibraryResource) ImportState(ctx context.Context, req resource.Im
 
 	dataApi, err := r.client.GetStreamLibrary(id)
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching video library", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching stream library", err.Error()))
 		return
 	}
 
