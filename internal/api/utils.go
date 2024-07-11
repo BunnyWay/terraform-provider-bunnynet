@@ -1,3 +1,6 @@
+// Copyright (c) BunnyWay d.o.o.
+// SPDX-License-Identifier: MPL-2.0
+
 package api
 
 func sliceDiff[T comparable](s1 []T, s2 []T) []T {
