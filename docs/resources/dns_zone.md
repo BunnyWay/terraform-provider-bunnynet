@@ -37,7 +37,7 @@ resource "bunny_dns_zone" "example" {
 ### Optional
 
 - `log_anonymized` (Boolean)
-- `log_anonymized_style` (String)
+- `log_anonymized_style` (String) Options: `Drop`, `OneDigit`
 - `log_enabled` (Boolean)
 - `nameserver1` (String)
 - `nameserver2` (String)

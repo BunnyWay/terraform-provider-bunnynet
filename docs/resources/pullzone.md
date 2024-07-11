@@ -3,12 +3,12 @@
 page_title: "bunny_pullzone Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Pullzone
+  CDN Pullzone
 ---
 
 # bunny_pullzone (Resource)
 
-Pullzone
+CDN Pullzone
 
 ## Example Usage
 
@@ -153,10 +153,10 @@ resource "bunny_pullzone" "test" {
 - `cache_chunked` (Boolean)
 - `cache_enabled` (Boolean)
 - `cache_errors` (Boolean)
-- `cache_expiration_time` (Number)
-- `cache_expiration_time_browser` (Number)
-- `cache_stale` (Set of String)
-- `cache_vary` (Set of String)
+- `cache_expiration_time` (Number) Expiration time in seconds.
+- `cache_expiration_time_browser` (Number) Expiration time in seconds.
+- `cache_stale` (Set of String) Options: `offline`, `updating`
+- `cache_vary` (Set of String) Options: `avif`, `cookie`, `country`, `hostname`, `mobile`, `querystring`, `webp`
 - `cache_vary_cookie` (Set of String)
 - `cache_vary_querystring` (Set of String)
 - `cors_enabled` (Boolean)
@@ -174,16 +174,16 @@ resource "bunny_pullzone" "test" {
 - `limit_download_speed` (Number)
 - `limit_requests` (Number)
 - `log_anonymized` (Boolean)
-- `log_anonymized_style` (String)
+- `log_anonymized_style` (String) Options: `Drop`, `OneDigit`
 - `log_enabled` (Boolean)
 - `log_forward_enabled` (Boolean)
-- `log_forward_format` (String)
+- `log_forward_format` (String) Options: `JSON`, `Plain`
 - `log_forward_port` (Number)
-- `log_forward_protocol` (String)
+- `log_forward_protocol` (String) Options: `DataDog`, `TCP`, `TCPEncrypted`, `UDP`
 - `log_forward_server` (String)
 - `log_forward_token` (String)
 - `log_storage_enabled` (Boolean)
-- `log_storage_zone` (Number)
+- `log_storage_zone` (Number) Storage Zone ID
 - `optimizer_classes_force` (Boolean)
 - `optimizer_dynamic_image_api` (Boolean)
 - `optimizer_enabled` (Boolean)
@@ -197,7 +197,7 @@ resource "bunny_pullzone" "test" {
 - `optimizer_watermark` (Boolean)
 - `optimizer_watermark_borderoffset` (Number)
 - `optimizer_watermark_minsize` (Number)
-- `optimizer_watermark_position` (String)
+- `optimizer_watermark_position` (String) Options: `BottomLeft`, `BottomRight`, `Center`, `CenterStretch`, `TopLeft`, `TopRight`
 - `optimizer_watermark_url` (String)
 - `optimizer_webp` (Boolean)
 - `origin` (Block, Optional) (see [below for nested schema](#nestedblock--origin))
@@ -206,7 +206,7 @@ resource "bunny_pullzone" "test" {
 - `originshield_enabled` (Boolean)
 - `originshield_queue_requests` (Number)
 - `originshield_queue_wait` (Number)
-- `permacache_storagezone` (Number)
+- `permacache_storagezone` (Number) Storage Zone ID
 - `request_coalescing_enabled` (Boolean)
 - `request_coalescing_timeout` (Number)
 - `routing` (Block, Optional) (see [below for nested schema](#nestedblock--routing))
@@ -219,10 +219,10 @@ resource "bunny_pullzone" "test" {
 - `safehop_response_timeout` (Number)
 - `safehop_retry_count` (Number)
 - `safehop_retry_delay` (Number)
-- `safehop_retry_reasons` (Set of String)
+- `safehop_retry_reasons` (Set of String) Options: `5xxResponse`, `connectionTimeout`, `responseTimeout`
 - `sort_querystring` (Boolean)
 - `strip_cookies` (Boolean)
-- `tls_support` (Set of String)
+- `tls_support` (Set of String) Options: `TLSv1.0`, `TLSv1.1`
 - `token_auth_enabled` (Boolean)
 - `token_auth_ip_validation` (Boolean)
 - `use_background_update` (Boolean)
@@ -238,14 +238,14 @@ resource "bunny_pullzone" "test" {
 
 Required:
 
-- `type` (String)
+- `type` (String) Options: `DnsAccelerate`, `OriginUrl`, `StorageZone`
 
 Optional:
 
 - `follow_redirects` (Boolean)
 - `forward_host_header` (Boolean)
 - `host_header` (String)
-- `storagezone` (Number)
+- `storagezone` (Number) Storage Zone ID
 - `url` (String)
 - `verify_ssl` (Boolean)
 
@@ -255,8 +255,8 @@ Optional:
 
 Optional:
 
-- `blocked_countries` (Set of String)
-- `filters` (Set of String)
-- `redirected_countries` (Set of String)
-- `tier` (String)
-- `zones` (Set of String)
+- `blocked_countries` (Set of String) List of two-letter country codes.
+- `filters` (Set of String) Options: `all`, `eu`
+- `redirected_countries` (Set of String) List of two-letter country codes.
+- `tier` (String) Options: `Standard`, `Volume`
+- `zones` (Set of String) Options: `AF`, `ASIA`, `EU`, `SA`, `US`

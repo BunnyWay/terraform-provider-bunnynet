@@ -27,7 +27,7 @@ resource "bunny_storage_zone" "test" {
 
 - `name` (String)
 - `region` (String)
-- `zone_tier` (String)
+- `zone_tier` (String) Options: `Edge`, `Standard`
 
 ### Optional
 

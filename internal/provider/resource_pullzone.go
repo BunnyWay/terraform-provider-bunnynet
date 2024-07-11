@@ -267,7 +267,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 	}
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Pullzone",
+		MarkdownDescription: "CDN Pullzone",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -325,6 +325,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(-1, 31919000), // -1 to 1y
 				},
+				Description: "Expiration time in seconds.",
 			},
 			"cache_expiration_time_browser": schema.Int64Attribute{
 				Optional: true,
@@ -336,6 +337,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(-1, 31919000), // -1 to 1y
 				},
+				Description: "Expiration time in seconds.",
 			},
 			"sort_querystring": schema.BoolAttribute{
 				Computed: true,
@@ -366,6 +368,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.OneOf(pullzoneCacheVaryOptions...),
 					),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(pullzoneCacheVaryOptions),
 			},
 			"cache_vary_querystring": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -419,6 +422,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.OneOf(pullzoneCacheStaleOptions...),
 					),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(pullzoneCacheStaleOptions),
 			},
 			"permacache_storagezone": schema.Int64Attribute{
 				Optional: true,
@@ -427,6 +431,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "Storage Zone ID",
 			},
 			"originshield_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -588,6 +593,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneLogAnonymizedStyleMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneLogAnonymizedStyleMap),
 			},
 			"log_forward_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -631,6 +637,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneLogForwardProtocolMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneLogForwardProtocolMap),
 			},
 			"log_forward_format": schema.StringAttribute{
 				Optional: true,
@@ -642,6 +649,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneLogForwardFormatMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneLogForwardFormatMap),
 			},
 			"log_storage_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -657,6 +665,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "Storage Zone ID",
 			},
 			"tls_support": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -671,6 +680,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.OneOf(pullzoneTlsSupportOptions...),
 					),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(pullzoneTlsSupportOptions),
 			},
 			"errorpage_whitelabel": schema.BoolAttribute{
 				Computed: true,
@@ -983,6 +993,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneOptimizerWatermarkPositionMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneOptimizerWatermarkPositionMap),
 			},
 			"optimizer_watermark_borderoffset": schema.Float64Attribute{
 				Optional: true,
@@ -1054,6 +1065,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.OneOf(pullzoneSafehopRetryReasonsOptions...),
 					),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(pullzoneSafehopRetryReasonsOptions),
 			},
 			"safehop_connection_timeout": schema.Int64Attribute{
 				Optional: true,
@@ -1086,12 +1098,14 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Validators: []validator.String{
 							stringvalidator.OneOf(maps.Values(pullzoneOriginTypeMap)...),
 						},
+						MarkdownDescription: generateMarkdownMapOptions(pullzoneOriginTypeMap),
 					},
 					"url": schema.StringAttribute{
 						Optional: true,
 					},
 					"storagezone": schema.Int64Attribute{
-						Optional: true,
+						Optional:    true,
+						Description: "Storage Zone ID",
 					},
 					"follow_redirects": schema.BoolAttribute{
 						Optional: true,
@@ -1127,6 +1141,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Validators: []validator.String{
 							stringvalidator.OneOf(maps.Values(pullzoneRoutingTierMap)...),
 						},
+						MarkdownDescription: generateMarkdownMapOptions(pullzoneRoutingTierMap),
 					},
 					"zones": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -1141,6 +1156,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 								stringvalidator.OneOf(pullzoneRoutingZonesOptions...),
 							),
 						},
+						MarkdownDescription: generateMarkdownSliceOptions(pullzoneRoutingZonesOptions),
 					},
 					"filters": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -1155,6 +1171,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 								stringvalidator.OneOf(pullzoneRoutingFiltersOptions...),
 							),
 						},
+						MarkdownDescription: generateMarkdownSliceOptions(pullzoneRoutingFiltersOptions),
 					},
 					"blocked_countries": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -1164,6 +1181,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
+						Description: "List of two-letter country codes.",
 					},
 					"redirected_countries": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -1173,6 +1191,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
+						Description: "List of two-letter country codes.",
 					},
 				},
 				Validators: []validator.Object{

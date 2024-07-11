@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 	"math"
 	"strconv"
 	"strings"
@@ -94,4 +96,14 @@ func convertSecondsToTimestamp(seconds uint64) string {
 	remainder := math.Mod(float64(seconds), 60)
 
 	return fmt.Sprintf("%02d:%02d", int64(minutes), int64(remainder))
+}
+
+func generateMarkdownMapOptions[T comparable](m map[T]string) string {
+	s := maps.Values(m)
+	return generateMarkdownSliceOptions(s)
+}
+
+func generateMarkdownSliceOptions(s []string) string {
+	slices.Sort(s)
+	return "Options: `" + strings.Join(s, "`, `") + "`"
 }

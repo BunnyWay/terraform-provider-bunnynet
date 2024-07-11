@@ -111,6 +111,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "ID of the related DNS zone.",
 			},
 			"enabled": schema.BoolAttribute{
 				Optional: true,
@@ -128,6 +129,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(dnsRecordTypeMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(dnsRecordTypeMap),
 			},
 			"ttl": schema.Int64Attribute{
 				Optional: true,
@@ -240,6 +242,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(dnsRecordMonitorTypeMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(dnsRecordMonitorTypeMap),
 			},
 			"geolocation_lat": schema.Float64Attribute{
 				Optional: true,
@@ -284,6 +287,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(dnsRecordSmartRoutingTypeMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(dnsRecordSmartRoutingTypeMap),
 			},
 			"comment": schema.StringAttribute{
 				Optional: true,

@@ -135,6 +135,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleActionMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleActionMap),
 			},
 			"description": schema.StringAttribute{
 				Optional: true,
@@ -152,6 +153,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleMatchTypeMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleMatchTypeMap),
 			},
 			"triggers": schema.ListAttribute{
 				Required:    true,

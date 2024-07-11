@@ -29,9 +29,9 @@ resource "bunny_dns_record" "MX" {
 ### Required
 
 - `name` (String)
-- `type` (String)
+- `type` (String) Options: `A`, `AAAA`, `CAA`, `CNAME`, `Flatten`, `MX`, `NS`, `PTR`, `PullZone`, `Redirect`, `SRV`, `Script`, `TXT`
 - `value` (String)
-- `zone` (Number)
+- `zone` (Number) ID of the related DNS zone.
 
 ### Optional
 
@@ -44,10 +44,10 @@ resource "bunny_dns_record" "MX" {
 - `geolocation_long` (Number)
 - `latency_zone` (String)
 - `link_name` (String)
-- `monitor_type` (String)
+- `monitor_type` (String) Options: `Http`, `Monitor`, `None`, `Ping`
 - `port` (Number)
 - `priority` (Number)
-- `smart_routing_type` (String)
+- `smart_routing_type` (String) Options: `Geolocation`, `Latency`, `None`
 - `tag` (String)
 - `ttl` (Number)
 - `weight` (Number)

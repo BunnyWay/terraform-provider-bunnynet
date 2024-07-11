@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e -o pipefail
+
 VERSION="$1"
 PLATFORMS=("darwin/amd64" "darwin/arm64" "freebsd/386" "freebsd/amd64" "freebsd/arm" "freebsd/arm64" "linux/386" "linux/amd64" "linux/arm" "linux/arm64" "windows/386" "windows/amd64" "windows/arm" "windows/arm64")
 
@@ -31,3 +33,19 @@ curl -H "AccessKey: ${STORAGE_PASSWORD}" "https://${STORAGE_HOST}/${STORAGE_ZONE
 # /v1/providers/
 CONTENTS=$(cat .github/scripts/providers.json.template | sed "s/{{VERSION}}/${VERSION}/g")
 curl -H "AccessKey: ${STORAGE_PASSWORD}" "https://${STORAGE_HOST}/${STORAGE_ZONE}/v1/providers/index.html" -H 'Override-Content-Type: application/json' -X PUT --data-binary "${CONTENTS}"
+
+# cleanup old docs
+curl -H "AccessKey: ${STORAGE_PASSWORD}" "https://${STORAGE_HOST}/${STORAGE_ZONE}/terraform-provider-bunny/docs/" -X DELETE
+
+# upload docs
+unzip "docs-v${VERSION}.zip" -d docs/
+DOCS_FILES=()
+while IFS=  read -r -d $'\0'; do
+    DOCS_FILES+=("$REPLY")
+done < <(find docs -type f -print0)
+
+for FILE in "${DOCS_FILES[@]}"; do
+  echo "Uploading \"$FILE\""
+  curl -H "AccessKey: ${STORAGE_PASSWORD}" "https://${STORAGE_HOST}/${STORAGE_ZONE}/${FILE}" -X PUT --data-binary "@${PWD}/${FILE}"
+  echo
+done

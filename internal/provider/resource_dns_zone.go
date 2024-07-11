@@ -151,6 +151,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneLogAnonymizedStyleMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneLogAnonymizedStyleMap),
 			},
 		},
 	}

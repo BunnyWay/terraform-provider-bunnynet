@@ -3,19 +3,24 @@
 page_title: "bunny Provider"
 subcategory: ""
 description: |-
-  
+  The Bunny Terraform provider allows Terraform users to manage their bunny.net resources.
+  Before getting started, you will need a bunny.net account and the API key for it.
+  NOTE: Team member API keys are not supported.
 ---
 
 # bunny Provider
 
+The Bunny Terraform provider allows Terraform users to manage their bunny.net resources.
 
+Before getting started, you will need a bunny.net account and the API key for it.
+
+> NOTE: Team member API keys are not supported.
 
 ## Example Usage
 
 ```terraform
 provider "bunny" {
   api_key = "00000000-0000-0000-0000-000000000000"
-  api_url = "https://api.bunny.net"
 }
 ```
 
@@ -24,6 +29,6 @@ provider "bunny" {
 
 ### Optional
 
-- `api_key` (String) API key
-- `api_url` (String) API URL
-- `stream_api_url` (String) Stream API URL
+- `api_key` (String) API key. Can also be set using the `BUNNY_API_KEY` environment variable.
+- `api_url` (String) The API URL. Defaults to `https://api.bunny.net`.
+- `stream_api_url` (String) The Stream API URL. Defaults to `https://video.bunnycdn.com`.

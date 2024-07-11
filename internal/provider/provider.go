@@ -34,17 +34,25 @@ func (p *BunnyProvider) Metadata(ctx context.Context, req provider.MetadataReque
 
 func (p *BunnyProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Manage bunny.net resources with Terraform",
+		MarkdownDescription: `
+The Bunny Terraform provider allows Terraform users to manage their bunny.net resources.
+
+Before getting started, you will need a bunny.net account and the API key for it.
+
+> NOTE: Team member API keys are not supported.
+		`,
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
-				MarkdownDescription: "API key",
+				MarkdownDescription: "API key. Can also be set using the `BUNNY_API_KEY` environment variable.",
 				Optional:            true,
 			},
 			"api_url": schema.StringAttribute{
-				MarkdownDescription: "API URL",
+				MarkdownDescription: "The API URL. Defaults to `https://api.bunny.net`.",
 				Optional:            true,
 			},
 			"stream_api_url": schema.StringAttribute{
-				MarkdownDescription: "Stream API URL",
+				MarkdownDescription: "The Stream API URL. Defaults to `https://video.bunnycdn.com`.",
 				Optional:            true,
 			},
 		},

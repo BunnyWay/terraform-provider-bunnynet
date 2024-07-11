@@ -92,6 +92,7 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(storageZoneTierMap)...),
 				},
+				MarkdownDescription: generateMarkdownMapOptions(storageZoneTierMap),
 			},
 			"hostname": schema.StringAttribute{
 				Computed: true,

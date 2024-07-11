@@ -160,6 +160,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.OneOf(streamLibraryLanguageOptions...),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryLanguageOptions),
 			},
 			"player_font_family": schema.StringAttribute{
 				Optional: true,
@@ -171,6 +172,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.OneOf(streamLibraryFontFamilyOptions...),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryFontFamilyOptions),
 			},
 			"player_primary_color": schema.StringAttribute{
 				Optional: true,
@@ -196,6 +198,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 						stringvalidator.OneOf(streamLibraryPlayerControlsOptions...),
 					),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryPlayerControlsOptions),
 			},
 			"player_custom_head": schema.StringAttribute{
 				Optional: true,
@@ -302,6 +305,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"bitrate_360p": schema.Int64Attribute{
 				Optional: true,
@@ -313,6 +317,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"bitrate_480p": schema.Int64Attribute{
 				Optional: true,
@@ -324,6 +329,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"bitrate_720p": schema.Int64Attribute{
 				Optional: true,
@@ -335,6 +341,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"bitrate_1080p": schema.Int64Attribute{
 				Optional: true,
@@ -346,6 +353,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"bitrate_1440p": schema.Int64Attribute{
 				Optional: true,
@@ -357,6 +365,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"bitrate_2160p": schema.Int64Attribute{
 				Optional: true,
@@ -368,6 +377,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
+				Description: "Bitrate in kilobits per second",
 			},
 			"watermark_position_left": schema.Int64Attribute{
 				Optional: true,
@@ -438,6 +448,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 						stringvalidator.OneOf(streamLibraryLanguageOptions...),
 					),
 				},
+				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryLanguageOptions),
 			},
 			"direct_play_enabled": schema.BoolAttribute{
 				Optional: true,

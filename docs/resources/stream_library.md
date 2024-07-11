@@ -77,13 +77,13 @@ resource "bunny_stream_library" "example" {
 
 ### Optional
 
-- `bitrate_1080p` (Number)
-- `bitrate_1440p` (Number)
-- `bitrate_2160p` (Number)
-- `bitrate_240p` (Number)
-- `bitrate_360p` (Number)
-- `bitrate_480p` (Number)
-- `bitrate_720p` (Number)
+- `bitrate_1080p` (Number) Bitrate in kilobits per second
+- `bitrate_1440p` (Number) Bitrate in kilobits per second
+- `bitrate_2160p` (Number) Bitrate in kilobits per second
+- `bitrate_240p` (Number) Bitrate in kilobits per second
+- `bitrate_360p` (Number) Bitrate in kilobits per second
+- `bitrate_480p` (Number) Bitrate in kilobits per second
+- `bitrate_720p` (Number) Bitrate in kilobits per second
 - `cdn_token_authentication_required` (Boolean)
 - `content_tagging_enabled` (Boolean)
 - `direct_play_enabled` (Boolean)
@@ -95,17 +95,17 @@ resource "bunny_stream_library" "example" {
 - `player_captions_background_color` (String)
 - `player_captions_font_color` (String)
 - `player_captions_font_size` (Number)
-- `player_controls` (Set of String)
+- `player_controls` (Set of String) Options: `airplay`, `captions`, `chromecast`, `current-time`, `duration`, `fast-forward`, `fullscreen`, `mute`, `pip`, `play`, `play-large`, `progress`, `rewind`, `settings`, `volume`
 - `player_custom_head` (String)
-- `player_font_family` (String)
-- `player_language` (String)
+- `player_font_family` (String) Options: `arial`, `inter`, `lato`, `oswald`, `raleway`, `roboto`, `rubik`, `ubuntu`
+- `player_language` (String) Options: ``
 - `player_primary_color` (String)
 - `player_watchtime_heatmap_enabled` (Boolean)
 - `referers_allowed` (Set of String)
 - `referers_blocked` (Set of String)
 - `resolutions` (Set of String)
 - `transcribing_enabled` (Boolean)
-- `transcribing_languages` (Set of String)
+- `transcribing_languages` (Set of String) Options: ``
 - `transcribing_smart_description_enabled` (Boolean)
 - `transcribing_smart_title_enabled` (Boolean)
 - `vast_tag_url` (String)

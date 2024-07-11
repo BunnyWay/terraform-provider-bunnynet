@@ -46,7 +46,7 @@ resource "bunny_pullzone_edgerule" "block_admin" {
 
 ### Required
 
-- `action` (String)
+- `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
 - `enabled` (Boolean)
 - `pullzone` (Number)
 - `triggers` (List of Object) (see [below for nested schema](#nestedatt--triggers))
@@ -54,7 +54,7 @@ resource "bunny_pullzone_edgerule" "block_admin" {
 ### Optional
 
 - `description` (String)
-- `match_type` (String)
+- `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
 
 ### Read-Only
 
