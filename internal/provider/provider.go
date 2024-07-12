@@ -97,18 +97,6 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString(), data.StreamApiUrl.ValueString(), userAgent)
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
-
-	if len(streamLibraryLanguageOptions) == 0 {
-		languages, err := apiClient.GetVideoLanguages()
-		if err != nil {
-			resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching video languages", err.Error()))
-			return
-		}
-
-		streamLibraryLanguageOptions = sliceMap(languages, func(v api.VideoLanguage) string {
-			return v.ShortCode
-		})
-	}
 }
 
 func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resource {

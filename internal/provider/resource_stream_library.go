@@ -89,7 +89,6 @@ type StreamLibraryResourceModel struct {
 }
 
 var streamLibraryFontFamilyOptions = []string{"arial", "inter", "lato", "oswald", "raleway", "roboto", "rubik", "ubuntu"}
-var streamLibraryLanguageOptions = []string{}
 var streamLibraryPlayerControlsOptions = []string{"airplay", "captions", "chromecast", "current-time", "duration", "fast-forward", "fullscreen", "mute", "pip", "play", "play-large", "progress", "rewind", "settings", "volume"}
 
 func (r *StreamLibraryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -160,10 +159,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Validators: []validator.String{
-					stringvalidator.OneOf(streamLibraryLanguageOptions...),
-				},
-				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryLanguageOptions),
+				MarkdownDescription: "ISO 639 Alpha-2 code",
 			},
 			"player_font_family": schema.StringAttribute{
 				Optional: true,
@@ -447,11 +443,8 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				},
 				Validators: []validator.Set{
 					setvalidator.SizeAtLeast(1),
-					setvalidator.ValueStringsAre(
-						stringvalidator.OneOf(streamLibraryLanguageOptions...),
-					),
 				},
-				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryLanguageOptions),
+				MarkdownDescription: "ISO 639 Alpha-2 code",
 			},
 			"direct_play_enabled": schema.BoolAttribute{
 				Optional: true,
