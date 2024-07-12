@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -36,6 +37,7 @@ type StreamVideoResource struct {
 type StreamVideoResourceModel struct {
 	Id          types.String `tfsdk:"id"`
 	Library     types.Int64  `tfsdk:"library"`
+	Collection  types.String `tfsdk:"collection"`
 	Title       types.String `tfsdk:"title"`
 	Description types.String `tfsdk:"description"`
 	Chapters    types.Set    `tfsdk:"chapters"`
@@ -76,6 +78,14 @@ func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaReq
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
+				},
+			},
+			"collection": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"title": schema.StringAttribute{
@@ -242,6 +252,7 @@ func (r *StreamVideoResource) convertModelToApi(ctx context.Context, dataTf Stre
 	dataApi := api.StreamVideo{}
 	dataApi.Id = dataTf.Id.ValueString()
 	dataApi.LibraryId = dataTf.Library.ValueInt64()
+	dataApi.CollectionId = dataTf.Collection.ValueString()
 	dataApi.Title = dataTf.Title.ValueString()
 	dataApi.MetaTags = []api.StreamVideoMetaTag{
 		{Property: "description", Value: dataTf.Description.ValueString()},
@@ -320,6 +331,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 	dataTf := StreamVideoResourceModel{}
 	dataTf.Id = types.StringValue(dataApi.Id)
 	dataTf.Library = types.Int64Value(dataApi.LibraryId)
+	dataTf.Collection = types.StringValue(dataApi.CollectionId)
 	dataTf.Title = types.StringValue(dataApi.Title)
 
 	for _, meta := range dataApi.MetaTags {

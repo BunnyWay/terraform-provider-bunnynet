@@ -13,12 +13,13 @@ import (
 )
 
 type StreamVideo struct {
-	Id        string               `json:"guid,omitempty"`
-	LibraryId int64                `json:"videoLibraryId"`
-	Title     string               `json:"title"`
-	MetaTags  []StreamVideoMetaTag `json:"metaTags"`
-	Chapters  []StreamVideoChapter `json:"chapters"`
-	Moments   []StreamVideoMoment  `json:"moments"`
+	Id           string               `json:"guid,omitempty"`
+	LibraryId    int64                `json:"videoLibraryId"`
+	CollectionId string               `json:"collectionId"`
+	Title        string               `json:"title"`
+	MetaTags     []StreamVideoMetaTag `json:"metaTags"`
+	Chapters     []StreamVideoChapter `json:"chapters"`
+	Moments      []StreamVideoMoment  `json:"moments"`
 }
 
 type StreamVideoMetaTag struct {
