@@ -5,6 +5,8 @@ subcategory: ""
 description: |-
   The Bunny Terraform provider allows Terraform users to manage their bunny.net resources.
   Before getting started, you will need a bunny.net account and the API key for it.
+  Authentication
+  You can either set the API key directly on the apikey attribute for the provider, or set the BUNNYAPI_KEY environment variable.
   NOTE: Team member API keys are not supported.
 ---
 
@@ -14,13 +16,38 @@ The Bunny Terraform provider allows Terraform users to manage their bunny.net re
 
 Before getting started, you will need a bunny.net account and the API key for it.
 
+## Authentication
+
+You can either set the API key directly on the <code>api_key</code> attribute for the provider, or set the <code>BUNNY_API_KEY</code> environment variable.
+
 > NOTE: Team member API keys are not supported.
 
 ## Example Usage
 
 ```terraform
+terraform {
+  required_providers {
+    bunny = {
+      source = "terraform-provider-bunny.b-cdn.net/bunny/bunny"
+    }
+  }
+}
+
 provider "bunny" {
   api_key = "00000000-0000-0000-0000-000000000000"
+}
+
+resource "bunny_pullzone" "example" {
+  name = "example"
+
+  origin {
+    type = "OriginUrl"
+    url  = "https://192.0.2.1"
+  }
+
+  routing {
+    tier = "Standard"
+  }
 }
 ```
 
@@ -30,5 +57,5 @@ provider "bunny" {
 ### Optional
 
 - `api_key` (String) API key. Can also be set using the `BUNNY_API_KEY` environment variable.
-- `api_url` (String) The API URL. Defaults to `https://api.bunny.net`.
-- `stream_api_url` (String) The Stream API URL. Defaults to `https://video.bunnycdn.com`.
+- `api_url` (String) Optional. The API URL. Defaults to `https://api.bunny.net`.
+- `stream_api_url` (String) Optional. The Stream API URL. Defaults to `https://video.bunnycdn.com`.

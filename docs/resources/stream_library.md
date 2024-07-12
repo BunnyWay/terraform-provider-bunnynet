@@ -92,20 +92,20 @@ resource "bunny_stream_library" "example" {
 - `early_play_enabled` (Boolean)
 - `mp4_fallback_enabled` (Boolean)
 - `original_files_keep` (Boolean)
-- `player_captions_background_color` (String)
-- `player_captions_font_color` (String)
+- `player_captions_background_color` (String) Hash RBG color (i.e.: `#ffaf48`)
+- `player_captions_font_color` (String) Hash RBG color (i.e.: `#ffaf48`)
 - `player_captions_font_size` (Number)
 - `player_controls` (Set of String) Options: `airplay`, `captions`, `chromecast`, `current-time`, `duration`, `fast-forward`, `fullscreen`, `mute`, `pip`, `play`, `play-large`, `progress`, `rewind`, `settings`, `volume`
 - `player_custom_head` (String)
 - `player_font_family` (String) Options: `arial`, `inter`, `lato`, `oswald`, `raleway`, `roboto`, `rubik`, `ubuntu`
-- `player_language` (String) Options: ``
-- `player_primary_color` (String)
+- `player_language` (String) ISO 639 Alpha-2 code
+- `player_primary_color` (String) Hash RBG color (i.e.: `#ffaf48`)
 - `player_watchtime_heatmap_enabled` (Boolean)
 - `referers_allowed` (Set of String)
 - `referers_blocked` (Set of String)
 - `resolutions` (Set of String)
 - `transcribing_enabled` (Boolean)
-- `transcribing_languages` (Set of String) Options: ``
+- `transcribing_languages` (Set of String) ISO 639 Alpha-2 code
 - `transcribing_smart_description_enabled` (Boolean)
 - `transcribing_smart_title_enabled` (Boolean)
 - `vast_tag_url` (String)

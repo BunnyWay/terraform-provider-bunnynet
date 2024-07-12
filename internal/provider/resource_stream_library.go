@@ -183,6 +183,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^#([0-9a-fA-F]{1,6})$"), "Invalid hex color"),
 				},
+				MarkdownDescription: "Hash RBG color (i.e.: `#ffaf48`)",
 			},
 			"player_controls": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -217,6 +218,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^#([0-9a-fA-F]{1,6})$"), "Invalid hex color"),
 				},
+				MarkdownDescription: "Hash RBG color (i.e.: `#ffaf48`)",
 			},
 			"player_captions_font_size": schema.Int64Attribute{
 				Optional: true,
@@ -236,6 +238,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^#([0-9a-fA-F]{1,6})$"), "Invalid hex color"),
 				},
+				MarkdownDescription: "Hash RBG color (i.e.: `#ffaf48`)",
 			},
 			"player_watchtime_heatmap_enabled": schema.BoolAttribute{
 				Optional: true,

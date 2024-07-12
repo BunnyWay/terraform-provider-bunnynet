@@ -43,6 +43,10 @@ The Bunny Terraform provider allows Terraform users to manage their bunny.net re
 
 Before getting started, you will need a bunny.net account and the API key for it.
 
+## Authentication
+
+You can either set the API key directly on the <code>api_key</code> attribute for the provider, or set the <code>BUNNY_API_KEY</code> environment variable.
+
 > NOTE: Team member API keys are not supported.
 		`,
 		Attributes: map[string]schema.Attribute{
@@ -51,11 +55,11 @@ Before getting started, you will need a bunny.net account and the API key for it
 				Optional:            true,
 			},
 			"api_url": schema.StringAttribute{
-				MarkdownDescription: "The API URL. Defaults to `https://api.bunny.net`.",
+				MarkdownDescription: "Optional. The API URL. Defaults to `https://api.bunny.net`.",
 				Optional:            true,
 			},
 			"stream_api_url": schema.StringAttribute{
-				MarkdownDescription: "The Stream API URL. Defaults to `https://video.bunnycdn.com`.",
+				MarkdownDescription: "Optional. The Stream API URL. Defaults to `https://video.bunnycdn.com`.",
 				Optional:            true,
 			},
 		},
