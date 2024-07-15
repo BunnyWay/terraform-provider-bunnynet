@@ -24,9 +24,9 @@ resource "bunny_stream_collection" "test" {
 
 ### Required
 
-- `library` (Number)
-- `name` (String)
+- `library` (Number) The video library ID that contains the collection
+- `name` (String) The name of the collection
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID of the collection

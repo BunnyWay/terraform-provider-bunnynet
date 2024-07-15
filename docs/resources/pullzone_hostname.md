@@ -40,13 +40,13 @@ resource "bunny_pullzone_hostname" "custom" {
 
 ### Required
 
-- `name` (String)
+- `name` (String) The hostname value for the domain name
 - `pullzone` (Number)
 
 ### Optional
 
-- `force_ssl` (Boolean)
+- `force_ssl` (Boolean) Determines if the Force SSL feature is enabled
 
 ### Read-Only
 
-- `id` (Number) The ID of this resource.
+- `id` (Number) The unique ID of the hostname

@@ -25,20 +25,20 @@ resource "bunny_storage_zone" "test" {
 
 ### Required
 
-- `name` (String)
-- `region` (String)
+- `name` (String) The name of the storage zone
+- `region` (String) The main region used by the storage zone
 - `zone_tier` (String) Options: `Edge`, `Standard`
 
 ### Optional
 
-- `custom_404_file_path` (String)
-- `replication_regions` (Set of String)
-- `rewrite_404_to_200` (Boolean)
+- `custom_404_file_path` (String) The custom 404 error path that will be returned in case of a missing file.
+- `replication_regions` (Set of String) The replication regions enabled for this storage zone
+- `rewrite_404_to_200` (Boolean) Determines if the storage zone will rewrite 404 status codes to 200 status codes
 
 ### Read-Only
 
-- `date_modified` (String)
-- `hostname` (String)
-- `id` (Number) The ID of this resource.
-- `password` (String, Sensitive)
-- `password_readonly` (String, Sensitive)
+- `date_modified` (String) The date when the zone was last modified
+- `hostname` (String) Determines the storage hostname for this zone
+- `id` (Number) The ID of the storage zone
+- `password` (String, Sensitive) The API access key or FTP password
+- `password_readonly` (String, Sensitive) The read-only API access key or FTP password

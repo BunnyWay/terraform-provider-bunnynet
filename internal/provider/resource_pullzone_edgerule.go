@@ -117,6 +117,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The unique GUID of the edge rule",
 			},
 			"pullzone": schema.Int64Attribute{
 				Required: true,
@@ -129,6 +130,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Determines if the edge rule is currently enabled or not",
 			},
 			"action": schema.StringAttribute{
 				Required: true,
@@ -145,6 +147,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The description of the edge rule",
 			},
 			"match_type": schema.StringAttribute{
 				Optional: true,
@@ -162,6 +165,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				Required:    true,
 				ElementType: pullzoneEdgeruleTriggerType,
 			},
+			// @TODO ActionParameter1 and ActionParameter2
 		},
 	}
 }

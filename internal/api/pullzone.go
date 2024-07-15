@@ -124,9 +124,9 @@ type Pullzone struct {
 	OptimizerEnabled                      bool    `json:"OptimizerEnabled"`
 	OptimizerMinifyCss                    bool    `json:"OptimizerMinifyCSS"`
 	OptimizerMinifyJs                     bool    `json:"OptimizerMinifyJavaScript"`
-	OptimizerWebp                         bool    `json:"OptimizerEnableWebP"`
+	OptimizerEnableWebP                   bool    `json:"OptimizerEnableWebP"`
 	OptimizerForceClasses                 bool    `json:"OptimizerForceClasses"`
-	OptimizerImageOptimization            bool    `json:"OptimizerEnableManipulationEngine"`
+	OptimizerEnableManipulationEngine     bool    `json:"OptimizerEnableManipulationEngine"`
 	OptimizerAutomaticOptimizationEnabled bool    `json:"OptimizerAutomaticOptimizationEnabled"`
 	OptimizerDesktopMaxWidth              uint64  `json:"OptimizerDesktopMaxWidth"`
 	OptimizerMobileMaxWidth               uint64  `json:"OptimizerMobileMaxWidth"`

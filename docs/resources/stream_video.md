@@ -61,19 +61,19 @@ resource "bunny_stream_video" "test" {
 
 ### Required
 
-- `library` (Number)
-- `title` (String)
+- `library` (Number) The ID of the video library that the video belongs to
+- `title` (String) The title of the video
 
 ### Optional
 
-- `chapters` (Set of Object) (see [below for nested schema](#nestedatt--chapters))
-- `collection` (String)
+- `chapters` (Set of Object) The list of chapters available for the video (see [below for nested schema](#nestedatt--chapters))
+- `collection` (String) The ID of the collection where the video belongs
 - `description` (String)
-- `moments` (Set of Object) (see [below for nested schema](#nestedatt--moments))
+- `moments` (Set of Object) The list of moments available for the video (see [below for nested schema](#nestedatt--moments))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID of the video
 
 <a id="nestedatt--chapters"></a>
 ### Nested Schema for `chapters`

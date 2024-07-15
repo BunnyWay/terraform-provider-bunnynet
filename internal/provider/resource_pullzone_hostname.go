@@ -56,6 +56,7 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "The unique ID of the hostname",
 			},
 			"pullzone": schema.Int64Attribute{
 				Required: true,
@@ -71,6 +72,7 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("(.+)\\.(.+)"), "Invalid domain"),
 				},
+				Description: "The hostname value for the domain name",
 			},
 			"force_ssl": schema.BoolAttribute{
 				Optional: true,
@@ -79,6 +81,7 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Determines if the Force SSL feature is enabled",
 			},
 		},
 	}

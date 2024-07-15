@@ -73,52 +73,52 @@ resource "bunny_stream_library" "example" {
 
 ### Required
 
-- `name` (String)
+- `name` (String) The name of the Video Library.
 
 ### Optional
 
-- `bitrate_1080p` (Number) Bitrate in kilobits per second
-- `bitrate_1440p` (Number) Bitrate in kilobits per second
-- `bitrate_2160p` (Number) Bitrate in kilobits per second
-- `bitrate_240p` (Number) Bitrate in kilobits per second
-- `bitrate_360p` (Number) Bitrate in kilobits per second
-- `bitrate_480p` (Number) Bitrate in kilobits per second
-- `bitrate_720p` (Number) Bitrate in kilobits per second
+- `bitrate_1080p` (Number) The bitrate used for encoding 1080p videos
+- `bitrate_1440p` (Number) The bitrate used for encoding 1440p videos
+- `bitrate_2160p` (Number) The bitrate used for encoding 2160p videos
+- `bitrate_240p` (Number) The bitrate used for encoding 240p videos
+- `bitrate_360p` (Number) The bitrate used for encoding 360p videos
+- `bitrate_480p` (Number) The bitrate used for encoding 480p videos
+- `bitrate_720p` (Number) The bitrate used for encoding 720p videos
 - `cdn_token_authentication_required` (Boolean)
-- `content_tagging_enabled` (Boolean)
-- `direct_play_enabled` (Boolean)
-- `direct_url_file_access_blocked` (Boolean)
-- `drm_mediacage_basic_enabled` (Boolean)
-- `early_play_enabled` (Boolean)
-- `mp4_fallback_enabled` (Boolean)
-- `original_files_keep` (Boolean)
-- `player_captions_background_color` (String) Hash RBG color (i.e.: `#ffaf48`)
-- `player_captions_font_color` (String) Hash RBG color (i.e.: `#ffaf48`)
-- `player_captions_font_size` (Number)
+- `content_tagging_enabled` (Boolean) Determines if content tagging should be enabled for this library.
+- `direct_play_enabled` (Boolean) Determines direct play URLs are enabled for the library
+- `direct_url_file_access_blocked` (Boolean) Determines if the requests without a referrer are blocked
+- `drm_mediacage_basic_enabled` (Boolean) Determines if the MediaCage basic DRM is enabled
+- `early_play_enabled` (Boolean) Determines if the Early-Play feature is enabled
+- `mp4_fallback_enabled` (Boolean) Determines if the MP4 fallback feature is enabled
+- `original_files_keep` (Boolean) Determines if the original video files should be stored after encoding
+- `player_captions_background_color` (String) The captions display background color
+- `player_captions_font_color` (String) The captions display font color
+- `player_captions_font_size` (Number) The captions display font size
 - `player_controls` (Set of String) Options: `airplay`, `captions`, `chromecast`, `current-time`, `duration`, `fast-forward`, `fullscreen`, `mute`, `pip`, `play`, `play-large`, `progress`, `rewind`, `settings`, `volume`
-- `player_custom_head` (String)
+- `player_custom_head` (String) The custom HTMl that is added into the head of the HTML player.
 - `player_font_family` (String) Options: `arial`, `inter`, `lato`, `oswald`, `raleway`, `roboto`, `rubik`, `ubuntu`
-- `player_language` (String) ISO 639 Alpha-2 code
-- `player_primary_color` (String) Hash RBG color (i.e.: `#ffaf48`)
-- `player_watchtime_heatmap_enabled` (Boolean)
-- `referers_allowed` (Set of String)
-- `referers_blocked` (Set of String)
-- `resolutions` (Set of String)
-- `transcribing_enabled` (Boolean)
-- `transcribing_languages` (Set of String) ISO 639 Alpha-2 code
-- `transcribing_smart_description_enabled` (Boolean)
-- `transcribing_smart_title_enabled` (Boolean)
-- `vast_tag_url` (String)
-- `view_token_authentication_required` (Boolean)
-- `watermark_height` (Number)
-- `watermark_position_left` (Number)
-- `watermark_position_top` (Number)
-- `watermark_width` (Number)
-- `webhook_url` (String)
+- `player_language` (String) The UI language of the player
+- `player_primary_color` (String) The key color of the player.
+- `player_watchtime_heatmap_enabled` (Boolean) Determines if the video watch heatmap should be displayed in the player.
+- `referers_allowed` (Set of String) The list of allowed referrer domains allowed to access the library
+- `referers_blocked` (Set of String) The list of blocked referrer domains blocked from accessing the library
+- `resolutions` (Set of String) The comma separated list of enabled resolutions
+- `transcribing_enabled` (Boolean) Determines if the automatic audio transcribing is currently enabled for this zone.
+- `transcribing_languages` (Set of String) The list of languages that the captions will be automatically transcribed to.
+- `transcribing_smart_description_enabled` (Boolean) Determines if automatic transcribing description generation is currently enabled.
+- `transcribing_smart_title_enabled` (Boolean) Determines if automatic transcribing title generation is currently enabled.
+- `vast_tag_url` (String) The URL of the VAST tag endpoint for advertising configuration
+- `view_token_authentication_required` (Boolean) Determines if the player token authentication is enabled
+- `watermark_height` (Number) The height of the watermark (in %)
+- `watermark_position_left` (Number) The left offset of the watermark position (in %)
+- `watermark_position_top` (Number) The top offset of the watermark position (in %)
+- `watermark_width` (Number) The width of the watermark (in %)
+- `webhook_url` (String) The webhook URL of the video library
 
 ### Read-Only
 
-- `api_key` (String)
+- `api_key` (String) The API key used for authenticating with the video library
 - `id` (Number) The ID of this resource.
-- `pullzone` (Number)
-- `storage_zone` (Number)
+- `pullzone` (Number) The ID of the connected underlying pull zone
+- `storage_zone` (Number) The ID of the connected underlying storage zone

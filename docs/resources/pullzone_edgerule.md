@@ -47,18 +47,18 @@ resource "bunny_pullzone_edgerule" "block_admin" {
 ### Required
 
 - `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
-- `enabled` (Boolean)
+- `enabled` (Boolean) Determines if the edge rule is currently enabled or not
 - `pullzone` (Number)
 - `triggers` (List of Object) (see [below for nested schema](#nestedatt--triggers))
 
 ### Optional
 
-- `description` (String)
+- `description` (String) The description of the edge rule
 - `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique GUID of the edge rule
 
 <a id="nestedatt--triggers"></a>
 ### Nested Schema for `triggers`
