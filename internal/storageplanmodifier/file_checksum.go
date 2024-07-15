@@ -29,8 +29,22 @@ func (m detectFileContentsChange) MarkdownDescription(_ context.Context) string 
 }
 
 func (m detectFileContentsChange) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	var fileContents []byte
+	// Do nothing if there is no state value.
+	if req.StateValue.IsNull() {
+		return
+	}
 
+	// Do nothing if there is a known planned value.
+	if !req.PlanValue.IsUnknown() {
+		return
+	}
+
+	// Do nothing if there is an unknown configuration value, otherwise interpolation gets messed up.
+	if req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	var fileContents []byte
 	var content string
 	req.Plan.GetAttribute(ctx, path.Root("content"), &content)
 	if len(content) > 0 {
