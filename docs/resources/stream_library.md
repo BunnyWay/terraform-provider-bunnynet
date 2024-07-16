@@ -18,7 +18,7 @@ resource "bunny_stream_library" "example" {
 
   # player
   player_language                  = "en"
-  player_font_family               = "Rubik"
+  player_font_family               = "rubik"
   player_primary_color             = "#ff7755"
   player_controls                  = ["airplay", "play", "volume", "captions", "current-time", "fullscreen", "mute", "pip", "play-large", "progress", "settings"]
   player_captions_font_color       = "#fff"
