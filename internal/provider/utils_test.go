@@ -3,7 +3,11 @@
 
 package provider
 
-import "testing"
+import (
+	"golang.org/x/exp/rand"
+	"testing"
+	"time"
+)
 
 func TestConvertTimestampToSeconds(t *testing.T) {
 	type dataType struct {
@@ -57,4 +61,18 @@ func TestConvertSecondsToTimestamp(t *testing.T) {
 			t.Errorf("Expected %d to return %s, got %s", data.Seconds, data.Expected, result)
 		}
 	}
+}
+
+const randomStringOptions = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+func generateRandomString(n int) string {
+	// @TODO should not need, but it is unfortunately being called somewhere else
+	rand.Seed(uint64(time.Now().UnixNano()))
+
+	result := make([]byte, n)
+	for i := range result {
+		result[i] = randomStringOptions[rand.Intn(len(randomStringOptions))]
+	}
+
+	return string(result)
 }
