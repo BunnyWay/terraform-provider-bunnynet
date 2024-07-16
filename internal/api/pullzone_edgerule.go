@@ -13,13 +13,15 @@ import (
 )
 
 type PullzoneEdgerule struct {
-	Id          string                    `json:"Guid,omitempty"`
-	Enabled     bool                      `json:"Enabled"`
-	Description string                    `json:"Description"`
-	Action      uint8                     `json:"ActionType"`
-	MatchType   uint8                     `json:"TriggerMatchingType"`
-	Triggers    []PullzoneEdgeruleTrigger `json:"Triggers"`
-	PullzoneId  int64                     `json:"-"`
+	Id               string                    `json:"Guid,omitempty"`
+	Enabled          bool                      `json:"Enabled"`
+	Description      string                    `json:"Description"`
+	Action           uint8                     `json:"ActionType"`
+	ActionParameter1 string                    `json:"ActionParameter1"`
+	ActionParameter2 string                    `json:"ActionParameter2"`
+	MatchType        uint8                     `json:"TriggerMatchingType"`
+	Triggers         []PullzoneEdgeruleTrigger `json:"Triggers"`
+	PullzoneId       int64                     `json:"-"`
 }
 
 type PullzoneEdgeruleTrigger struct {

@@ -44,6 +44,8 @@ resource "bunny_pullzone_edgerule" "block_admin" {
 
 ### Optional
 
+- `action_parameter1` (String)
+- `action_parameter2` (String)
 - `description` (String) The description of the edge rule
 - `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
 

@@ -37,13 +37,15 @@ type PullzoneEdgeruleResource struct {
 }
 
 type PullzoneEdgeruleResourceModel struct {
-	Id          types.String `tfsdk:"id"`
-	PullzoneId  types.Int64  `tfsdk:"pullzone"`
-	Enabled     types.Bool   `tfsdk:"enabled"`
-	Description types.String `tfsdk:"description"`
-	Action      types.String `tfsdk:"action"`
-	MatchType   types.String `tfsdk:"match_type"`
-	Triggers    types.List   `tfsdk:"triggers"`
+	Id               types.String `tfsdk:"id"`
+	PullzoneId       types.Int64  `tfsdk:"pullzone"`
+	Enabled          types.Bool   `tfsdk:"enabled"`
+	Description      types.String `tfsdk:"description"`
+	Action           types.String `tfsdk:"action"`
+	ActionParameter1 types.String `tfsdk:"action_parameter1"`
+	ActionParameter2 types.String `tfsdk:"action_parameter2"`
+	MatchType        types.String `tfsdk:"match_type"`
+	Triggers         types.List   `tfsdk:"triggers"`
 }
 
 var pullzoneEdgeruleMatchTypeMap = map[uint8]string{
@@ -142,8 +144,26 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				},
 				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleActionMap),
 			},
+			"action_parameter1": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"action_parameter2": schema.StringAttribute{
+				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"description": schema.StringAttribute{
 				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -165,7 +185,6 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				Required:    true,
 				ElementType: pullzoneEdgeruleTriggerType,
 			},
-			// @TODO ActionParameter1 and ActionParameter2
 		},
 	}
 }
@@ -304,6 +323,8 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.Enabled = dataTf.Enabled.ValueBool()
 	dataApi.Action = mapValueToKey(pullzoneEdgeruleActionMap, dataTf.Action.ValueString())
+	dataApi.ActionParameter1 = dataTf.ActionParameter1.ValueString()
+	dataApi.ActionParameter2 = dataTf.ActionParameter2.ValueString()
 	dataApi.Description = dataTf.Description.ValueString()
 	dataApi.MatchType = mapValueToKey(pullzoneEdgeruleMatchTypeMap, dataTf.MatchType.ValueString())
 
@@ -348,6 +369,8 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Enabled = types.BoolValue(dataApi.Enabled)
 	dataTf.Action = types.StringValue(mapKeyToValue(pullzoneEdgeruleActionMap, dataApi.Action))
+	dataTf.ActionParameter1 = types.StringValue(dataApi.ActionParameter1)
+	dataTf.ActionParameter2 = types.StringValue(dataApi.ActionParameter2)
 	dataTf.Description = types.StringValue(dataApi.Description)
 	dataTf.MatchType = types.StringValue(mapKeyToValue(pullzoneEdgeruleMatchTypeMap, dataApi.MatchType))
 
