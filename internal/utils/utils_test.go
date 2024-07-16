@@ -1,7 +1,7 @@
 // Copyright (c) BunnyWay d.o.o.
 // SPDX-License-Identifier: MPL-2.0
 
-package api
+package utils
 
 import (
 	"golang.org/x/exp/slices"
@@ -24,7 +24,7 @@ func TestSliceDiff(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		diff := sliceDiff(data.SliceA, data.SliceB)
+		diff := SliceDiff(data.SliceA, data.SliceB)
 
 		if !slices.Equal(diff, data.Expected) {
 			t.Errorf("Expected diff to be %v, got %v", data.Expected, diff)

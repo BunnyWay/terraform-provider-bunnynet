@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunny/internal/utils"
 	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
@@ -209,7 +210,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 
 	reloadResult := false
 	if !slices.Equal(dataApi.AllowedReferrers, dataApiResult.AllowedReferrers) {
-		diff := sliceDiff(dataApi.AllowedReferrers, dataApiResult.AllowedReferrers)
+		diff := utils.SliceDiff(dataApi.AllowedReferrers, dataApiResult.AllowedReferrers)
 		if len(diff) > 0 {
 			for _, hostname := range diff {
 				err = c.streamLibraryRefererAddRemove(id, hostname, "Allowed", "add")
@@ -221,7 +222,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 			reloadResult = true
 		}
 
-		diff = sliceDiff(dataApiResult.AllowedReferrers, dataApi.AllowedReferrers)
+		diff = utils.SliceDiff(dataApiResult.AllowedReferrers, dataApi.AllowedReferrers)
 		if len(diff) > 0 {
 			for _, hostname := range diff {
 				err = c.streamLibraryRefererAddRemove(id, hostname, "Allowed", "remove")
@@ -235,7 +236,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 	}
 
 	if !slices.Equal(dataApi.BlockedReferrers, dataApiResult.BlockedReferrers) {
-		diff := sliceDiff(dataApi.BlockedReferrers, dataApiResult.BlockedReferrers)
+		diff := utils.SliceDiff(dataApi.BlockedReferrers, dataApiResult.BlockedReferrers)
 		if len(diff) > 0 {
 			for _, hostname := range diff {
 				err = c.streamLibraryRefererAddRemove(id, hostname, "Blocked", "add")
@@ -247,7 +248,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 			reloadResult = true
 		}
 
-		diff = sliceDiff(dataApiResult.BlockedReferrers, dataApi.BlockedReferrers)
+		diff = utils.SliceDiff(dataApiResult.BlockedReferrers, dataApi.BlockedReferrers)
 		if len(diff) > 0 {
 			for _, hostname := range diff {
 				err = c.streamLibraryRefererAddRemove(id, hostname, "Blocked", "remove")

@@ -7,9 +7,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/bunnyway/terraform-provider-bunny/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -224,7 +226,22 @@ func (r *StorageZoneResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	// @TODO removing a region from replication_regions is not allowed
+	// removing a region from replication_regions is not allowed
+	{
+		attrPath := path.Root("replication_regions")
+		var originalValues []string
+		req.State.GetAttribute(ctx, attrPath, &originalValues)
+
+		var newValues []string
+		req.Plan.GetAttribute(ctx, attrPath, &newValues)
+
+		diff := utils.SliceDiff(originalValues, newValues)
+		if len(diff) > 0 {
+			resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(attrPath, "Error updating storage zone", "Once set, a region cannot be removed from the replication_regions list."))
+			return
+		}
+	}
+
 	dataApi := r.convertModelToApi(ctx, data)
 	dataApi, err := r.client.UpdateStorageZone(dataApi)
 	if err != nil {

@@ -1,9 +1,9 @@
 // Copyright (c) BunnyWay d.o.o.
 // SPDX-License-Identifier: MPL-2.0
 
-package api
+package utils
 
-func sliceDiff[T comparable](s1 []T, s2 []T) []T {
+func SliceDiff[T comparable](s1 []T, s2 []T) []T {
 	diff := make([]T, 0)
 
 	for _, v1 := range s1 {
