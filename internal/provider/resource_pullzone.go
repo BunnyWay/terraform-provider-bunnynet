@@ -180,6 +180,7 @@ var pullzoneTlsSupportOptions = []string{"TLSv1.0", "TLSv1.1"}
 var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxResponse", "responseTimeout"}
 var pullzoneRoutingZonesOptions = []string{"AF", "ASIA", "EU", "SA", "US"}
 var pullzoneRoutingFiltersOptions = []string{"all", "eu"}
+var pullzoneCorsExtensionsDefault = []string{"css", "eot", "gif", "jpeg", "jpg", "js", "mp3", "mp4", "mpeg", "png", "svg", "ttf", "webm", "webp", "woff", "woff2"}
 
 var pullzoneLogAnonymizedStyleMap = map[uint8]string{
 	0: "OneDigit",
@@ -224,14 +225,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 		return
 	}
 
-	pullzoneCorsExtensionsDefault, diags := types.SetValue(types.StringType, []attr.Value{
-		types.StringValue("css"),
-		types.StringValue("eot"),
-		types.StringValue("ttf"),
-		types.StringValue("woff"),
-		types.StringValue("woff2"),
-	})
-
+	pullzoneCorsExtensionsSetDefault, diags := convertStringSliceToSet(pullzoneCorsExtensionsDefault)
 	if diags != nil {
 		resp.Diagnostics = append(resp.Diagnostics, diags...)
 		return
@@ -833,7 +827,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				Default:     setdefault.StaticValue(pullzoneCorsExtensionsDefault),
+				Default:     setdefault.StaticValue(pullzoneCorsExtensionsSetDefault),
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -1349,6 +1343,15 @@ func (r *PullzoneResource) Update(ctx context.Context, req resource.UpdateReques
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if data.CorsExtensions.IsNull() {
+		extensions, diags := convertStringSliceToSet(pullzoneCorsExtensionsDefault)
+		if diags != nil {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		data.CorsExtensions = extensions
 	}
 
 	pullzoneId := data.Id.ValueInt64()
