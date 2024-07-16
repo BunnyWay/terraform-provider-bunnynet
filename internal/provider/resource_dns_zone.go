@@ -180,8 +180,51 @@ func (r *DnsZoneResource) Configure(ctx context.Context, req resource.ConfigureR
 
 func (r *DnsZoneResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var dataTf DnsZoneResourceModel
+	var diags diag.Diagnostics
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = planAttrBoolEnforceDefault(ctx, req.Plan, "nameserver_custom")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = planAttrStringEnforceDefault(ctx, req.Plan, "soa_email")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = planAttrStringEnforceDefault(ctx, req.Plan, "nameserver1")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = planAttrStringEnforceDefault(ctx, req.Plan, "nameserver2")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = planAttrBoolEnforceDefault(ctx, req.Plan, "log_enabled")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = planAttrBoolEnforceDefault(ctx, req.Plan, "log_anonymized")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	diags = planAttrStringEnforceDefault(ctx, req.Plan, "log_anonymized_style")
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -193,7 +236,7 @@ func (r *DnsZoneResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	tflog.Trace(ctx, "created dns zone "+dataApi.Domain)
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags = r.convertApiToModel(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
