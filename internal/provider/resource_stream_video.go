@@ -65,7 +65,7 @@ func (r *StreamVideoResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stream Video",
+		Description: "This resource manages individual video files in bunny.net Stream. It is used to upload, update, and manage individual video files, providing control over the video content available through bunny.net’s streaming service.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

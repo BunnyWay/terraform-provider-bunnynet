@@ -48,7 +48,7 @@ func (r *PullzoneHostnameResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Pullzone Hostname",
+		Description: "This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pull zones, allowing for branded URLs and better control over content delivery endpoints.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

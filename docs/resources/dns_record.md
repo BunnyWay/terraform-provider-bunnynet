@@ -3,12 +3,12 @@
 page_title: "bunny_dns_record Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  DNS Record
+  This resource manages DNS records in a bunny.net DNS zone.It is used to create, update, and delete DNS records such as A, CNAME, TXT, etc., within a specific DNS zone managed by bunny.net.
 ---
 
 # bunny_dns_record (Resource)
 
-DNS Record
+This resource manages DNS records in a bunny.net DNS zone.It is used to create, update, and delete DNS records such as A, CNAME, TXT, etc., within a specific DNS zone managed by bunny.net.
 
 ## Example Usage
 
@@ -16,10 +16,9 @@ DNS Record
 resource "bunny_dns_record" "MX" {
   zone = bunny_dns_zone.example.id
 
-  name     = ""
-  type     = "MX"
-  value    = "mail.example.com."
-  priority = 1
+  name  = ""
+  type  = "A"
+  value = "192.0.2.33"
 }
 ```
 
@@ -28,30 +27,30 @@ resource "bunny_dns_record" "MX" {
 
 ### Required
 
-- `name` (String)
+- `name` (String) The name of the DNS record.
 - `type` (String) Options: `A`, `AAAA`, `CAA`, `CNAME`, `Flatten`, `MX`, `NS`, `PTR`, `PullZone`, `Redirect`, `SRV`, `Script`, `TXT`
-- `value` (String)
+- `value` (String) The value of the DNS record.
 - `zone` (Number) ID of the related DNS zone.
 
 ### Optional
 
-- `accelerated` (Boolean)
-- `accelerated_pullzone` (Number)
-- `comment` (String)
-- `enabled` (Boolean)
-- `flags` (Number)
-- `geolocation_lat` (Number)
-- `geolocation_long` (Number)
-- `latency_zone` (String)
-- `link_name` (String)
+- `accelerated` (Boolean) This property determines if the DNS record should utilize bunny.net’s acceleration services.
+- `accelerated_pullzone` (Number) The ID of the accelerated pull zone.
+- `comment` (String) This property allows users to add descriptive notes for documentation and management purposes.
+- `enabled` (Boolean) Indicates whether the DNS record is enabled.
+- `flags` (Number) Flags for advanced DNS settings.
+- `geolocation_lat` (Number) The latitude for geolocation-based routing.
+- `geolocation_long` (Number) The longitude for geolocation-based routing.
+- `latency_zone` (String) The latency zone for latency-based routing.
+- `link_name` (String) The name of the linked resource.
 - `monitor_type` (String) Options: `Http`, `Monitor`, `None`, `Ping`
-- `port` (Number)
-- `priority` (Number)
+- `port` (Number) The port number for services that require a specific port.
+- `priority` (Number) The priority of the DNS record.
 - `smart_routing_type` (String) Options: `Geolocation`, `Latency`, `None`
-- `tag` (String)
-- `ttl` (Number)
-- `weight` (Number)
+- `tag` (String) A tag for the DNS record.
+- `ttl` (Number) The time-to-live value for the DNS record.
+- `weight` (Number) The weight of the DNS record. It is used in load balancing scenarios to distribute traffic based on the specified weight.
 
 ### Read-Only
 
-- `id` (Number) The ID of this resource.
+- `id` (Number) The unique identifier for the DNS record.

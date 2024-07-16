@@ -3,18 +3,18 @@
 page_title: "bunny_storage_file Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Storage File
+  This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone, providing an organized and scalable way to manage static content.
 ---
 
 # bunny_storage_file (Resource)
 
-Storage File
+This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone, providing an organized and scalable way to manage static content.
 
 ## Example Usage
 
 ```terraform
 resource "bunny_storage_file" "homepage" {
-  zone = bunny_storage_zone.test.id
+  zone = bunny_storage_zone.example.id
   path = "index.html"
 
   ## file contents

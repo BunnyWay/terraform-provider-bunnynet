@@ -56,7 +56,7 @@ func (r *StorageFileResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *StorageFileResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Storage File",
+		Description: "This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone, providing an organized and scalable way to manage static content.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

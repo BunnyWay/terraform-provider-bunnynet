@@ -3,12 +3,12 @@
 page_title: "bunny_video_language Data Source - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Video Language
+  This data source provides a list of languages supported for bunny.net video streaming. It is used to retrieve and specify the languages available for video content, which can be important for configuring multi-language support in video streaming services.
 ---
 
 # bunny_video_language (Data Source)
 
-Video Language
+This data source provides a list of languages supported for bunny.net video streaming. It is used to retrieve and specify the languages available for video content, which can be important for configuring multi-language support in video streaming services.
 
 ## Example Usage
 
@@ -23,11 +23,11 @@ data "bunny_video_language" "en" {
 
 ### Required
 
-- `code` (String)
+- `code` (String) The code of the video language.
 
 ### Read-Only
 
-- `name` (String)
-- `support_player_translation` (Boolean)
-- `support_transcribing` (Boolean)
-- `transcribing_accuracy` (Number)
+- `name` (String) The name of the video language.
+- `support_player_translation` (Boolean) Indicates whether player translation is supported for this language.
+- `support_transcribing` (Boolean) Indicates whether transcribing is supported for this language.
+- `transcribing_accuracy` (Number) The accuracy of transcription for this language, represented as a percentage.

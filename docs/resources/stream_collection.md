@@ -3,19 +3,19 @@
 page_title: "bunny_stream_collection Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Stream Collection
+  This resource manages collections in bunny.net Stream. It is used to create and organize collections of video content, facilitating better management and categorization of videos within the streaming service.
 ---
 
 # bunny_stream_collection (Resource)
 
-Stream Collection
+This resource manages collections in bunny.net Stream. It is used to create and organize collections of video content, facilitating better management and categorization of videos within the streaming service.
 
 ## Example Usage
 
 ```terraform
-resource "bunny_stream_collection" "test" {
-  library = bunny_stream_library.test.id
-  name    = "test collection"
+resource "bunny_stream_collection" "example" {
+  library = bunny_stream_library.example.id
+  name    = "example collection"
 }
 ```
 

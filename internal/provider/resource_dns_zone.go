@@ -61,7 +61,7 @@ func (r *DnsZoneResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "DNS Zone",
+		Description: "This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones, which serve as containers for DNS records, allowing for the organization and delegation of DNS management within bunny.net.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -69,6 +69,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "The unique identifier for the DNS zone.",
 			},
 			"domain": schema.StringAttribute{
 				Required: true,
@@ -78,6 +79,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("(.+)\\.(.+)"), "Invalid domain"),
 				},
+				Description: "The domain name for the DNS zone.",
 			},
 			"nameserver_custom": schema.BoolAttribute{
 				Optional: true,
@@ -93,6 +95,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 						path.MatchRoot("soa_email"),
 					),
 				},
+				Description: "Indicates whether custom nameservers are used.",
 			},
 			"nameserver1": schema.StringAttribute{
 				Optional: true,
@@ -104,6 +107,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+				Description: "The primary nameserver for the DNS zone.",
 			},
 			"nameserver2": schema.StringAttribute{
 				Optional: true,
@@ -115,6 +119,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+				Description: "The secondary nameserver for the DNS zone.",
 			},
 			"soa_email": schema.StringAttribute{
 				Optional: true,
@@ -127,6 +132,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 					stringvalidator.LengthAtLeast(1),
 					stringvalidator.RegexMatches(regexp.MustCompile("(.+)@(.+)\\.(.+)"), "Invalid email address"),
 				},
+				Description: "The email address used in the Start of Authority (SOA) record for the DNS zone.",
 			},
 			"log_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -135,6 +141,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "This property enables or disables logging for the DNS zone, allowing for monitoring and debugging of DNS traffic.",
 			},
 			"log_anonymized": schema.BoolAttribute{
 				Optional: true,
@@ -143,6 +150,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether DNS logs are anonymized.",
 			},
 			"log_anonymized_style": schema.StringAttribute{
 				Optional: true,

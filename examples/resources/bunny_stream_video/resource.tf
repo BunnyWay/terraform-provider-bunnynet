@@ -1,6 +1,6 @@
-resource "bunny_stream_video" "test" {
-  library    = bunny_stream_library.test.id
-  collection = bunny_stream_collection.test.id
+resource "bunny_stream_video" "example" {
+  library    = bunny_stream_library.example.id
+  collection = bunny_stream_collection.example.id
 
   title       = "Big Buck Bunny (2008)"
   description = "Big Buck Bunny (code-named Project Peach) is a 2008 animated comedy short film featuring animals of the forest, made by the Blender Institute, part of the Blender Foundation."

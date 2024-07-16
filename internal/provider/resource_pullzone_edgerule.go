@@ -109,7 +109,7 @@ var pullzoneEdgeruleTriggerType = types.ObjectType{
 
 func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Pullzone Edgerule",
+		Description: "This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge, such as URL redirects, custom caching policies, and header manipulations.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

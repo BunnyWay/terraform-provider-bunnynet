@@ -119,7 +119,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 	})
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stream Library",
+		Description: "This resource manages libraries in bunny.net Stream. It is used to create and manage libraries, which are overarching containers for organizing video collections and individual videos in bunny.net’s streaming service.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

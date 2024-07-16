@@ -100,7 +100,7 @@ func (r *DnsRecordResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "DNS Record",
+		Description: "This resource manages DNS records in a bunny.net DNS zone.It is used to create, update, and delete DNS records such as A, CNAME, TXT, etc., within a specific DNS zone managed by bunny.net.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -108,6 +108,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "The unique identifier for the DNS record.",
 			},
 			"zone": schema.Int64Attribute{
 				Required: true,
@@ -123,6 +124,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether the DNS record is enabled.",
 			},
 			"type": schema.StringAttribute{
 				Required: true,
@@ -144,6 +146,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
+				Description: "The time-to-live value for the DNS record.",
 			},
 			"value": schema.StringAttribute{
 				Required: true,
@@ -153,12 +156,14 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+				Description: "The value of the DNS record.",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Description: "The name of the DNS record.",
 			},
 			"weight": schema.Int64Attribute{
 				Optional: true,
@@ -170,6 +175,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
+				Description: "The weight of the DNS record. It is used in load balancing scenarios to distribute traffic based on the specified weight.",
 			},
 			"priority": schema.Int64Attribute{
 				Optional: true,
@@ -181,6 +187,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
+				Description: "The priority of the DNS record.",
 			},
 			"port": schema.Int64Attribute{
 				Optional: true,
@@ -192,6 +199,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.Between(0, 65535),
 				},
+				Description: "The port number for services that require a specific port.",
 			},
 			"flags": schema.Int64Attribute{
 				Optional: true,
@@ -203,6 +211,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
+				Description: "Flags for advanced DNS settings.",
 			},
 			"tag": schema.StringAttribute{
 				Optional: true,
@@ -211,6 +220,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "A tag for the DNS record.",
 			},
 			"accelerated": schema.BoolAttribute{
 				Optional: true,
@@ -218,6 +228,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "This property determines if the DNS record should utilize bunny.net’s acceleration services.",
 			},
 			"accelerated_pullzone": schema.Int64Attribute{
 				Optional: true,
@@ -226,6 +237,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "The ID of the accelerated pull zone.",
 			},
 			"link_name": schema.StringAttribute{
 				Optional: true,
@@ -234,6 +246,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The name of the linked resource.",
 			},
 			"monitor_type": schema.StringAttribute{
 				Optional: true,
@@ -257,6 +270,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Float64{
 					float64validator.Between(-180.0, 180.0),
 				},
+				Description: "The latitude for geolocation-based routing.",
 			},
 			"geolocation_long": schema.Float64Attribute{
 				Optional: true,
@@ -268,6 +282,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Float64{
 					float64validator.Between(-180.0, 180.0),
 				},
+				Description: "The longitude for geolocation-based routing.",
 			},
 			"latency_zone": schema.StringAttribute{
 				Optional: true,
@@ -279,6 +294,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+				Description: "The latency zone for latency-based routing.",
 			},
 			"smart_routing_type": schema.StringAttribute{
 				Optional: true,
@@ -299,6 +315,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "This property allows users to add descriptive notes for documentation and management purposes.",
 			},
 		},
 	}

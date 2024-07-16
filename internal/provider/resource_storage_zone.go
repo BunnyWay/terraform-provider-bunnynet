@@ -59,7 +59,7 @@ func (r *StorageZoneResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Storage Zone",
+		Description: "This resource manages a bunny.net storage zone. It is used to create and manage storage zones, which serve as containers for storing files and assets that can be delivered via bunny.net’s CDN.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

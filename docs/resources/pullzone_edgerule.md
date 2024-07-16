@@ -3,28 +3,19 @@
 page_title: "bunny_pullzone_edgerule Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Pullzone Edgerule
+  This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge, such as URL redirects, custom caching policies, and header manipulations.
 ---
 
 # bunny_pullzone_edgerule (Resource)
 
-Pullzone Edgerule
+This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge, such as URL redirects, custom caching policies, and header manipulations.
 
 ## Example Usage
 
 ```terraform
-resource "bunny_pullzone" "test" {
-  name = "test"
-
-  origin {
-    type = "OriginUrl"
-    url  = "https://192.0.2.1"
-  }
-}
-
 resource "bunny_pullzone_edgerule" "block_admin" {
   enabled     = true
-  pullzone    = bunny_pullzone.test.id
+  pullzone    = bunny_pullzone.example.id
   action      = "BlockRequest"
   description = "Block access to admin"
 

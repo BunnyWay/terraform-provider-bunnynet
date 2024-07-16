@@ -3,27 +3,18 @@
 page_title: "bunny_dns_zone Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  DNS Zone
+  This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones, which serve as containers for DNS records, allowing for the organization and delegation of DNS management within bunny.net.
 ---
 
 # bunny_dns_zone (Resource)
 
-DNS Zone
+This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones, which serve as containers for DNS records, allowing for the organization and delegation of DNS management within bunny.net.
 
 ## Example Usage
 
 ```terraform
 resource "bunny_dns_zone" "example" {
   domain = "example.com"
-
-  nameserver_custom = true
-  nameserver1       = "ns1.example.com"
-  nameserver2       = "ns2.example.com"
-  soa_email         = "hostmaster@example.com"
-
-  log_enabled          = true
-  log_anonymized       = true
-  log_anonymized_style = "OneDigit"
 }
 ```
 
@@ -32,18 +23,18 @@ resource "bunny_dns_zone" "example" {
 
 ### Required
 
-- `domain` (String)
+- `domain` (String) The domain name for the DNS zone.
 
 ### Optional
 
-- `log_anonymized` (Boolean)
+- `log_anonymized` (Boolean) Indicates whether DNS logs are anonymized.
 - `log_anonymized_style` (String) Options: `Drop`, `OneDigit`
-- `log_enabled` (Boolean)
-- `nameserver1` (String)
-- `nameserver2` (String)
-- `nameserver_custom` (Boolean)
-- `soa_email` (String)
+- `log_enabled` (Boolean) This property enables or disables logging for the DNS zone, allowing for monitoring and debugging of DNS traffic.
+- `nameserver1` (String) The primary nameserver for the DNS zone.
+- `nameserver2` (String) The secondary nameserver for the DNS zone.
+- `nameserver_custom` (Boolean) Indicates whether custom nameservers are used.
+- `soa_email` (String) The email address used in the Start of Authority (SOA) record for the DNS zone.
 
 ### Read-Only
 
-- `id` (Number) The ID of this resource.
+- `id` (Number) The unique identifier for the DNS zone.

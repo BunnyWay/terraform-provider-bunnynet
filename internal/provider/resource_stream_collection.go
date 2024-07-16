@@ -42,7 +42,7 @@ func (r *StreamCollectionResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *StreamCollectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stream Collection",
+		Description: "This resource manages collections in bunny.net Stream. It is used to create and organize collections of video content, facilitating better management and categorization of videos within the streaming service.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

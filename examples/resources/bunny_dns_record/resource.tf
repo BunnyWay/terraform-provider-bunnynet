@@ -1,8 +1,7 @@
 resource "bunny_dns_record" "MX" {
   zone = bunny_dns_zone.example.id
 
-  name     = ""
-  type     = "MX"
-  value    = "mail.example.com."
-  priority = 1
+  name  = ""
+  type  = "A"
+  value = "192.0.2.33"
 }

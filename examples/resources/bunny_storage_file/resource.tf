@@ -1,5 +1,5 @@
 resource "bunny_storage_file" "homepage" {
-  zone = bunny_storage_zone.test.id
+  zone = bunny_storage_zone.example.id
   path = "index.html"
 
   ## file contents

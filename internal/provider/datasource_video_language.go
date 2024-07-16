@@ -37,22 +37,27 @@ func (d *VideoLanguageDataSource) Metadata(ctx context.Context, req datasource.M
 
 func (d *VideoLanguageDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Video Language",
+		Description: "This data source provides a list of languages supported for bunny.net video streaming. It is used to retrieve and specify the languages available for video content, which can be important for configuring multi-language support in video streaming services.",
 		Attributes: map[string]schema.Attribute{
 			"code": schema.StringAttribute{
-				Required: true,
+				Required:    true,
+				Description: "The code of the video language.",
 			},
 			"name": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The name of the video language.",
 			},
 			"support_player_translation": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Indicates whether player translation is supported for this language.",
 			},
 			"support_transcribing": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Indicates whether transcribing is supported for this language.",
 			},
 			"transcribing_accuracy": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The accuracy of transcription for this language, represented as a percentage.",
 			},
 		},
 	}

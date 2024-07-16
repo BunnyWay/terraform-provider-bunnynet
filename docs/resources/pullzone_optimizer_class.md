@@ -3,29 +3,19 @@
 page_title: "bunny_pullzone_optimizer_class Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Pullzone Optimizer Image Class
+  This resource manages optimizer classes for a bunny.net pull zone. It is used to define optimization settings for pull zones, such as compression and image optimization, improving the performance and efficiency of content delivery.
 ---
 
 # bunny_pullzone_optimizer_class (Resource)
 
-Pullzone Optimizer Image Class
+This resource manages optimizer classes for a bunny.net pull zone. It is used to define optimization settings for pull zones, such as compression and image optimization, improving the performance and efficiency of content delivery.
 
 ## Example Usage
 
 ```terraform
-resource "bunny_pullzone" "test" {
-  name = "test"
-
-  origin {
-    type = "OriginUrl"
-    url  = "https://192.0.2.1"
-  }
-}
-
 resource "bunny_pullzone_optimizer_class" "thumbnail" {
-  pullzone = bunny_pullzone.test.id
-  name     = "thumbnail"
-
+  pullzone   = bunny_pullzone.example.id
+  name       = "thumbnail"
   width      = 200
   height     = 300
   brightness = 15

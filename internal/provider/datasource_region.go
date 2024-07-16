@@ -41,44 +41,53 @@ func (d *RegionDataSource) Metadata(ctx context.Context, req datasource.Metadata
 
 func (d *RegionDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Region",
+		Description: "This data source provides information about the regions supported by bunny.net. It is used to retrieve a list of regions where bunny.net services are available, which can then be used to configure other resources within those specific regions.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				MarkdownDescription: "Id",
 				Computed:            true,
+				Description:         "The unique identifier for the region.",
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Name",
 				Computed:            true,
+				Description:         "The name of the region.",
 			},
 			"price_per_gigabyte": schema.Float64Attribute{
 				MarkdownDescription: "Price per Gigabyte",
 				Computed:            true,
+				Description:         "The cost per gigabyte of data transfer in this region.",
 			},
 			"region_code": schema.StringAttribute{
 				MarkdownDescription: "Region Code",
 				Required:            true,
+				Description:         "The code representing a specific region.",
 			},
 			"continent_code": schema.StringAttribute{
 				MarkdownDescription: "Continent Code",
 				Computed:            true,
+				Description:         "The code representing the continent where the region is located.",
 			},
 			"country_code": schema.StringAttribute{
 				MarkdownDescription: "Country Code",
 				Computed:            true,
+				Description:         "The code representing the country where the region is located.",
 			},
 			"latitude": schema.Float64Attribute{
 				MarkdownDescription: "Latitude",
 				Computed:            true,
+				Description:         "The latitude coordinate of the region.",
 			},
 			"longitude": schema.Float64Attribute{
 				MarkdownDescription: "Longitude",
 				Computed:            true,
+				Description:         "The longitude coordinate of the region.",
 			},
 			"allow_latency_routing": schema.BoolAttribute{
 				MarkdownDescription: "Allow Latency Routing",
 				Computed:            true,
+				Description:         "Indicates whether latency routing is allowed for this region.",
 			},
 		},
 	}

@@ -270,7 +270,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 	}
 
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "CDN Pullzone",
+		Description: "This resource manages a bunny.net pull zone. It is used to create and configure pull zones, which are essential for bunny.net’s CDN services. Pull zones fetch content from the origin server and deliver it to end-users, improving website performance and content delivery speed.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

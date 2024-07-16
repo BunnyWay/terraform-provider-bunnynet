@@ -3,12 +3,12 @@
 page_title: "bunny_region Data Source - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Region
+  This data source provides information about the regions supported by bunny.net. It is used to retrieve a list of regions where bunny.net services are available, which can then be used to configure other resources within those specific regions.
 ---
 
 # bunny_region (Data Source)
 
-Region
+This data source provides information about the regions supported by bunny.net. It is used to retrieve a list of regions where bunny.net services are available, which can then be used to configure other resources within those specific regions.
 
 ## Example Usage
 

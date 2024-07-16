@@ -3,18 +3,18 @@
 page_title: "bunny_storage_zone Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Storage Zone
+  This resource manages a bunny.net storage zone. It is used to create and manage storage zones, which serve as containers for storing files and assets that can be delivered via bunny.net’s CDN.
 ---
 
 # bunny_storage_zone (Resource)
 
-Storage Zone
+This resource manages a bunny.net storage zone. It is used to create and manage storage zones, which serve as containers for storing files and assets that can be delivered via bunny.net’s CDN.
 
 ## Example Usage
 
 ```terraform
-resource "bunny_storage_zone" "test" {
-  name      = "test"
+resource "bunny_storage_zone" "example" {
+  name      = "my-storage"
   region    = "DE"
   zone_tier = "Standard"
 }

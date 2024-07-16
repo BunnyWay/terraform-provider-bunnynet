@@ -3,33 +3,24 @@
 page_title: "bunny_pullzone_hostname Resource - terraform-provider-bunny"
 subcategory: ""
 description: |-
-  Pullzone Hostname
+  This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pull zones, allowing for branded URLs and better control over content delivery endpoints.
 ---
 
 # bunny_pullzone_hostname (Resource)
 
-Pullzone Hostname
+This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pull zones, allowing for branded URLs and better control over content delivery endpoints.
 
 ## Example Usage
 
 ```terraform
-resource "bunny_pullzone" "test" {
-  name = "test"
-
-  origin {
-    type = "OriginUrl"
-    url  = "https://192.0.2.1"
-  }
-}
-
 resource "bunny_pullzone_hostname" "bunny" {
-  pullzone  = bunny_pullzone.test.id
-  name      = "test.b-cdn.net"
+  pullzone  = bunny_pullzone.example.id
+  name      = "my-pullzone.b-cdn.net"
   force_ssl = false
 }
 
 resource "bunny_pullzone_hostname" "custom" {
-  pullzone  = bunny_pullzone.test.id
+  pullzone  = bunny_pullzone.example.id
   name      = "cdn.example.com"
   force_ssl = true
 }

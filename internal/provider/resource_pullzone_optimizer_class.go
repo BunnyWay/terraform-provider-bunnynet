@@ -62,7 +62,7 @@ func (r *PullzoneOptimizerClassResource) Metadata(ctx context.Context, req resou
 
 func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Pullzone Optimizer Image Class",
+		Description: "This resource manages optimizer classes for a bunny.net pull zone. It is used to define optimization settings for pull zones, such as compression and image optimization, improving the performance and efficiency of content delivery.",
 
 		Attributes: map[string]schema.Attribute{
 			"pullzone": schema.Int64Attribute{

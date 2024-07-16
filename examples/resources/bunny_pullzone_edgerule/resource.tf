@@ -1,15 +1,6 @@
-resource "bunny_pullzone" "test" {
-  name = "test"
-
-  origin {
-    type = "OriginUrl"
-    url  = "https://192.0.2.1"
-  }
-}
-
 resource "bunny_pullzone_edgerule" "block_admin" {
   enabled     = true
-  pullzone    = bunny_pullzone.test.id
+  pullzone    = bunny_pullzone.example.id
   action      = "BlockRequest"
   description = "Block access to admin"
 
