@@ -6,7 +6,7 @@ description: |-
   The Bunny Terraform provider allows Terraform users to manage their bunny.net resources.
   Before getting started, you will need a bunny.net account and the API key for it.
   Authentication
-  You can either set the API key directly on the apikey attribute for the provider, or set the BUNNYAPI_KEY environment variable.
+  You can either set the API key directly on the apikey attribute for the provider, or set the BUNNYNETAPI_KEY environment variable.
   NOTE: Team member API keys are not supported.
 ---
 
@@ -18,7 +18,7 @@ Before getting started, you will need a bunny.net account and the API key for it
 
 ## Authentication
 
-You can either set the API key directly on the <code>api_key</code> attribute for the provider, or set the <code>BUNNY_API_KEY</code> environment variable.
+You can either set the API key directly on the <code>api_key</code> attribute for the provider, or set the <code>BUNNYNET_API_KEY</code> environment variable.
 
 > NOTE: Team member API keys are not supported.
 

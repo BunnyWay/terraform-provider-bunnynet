@@ -1,4 +1,4 @@
-resource "bunny_pullzone" "example" {
+resource "bunnynet_pullzone" "example" {
   name = "my-website"
 
   origin {

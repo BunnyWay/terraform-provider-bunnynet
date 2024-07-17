@@ -13,7 +13,7 @@ This resource manages a bunny.net pull zone. It is used to create and configure 
 ## Example Usage
 
 ```terraform
-resource "bunny_pullzone" "example" {
+resource "bunnynet_pullzone" "example" {
   name = "my-website"
 
   origin {

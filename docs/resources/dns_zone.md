@@ -13,7 +13,7 @@ This resource manages a DNS zone in bunny.net. It is used to create and manage D
 ## Example Usage
 
 ```terraform
-resource "bunny_dns_zone" "example" {
+resource "bunnynet_dns_zone" "example" {
   domain = "example.com"
 }
 ```

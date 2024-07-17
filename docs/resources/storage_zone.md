@@ -13,7 +13,7 @@ This resource manages a bunny.net storage zone. It is used to create and manage 
 ## Example Usage
 
 ```terraform
-resource "bunny_storage_zone" "example" {
+resource "bunnynet_storage_zone" "example" {
   name      = "my-storage"
   region    = "DE"
   zone_tier = "Standard"
