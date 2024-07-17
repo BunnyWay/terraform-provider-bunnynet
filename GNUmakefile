@@ -11,4 +11,3 @@ build:
 .PHONY: docs
 docs:
 	@go generate
-	@mkdocs build

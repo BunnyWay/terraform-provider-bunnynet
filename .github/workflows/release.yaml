@@ -34,20 +34,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-
-      - name: Install mkdocs
-        run: pip install mkdocs
-
-      - name: Generate docs
-        run: |
-          mkdocs build
-          cd site/
-          zip -r ../docs-${{ github.ref_name }}.zip .
-
-      - name: Upload docs to release
-        run: |
-          gh release upload "${{ github.ref_name }}" \
-            docs-${{ github.ref_name }}.zip \
-            --repo="$GITHUB_REPOSITORY"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
