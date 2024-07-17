@@ -12,7 +12,7 @@ import (
 )
 
 const configStorageZoneTest = `
-resource "bunny_storage_zone" "test" {
+resource "bunnynet_storage_zone" "test" {
   name = "test-acceptance-%s"
   region = "DE"
   zone_tier = "Standard"
@@ -20,7 +20,7 @@ resource "bunny_storage_zone" "test" {
 `
 
 func TestAccStorageZoneResource(t *testing.T) {
-	resourceName := "bunny_storage_zone.test"
+	resourceName := "bunnynet_storage_zone.test"
 	testKey := generateRandomString(12)
 	config := fmt.Sprintf(configStorageZoneTest, testKey)
 

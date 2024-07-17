@@ -6,7 +6,7 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"

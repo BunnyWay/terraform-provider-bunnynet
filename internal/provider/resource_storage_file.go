@@ -6,8 +6,8 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunny/internal/api"
-	"github.com/bunnyway/terraform-provider-bunny/internal/storageplanmodifier"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/storageplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"

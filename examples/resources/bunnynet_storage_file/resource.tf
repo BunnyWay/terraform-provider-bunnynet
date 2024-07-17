@@ -1,5 +1,5 @@
-resource "bunny_storage_file" "homepage" {
-  zone = bunny_storage_zone.example.id
+resource "bunnynet_storage_file" "homepage" {
+  zone = bunnynet_storage_zone.example.id
   path = "index.html"
 
   ## file contents

@@ -1,4 +1,4 @@
-resource "bunny_stream_library" "example" {
+resource "bunnynet_stream_library" "example" {
   name = "example"
 
   player_controls                  = ["airplay", "play", "volume", "captions", "current-time", "fullscreen", "mute", "pip", "play-large", "progress", "settings"]

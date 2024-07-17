@@ -8,7 +8,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/bunnyway/terraform-provider-bunny/internal/provider"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
@@ -38,7 +38,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "registry.terraform.io/hashicorp/bunny",
+		Address: "registry.terraform.io/BunnyWay/bunnynet",
 		Debug:   debug,
 	}
 

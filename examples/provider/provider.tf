@@ -1,16 +1,16 @@
 terraform {
   required_providers {
-    bunny = {
-      source = "terraform-provider-bunny.b-cdn.net/bunny/bunny"
+    bunnynet = {
+      source = "BunnyWay/bunnynet"
     }
   }
 }
 
-provider "bunny" {
+provider "bunnynet" {
   api_key = "00000000-0000-0000-0000-000000000000"
 }
 
-resource "bunny_pullzone" "example" {
+resource "bunnynet_pullzone" "example" {
   name = "example"
 
   origin {

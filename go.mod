@@ -1,4 +1,4 @@
-module github.com/bunnyway/terraform-provider-bunny
+module github.com/bunnyway/terraform-provider-bunnynet
 
 go 1.19
 

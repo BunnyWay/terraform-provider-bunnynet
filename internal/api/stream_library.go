@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunny/internal/utils"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"golang.org/x/exp/slices"
 	"io"
 	"net/http"

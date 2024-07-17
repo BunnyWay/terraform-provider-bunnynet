@@ -1,6 +1,6 @@
-resource "bunny_pullzone_edgerule" "block_admin" {
+resource "bunnynet_pullzone_edgerule" "block_admin" {
   enabled     = true
-  pullzone    = bunny_pullzone.example.id
+  pullzone    = bunnynet_pullzone.example.id
   action      = "BlockRequest"
   description = "Block access to admin"
 

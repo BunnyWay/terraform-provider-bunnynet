@@ -6,7 +6,7 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunny/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"os"
@@ -18,9 +18,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var _ provider.Provider = &BunnyProvider{}
+var _ provider.Provider = &BunnynetProvider{}
 
-type BunnyProvider struct {
+type BunnynetProvider struct {
 	version string
 }
 
@@ -30,12 +30,12 @@ type BunnyProviderModel struct {
 	StreamApiUrl types.String `tfsdk:"stream_api_url"`
 }
 
-func (p *BunnyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "bunny"
+func (p *BunnynetProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "bunnynet"
 	resp.Version = p.version
 }
 
-func (p *BunnyProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *BunnynetProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Manage bunny.net resources with Terraform",
 		MarkdownDescription: `
@@ -51,7 +51,7 @@ You can either set the API key directly on the <code>api_key</code> attribute fo
 		`,
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
-				MarkdownDescription: "API key. Can also be set using the `BUNNY_API_KEY` environment variable.",
+				MarkdownDescription: "API key. Can also be set using the `BUNNYNET_API_KEY` environment variable.",
 				Optional:            true,
 			},
 			"api_url": schema.StringAttribute{
@@ -66,7 +66,7 @@ You can either set the API key directly on the <code>api_key</code> attribute fo
 	}
 }
 
-func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *BunnynetProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var data BunnyProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -74,12 +74,12 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	envApiKey := os.Getenv("BUNNY_API_KEY")
+	envApiKey := os.Getenv("BUNNYNET_API_KEY")
 	if envApiKey != "" {
 		data.ApiKey = types.StringValue(envApiKey)
 	}
 
-	envApiUrl := os.Getenv("BUNNY_API_URL")
+	envApiUrl := os.Getenv("BUNNYNET_API_URL")
 	if envApiUrl != "" {
 		data.ApiUrl = types.StringValue(envApiUrl)
 	}
@@ -88,7 +88,7 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		data.ApiUrl = types.StringValue("https://api.bunny.net")
 	}
 
-	envStreamApiUrl := os.Getenv("BUNNY_STREAM_API_URL")
+	envStreamApiUrl := os.Getenv("BUNNYNET_STREAM_API_URL")
 	if envStreamApiUrl != "" {
 		data.StreamApiUrl = types.StringValue(envStreamApiUrl)
 	}
@@ -97,13 +97,13 @@ func (p *BunnyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		data.StreamApiUrl = types.StringValue("https://video.bunnycdn.com")
 	}
 
-	userAgent := fmt.Sprintf("Terraform/%s BunnyProvider/%s", req.TerraformVersion, p.version)
+	userAgent := fmt.Sprintf("Terraform/%s BunnynetProvider/%s", req.TerraformVersion, p.version)
 	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString(), data.StreamApiUrl.ValueString(), userAgent)
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
 }
 
-func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewDnsRecordResourceResource,
 		NewDnsZoneResourceResource,
@@ -119,7 +119,7 @@ func (p *BunnyProvider) Resources(ctx context.Context) []func() resource.Resourc
 	}
 }
 
-func (p *BunnyProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewRegionDataSource,
 		NewVideoLanguageDataSource,
@@ -128,7 +128,7 @@ func (p *BunnyProvider) DataSources(ctx context.Context) []func() datasource.Dat
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &BunnyProvider{
+		return &BunnynetProvider{
 			version: version,
 		}
 	}

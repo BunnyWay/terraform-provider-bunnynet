@@ -47,7 +47,7 @@ func sliceMap[T any, R any](s []T, f func(v T) R) []R {
 	return result
 }
 
-// Mutex to manage concurrent changes to pullzone sub-resources (i.e. bunny_pullzone_optimizer_class)
+// Mutex to manage concurrent changes to pullzone sub-resources (i.e. bunnynet_pullzone_optimizer_class)
 // Based on https://discuss.hashicorp.com/t/cooping-with-parallelism-is-there-a-way-to-prioritise-resource-types/55690
 var pzMutex *pullzoneMutex
 
