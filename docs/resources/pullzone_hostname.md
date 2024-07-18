@@ -3,12 +3,12 @@
 page_title: "bunnynet_pullzone_hostname Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pull zones, allowing for branded URLs and better control over content delivery endpoints.
+  This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pullzones.
 ---
 
 # bunnynet_pullzone_hostname (Resource)
 
-This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pull zones, allowing for branded URLs and better control over content delivery endpoints.
+This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pullzones.
 
 ## Example Usage
 
@@ -31,13 +31,13 @@ resource "bunnynet_pullzone_hostname" "custom" {
 
 ### Required
 
-- `name` (String) The hostname value for the domain name
-- `pullzone` (Number)
+- `name` (String) The hostname value for the domain name.
+- `pullzone` (Number) The ID of the linked pull zone.
 
 ### Optional
 
-- `force_ssl` (Boolean) Determines if the Force SSL feature is enabled
+- `force_ssl` (Boolean) Indicates whether SSL should be enforced for the hostname.
 
 ### Read-Only
 
-- `id` (Number) The unique ID of the hostname
+- `id` (Number) The unique ID of the hostname.

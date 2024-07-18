@@ -3,12 +3,12 @@
 page_title: "bunnynet_dns_zone Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones, which serve as containers for DNS records, allowing for the organization and delegation of DNS management within bunny.net.
+  This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones.
 ---
 
 # bunnynet_dns_zone (Resource)
 
-This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones, which serve as containers for DNS records, allowing for the organization and delegation of DNS management within bunny.net.
+This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones.
 
 ## Example Usage
 
@@ -29,7 +29,7 @@ resource "bunnynet_dns_zone" "example" {
 
 - `log_anonymized` (Boolean) Indicates whether DNS logs are anonymized.
 - `log_anonymized_style` (String) Options: `Drop`, `OneDigit`
-- `log_enabled` (Boolean) This property enables or disables logging for the DNS zone, allowing for monitoring and debugging of DNS traffic.
+- `log_enabled` (Boolean) Indicates whether permanent logging for DNS queries is enabled.
 - `nameserver1` (String) The primary nameserver for the DNS zone.
 - `nameserver2` (String) The secondary nameserver for the DNS zone.
 - `nameserver_custom` (Boolean) Indicates whether custom nameservers are used.

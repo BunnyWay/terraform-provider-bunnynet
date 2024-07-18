@@ -100,7 +100,7 @@ func (r *DnsRecordResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages DNS records in a bunny.net DNS zone.It is used to create, update, and delete DNS records such as A, CNAME, TXT, etc., within a specific DNS zone managed by bunny.net.",
+		Description: "This resource manages DNS records in a bunny.net DNS zone. It is used to create, update, and delete DNS records within a specific DNS zone managed by bunny.net.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -228,7 +228,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "This property determines if the DNS record should utilize bunny.net’s acceleration services.",
+				Description: "Indicates whether the DNS record should utilize bunny.net’s acceleration services.",
 			},
 			"accelerated_pullzone": schema.Int64Attribute{
 				Optional: true,

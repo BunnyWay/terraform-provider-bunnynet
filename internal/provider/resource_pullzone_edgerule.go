@@ -111,7 +111,7 @@ var pullzoneEdgeruleTriggerType = types.ObjectType{
 
 func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge, such as URL redirects, custom caching policies, and header manipulations.",
+		Description: "This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -119,7 +119,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The unique GUID of the edge rule",
+				Description: "The unique GUID of the edge rule.",
 			},
 			"pullzone": schema.Int64Attribute{
 				Required: true,
@@ -132,7 +132,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the edge rule is currently enabled or not",
+				Description: "Indicates whether the edge rule is enabled.",
 			},
 			"action": schema.StringAttribute{
 				Required: true,
@@ -167,7 +167,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The description of the edge rule",
+				Description: "The description of the edge rule.",
 			},
 			"match_type": schema.StringAttribute{
 				Optional: true,

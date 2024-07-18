@@ -3,12 +3,12 @@
 page_title: "bunnynet_storage_file Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone, providing an organized and scalable way to manage static content.
+  This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone.
 ---
 
 # bunnynet_storage_file (Resource)
 
-This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone, providing an organized and scalable way to manage static content.
+This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone.
 
 ## Example Usage
 
@@ -30,19 +30,19 @@ resource "bunnynet_storage_file" "homepage" {
 
 ### Required
 
-- `path` (String)
-- `zone` (Number)
+- `path` (String) The path of the file within the storage zone.
+- `zone` (Number) The ID of the storage zone where the file is stored.
 
 ### Optional
 
-- `content` (String)
-- `content_type` (String)
-- `source` (String)
+- `content` (String) The to be stored in the file. Use <code>source</code> to upload files from the local disk.
+- `content_type` (String) Specifies the content type of the file.
+- `source` (String) The path in the local disk for the file to be uploaded to the storage zone. Use <code>content</code> to define the content directly.
 
 ### Read-Only
 
-- `checksum` (String)
-- `date_created` (String)
-- `date_modified` (String)
-- `id` (String) The ID of this resource.
-- `size` (Number)
+- `checksum` (String) The SHA-256 hash of the stored file.
+- `date_created` (String) The date and time when the file was created.
+- `date_modified` (String) The date and time when the file was last modified.
+- `id` (String) The unique identifier for the file.
+- `size` (Number) The size of the file in bytes.

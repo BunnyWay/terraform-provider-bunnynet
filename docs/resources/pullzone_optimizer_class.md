@@ -3,12 +3,12 @@
 page_title: "bunnynet_pullzone_optimizer_class Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages optimizer classes for a bunny.net pull zone. It is used to define optimization settings for pull zones, such as compression and image optimization, improving the performance and efficiency of content delivery.
+  This resource manages optimizer classes for a bunny.net pull zone. It is used to define Bunny Optimizer settings for pullzones.
 ---
 
 # bunnynet_pullzone_optimizer_class (Resource)
 
-This resource manages optimizer classes for a bunny.net pull zone. It is used to define optimization settings for pull zones, such as compression and image optimization, improving the performance and efficiency of content delivery.
+This resource manages optimizer classes for a bunny.net pull zone. It is used to define Bunny Optimizer settings for pullzones.
 
 ## Example Usage
 
@@ -27,24 +27,24 @@ resource "bunnynet_pullzone_optimizer_class" "thumbnail" {
 
 ### Required
 
-- `name` (String)
-- `pullzone` (Number)
+- `name` (String) The name of the optimizer class.
+- `pullzone` (Number) The ID of the linked pull zone.
 
 ### Optional
 
-- `aspect_ratio` (String)
-- `auto_optimize` (String)
-- `blur` (Number)
-- `brightness` (Number)
-- `contrast` (Number)
-- `crop` (String)
-- `crop_gravity` (String)
-- `flip` (Boolean)
-- `flop` (Boolean)
-- `height` (Number)
-- `hue` (Number)
-- `quality` (Number)
-- `saturation` (Number)
-- `sepia` (Number)
-- `sharpen` (Boolean)
-- `width` (Number)
+- `aspect_ratio` (String) The aspect ratio for image optimization.
+- `auto_optimize` (String) Indicates whether automatic optimization for images is enabled.
+- `blur` (Number) The level of blur to apply to images.
+- `brightness` (Number) The brightness adjustment for images.
+- `contrast` (Number) The contrast adjustment for images.
+- `crop` (String) The cropping settings for images.
+- `crop_gravity` (String) The gravity setting for cropping.
+- `flip` (Boolean) Indicates whether to flip images horizontally.
+- `flop` (Boolean) Indicates whether to flip images vertically.
+- `height` (Number) The height to which images should be resized.
+- `hue` (Number) The hue adjustment for images.
+- `quality` (Number) The quality setting for image optimization.
+- `saturation` (Number) The saturation adjustment for images.
+- `sepia` (Number) The level of sepia tone to apply to images.
+- `sharpen` (Boolean) Indicates whether to sharpen images.
+- `width` (Number) The width to which images should be resized.

@@ -48,7 +48,7 @@ func (r *PullzoneHostnameResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pull zones, allowing for branded URLs and better control over content delivery endpoints.",
+		Description: "This resource manages custom hostnames for a bunny.net pull zone. It is used to add and configure custom hostnames for pullzones.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -56,13 +56,14 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The unique ID of the hostname",
+				Description: "The unique ID of the hostname.",
 			},
 			"pullzone": schema.Int64Attribute{
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
+				Description: "The ID of the linked pull zone.",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -72,7 +73,7 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("(.+)\\.(.+)"), "Invalid domain"),
 				},
-				Description: "The hostname value for the domain name",
+				Description: "The hostname value for the domain name.",
 			},
 			"force_ssl": schema.BoolAttribute{
 				Optional: true,
@@ -81,7 +82,7 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the Force SSL feature is enabled",
+				Description: "Indicates whether SSL should be enforced for the hostname.",
 			},
 		},
 	}

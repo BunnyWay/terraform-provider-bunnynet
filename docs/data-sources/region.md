@@ -23,15 +23,15 @@ data "bunnynet_region" "LJ" {
 
 ### Required
 
-- `region_code` (String) Region Code
+- `region_code` (String) The code representing a specific region.
 
 ### Read-Only
 
-- `allow_latency_routing` (Boolean) Allow Latency Routing
-- `continent_code` (String) Continent Code
-- `country_code` (String) Country Code
-- `id` (Number) Id
-- `latitude` (Number) Latitude
-- `longitude` (Number) Longitude
-- `name` (String) Name
-- `price_per_gigabyte` (Number) Price per Gigabyte
+- `allow_latency_routing` (Boolean) Indicates whether latency routing is allowed for this region.
+- `continent_code` (String) The code representing the continent where the region is located.
+- `country_code` (String) The code representing the country where the region is located.
+- `id` (Number) The unique identifier for the region.
+- `latitude` (Number) The latitude coordinate of the region.
+- `longitude` (Number) The longitude coordinate of the region.
+- `name` (String) The name of the region.
+- `price_per_gigabyte` (Number) The cost per gigabyte of data transfer in this region.

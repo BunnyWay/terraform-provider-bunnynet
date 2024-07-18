@@ -61,7 +61,7 @@ func (r *DnsZoneResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones, which serve as containers for DNS records, allowing for the organization and delegation of DNS management within bunny.net.",
+		Description: "This resource manages a DNS zone in bunny.net. It is used to create and manage DNS zones.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -141,7 +141,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "This property enables or disables logging for the DNS zone, allowing for monitoring and debugging of DNS traffic.",
+				Description: "Indicates whether permanent logging for DNS queries is enabled.",
 			},
 			"log_anonymized": schema.BoolAttribute{
 				Optional: true,

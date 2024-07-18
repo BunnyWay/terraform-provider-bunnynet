@@ -65,7 +65,7 @@ func (r *StreamVideoResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages individual video files in bunny.net Stream. It is used to upload, update, and manage individual video files, providing control over the video content available through bunny.net’s streaming service.",
+		Description: "This resource manages individual video files in bunny.net Stream. It is used to manage individual video files in a stream library.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -73,14 +73,14 @@ func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The unique ID of the video",
+				Description: "The unique ID of the video.",
 			},
 			"library": schema.Int64Attribute{
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
-				Description: "The ID of the video library that the video belongs to",
+				Description: "The ID of the stream library to which the video belongs.",
 			},
 			"collection": schema.StringAttribute{
 				Optional: true,
@@ -89,20 +89,21 @@ func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The ID of the collection where the video belongs",
+				Description: "The ID of the collection to which the video belongs.",
 			},
 			"title": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The title of the video",
+				Description: "The title of the video.",
 			},
 			"description": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The description of the video.",
 			},
 			"chapters": schema.SetAttribute{
 				ElementType: streamVideoChapterType,
@@ -110,7 +111,7 @@ func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The list of chapters available for the video",
+				Description: "The list of chapters available in the video.",
 			},
 			"moments": schema.SetAttribute{
 				ElementType: streamVideoMomentType,
@@ -118,7 +119,7 @@ func (r *StreamVideoResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The list of moments available for the video",
+				Description: "The list of moments available in the video.",
 			},
 		},
 	}

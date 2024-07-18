@@ -62,7 +62,7 @@ func (r *PullzoneOptimizerClassResource) Metadata(ctx context.Context, req resou
 
 func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages optimizer classes for a bunny.net pull zone. It is used to define optimization settings for pull zones, such as compression and image optimization, improving the performance and efficiency of content delivery.",
+		Description: "This resource manages optimizer classes for a bunny.net pull zone. It is used to define Bunny Optimizer settings for pullzones.",
 
 		Attributes: map[string]schema.Attribute{
 			"pullzone": schema.Int64Attribute{
@@ -70,6 +70,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
+				Description: "The ID of the linked pull zone.",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -79,24 +80,28 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+				Description: "The name of the optimizer class.",
 			},
 			"width": schema.Int64Attribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "The width to which images should be resized.",
 			},
 			"height": schema.Int64Attribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Description: "The height to which images should be resized.",
 			},
 			"aspect_ratio": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The aspect ratio for image optimization.",
 			},
 			"quality": schema.Int64Attribute{
 				Optional: true,
@@ -106,12 +111,14 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(0, 100),
 				},
+				Description: "The quality setting for image optimization.",
 			},
 			"sharpen": schema.BoolAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether to sharpen images.",
 			},
 			"blur": schema.Int64Attribute{
 				Optional: true,
@@ -121,12 +128,14 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(0, 100),
 				},
+				Description: "The level of blur to apply to images.",
 			},
 			"crop": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The cropping settings for images.",
 			},
 			"crop_gravity": schema.StringAttribute{
 				Optional: true,
@@ -136,18 +145,21 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.String{
 					stringvalidator.OneOf("center", "forget", "east", "north", "south", "west", "northeast", "northwest", "southeast", "southwest"),
 				},
+				Description: "The gravity setting for cropping.",
 			},
 			"flip": schema.BoolAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether to flip images horizontally.",
 			},
 			"flop": schema.BoolAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether to flip images vertically.",
 			},
 			"brightness": schema.Int64Attribute{
 				Optional: true,
@@ -157,6 +169,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(-100, 100),
 				},
+				Description: "The brightness adjustment for images.",
 			},
 			"saturation": schema.Int64Attribute{
 				Optional: true,
@@ -166,6 +179,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(-100, 100),
 				},
+				Description: "The saturation adjustment for images.",
 			},
 			"hue": schema.Int64Attribute{
 				Optional: true,
@@ -175,6 +189,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(0, 100),
 				},
+				Description: "The hue adjustment for images.",
 			},
 			"contrast": schema.Int64Attribute{
 				Optional: true,
@@ -184,6 +199,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(-100, 100),
 				},
+				Description: "The contrast adjustment for images.",
 			},
 			"auto_optimize": schema.StringAttribute{
 				Optional: true,
@@ -193,6 +209,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.String{
 					stringvalidator.OneOf("low", "medium", "high"),
 				},
+				Description: "Indicates whether automatic optimization for images is enabled.",
 			},
 			"sepia": schema.Int64Attribute{
 				Optional: true,
@@ -202,6 +219,7 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				Validators: []validator.Int64{
 					int64validator.Between(0, 100),
 				},
+				Description: "The level of sepia tone to apply to images.",
 			},
 		},
 	}

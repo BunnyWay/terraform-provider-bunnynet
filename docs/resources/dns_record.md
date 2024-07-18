@@ -3,12 +3,12 @@
 page_title: "bunnynet_dns_record Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages DNS records in a bunny.net DNS zone.It is used to create, update, and delete DNS records such as A, CNAME, TXT, etc., within a specific DNS zone managed by bunny.net.
+  This resource manages DNS records in a bunny.net DNS zone. It is used to create, update, and delete DNS records within a specific DNS zone managed by bunny.net.
 ---
 
 # bunnynet_dns_record (Resource)
 
-This resource manages DNS records in a bunny.net DNS zone.It is used to create, update, and delete DNS records such as A, CNAME, TXT, etc., within a specific DNS zone managed by bunny.net.
+This resource manages DNS records in a bunny.net DNS zone. It is used to create, update, and delete DNS records within a specific DNS zone managed by bunny.net.
 
 ## Example Usage
 
@@ -34,7 +34,7 @@ resource "bunnynet_dns_record" "MX" {
 
 ### Optional
 
-- `accelerated` (Boolean) This property determines if the DNS record should utilize bunny.net’s acceleration services.
+- `accelerated` (Boolean) Indicates whether the DNS record should utilize bunny.net’s acceleration services.
 - `accelerated_pullzone` (Number) The ID of the accelerated pull zone.
 - `comment` (String) This property allows users to add descriptive notes for documentation and management purposes.
 - `enabled` (Boolean) Indicates whether the DNS record is enabled.

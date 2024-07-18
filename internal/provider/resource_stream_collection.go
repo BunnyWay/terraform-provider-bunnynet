@@ -42,7 +42,7 @@ func (r *StreamCollectionResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *StreamCollectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages collections in bunny.net Stream. It is used to create and organize collections of video content, facilitating better management and categorization of videos within the streaming service.",
+		Description: "This resource manages collections in bunny.net Stream. It is used to create and organize collections of video content.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -50,21 +50,21 @@ func (r *StreamCollectionResource) Schema(ctx context.Context, req resource.Sche
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The unique ID of the collection",
+				Description: "The unique identifier for the stream collection.",
 			},
 			"library": schema.Int64Attribute{
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
-				Description: "The video library ID that contains the collection",
+				Description: "The ID of the stream library to which the collection belongs.",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The name of the collection",
+				Description: "The name of the stream collection.",
 			},
 		},
 	}

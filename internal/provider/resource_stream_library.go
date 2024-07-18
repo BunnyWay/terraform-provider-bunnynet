@@ -119,7 +119,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 	})
 
 	resp.Schema = schema.Schema{
-		Description: "This resource manages libraries in bunny.net Stream. It is used to create and manage libraries, which are overarching containers for organizing video collections and individual videos in bunny.net’s streaming service.",
+		Description: "This resource manages libraries in bunny.net Stream.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -133,28 +133,28 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
-				Description: "The name of the Video Library.",
+				Description: "The name of the stream library.",
 			},
 			"pullzone": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The ID of the connected underlying pull zone",
+				Description: "The ID of the linked pullzone.",
 			},
 			"storage_zone": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The ID of the connected underlying storage zone",
+				Description: "The ID of the linked storage zone.",
 			},
 			"api_key": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The API key used for authenticating with the video library",
+				Description: "The API key for accessing the stream library.",
 			},
 			"player_language": schema.StringAttribute{
 				Optional: true,
@@ -163,7 +163,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				MarkdownDescription: "The UI language of the player",
+				MarkdownDescription: "Specifies the language for the video player interface.",
 			},
 			"player_font_family": schema.StringAttribute{
 				Optional: true,
@@ -187,7 +187,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^#([0-9a-fA-F]{1,6})$"), "Invalid hex color"),
 				},
-				MarkdownDescription: "The key color of the player.",
+				MarkdownDescription: "Customizes the appearance of the video player.",
 			},
 			"player_controls": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -211,7 +211,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The custom HTMl that is added into the head of the HTML player.",
+				Description: "Custom HTML to be included in the head of the video player.",
 			},
 			"player_captions_font_color": schema.StringAttribute{
 				Optional: true,
@@ -223,7 +223,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^#([0-9a-fA-F]{1,6})$"), "Invalid hex color"),
 				},
-				Description: "The captions display font color",
+				Description: "The font color of the captions in the video player.",
 			},
 			"player_captions_font_size": schema.Int64Attribute{
 				Optional: true,
@@ -232,7 +232,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The captions display font size",
+				Description: "The font size of the captions in the video player.",
 			},
 			"player_captions_background_color": schema.StringAttribute{
 				Optional: true,
@@ -244,7 +244,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^#([0-9a-fA-F]{1,6})$"), "Invalid hex color"),
 				},
-				Description: "The captions display background color",
+				Description: "The background color of the captions in the video player.",
 			},
 			"player_watchtime_heatmap_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -253,7 +253,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the video watch heatmap should be displayed in the player.",
+				Description: "Indicates whether the video watch heatmap should be displayed in the player.",
 			},
 			"vast_tag_url": schema.StringAttribute{
 				Optional: true,
@@ -262,7 +262,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The URL of the VAST tag endpoint for advertising configuration",
+				Description: "The URL of the VAST tag for ad integration.",
 			},
 			"original_files_keep": schema.BoolAttribute{
 				Optional: true,
@@ -271,7 +271,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the original video files should be stored after encoding",
+				Description: "Indicates whether to keep original files after encoding.",
 			},
 			"early_play_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -280,7 +280,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the Early-Play feature is enabled",
+				Description: "Indicates whether the Early-Play feature is enabled.",
 			},
 			"content_tagging_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -289,7 +289,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if content tagging should be enabled for this library.",
+				Description: "Indicates whether content tagging is enabled.",
 			},
 			"mp4_fallback_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -298,7 +298,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the MP4 fallback feature is enabled",
+				Description: "Indicates whether the MP4 fallback feature is enabled.",
 			},
 			"resolutions": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -308,7 +308,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The comma separated list of enabled resolutions",
+				Description: "A list of resolutions available for the videos.",
 			},
 			"bitrate_240p": schema.Int64Attribute{
 				Optional: true,
@@ -320,7 +320,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 240p videos",
+				Description: "The bitrate used for encoding 240p videos, in kilobits per second.",
 			},
 			"bitrate_360p": schema.Int64Attribute{
 				Optional: true,
@@ -332,7 +332,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 360p videos",
+				Description: "The bitrate used for encoding 360p videos, in kilobits per second.",
 			},
 			"bitrate_480p": schema.Int64Attribute{
 				Optional: true,
@@ -344,7 +344,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 480p videos",
+				Description: "The bitrate used for encoding 480p videos, in kilobits per second.",
 			},
 			"bitrate_720p": schema.Int64Attribute{
 				Optional: true,
@@ -356,7 +356,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 720p videos",
+				Description: "The bitrate used for encoding 720p videos, in kilobits per second.",
 			},
 			"bitrate_1080p": schema.Int64Attribute{
 				Optional: true,
@@ -368,7 +368,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 1080p videos",
+				Description: "The bitrate used for encoding 1080p videos, in kilobits per second.",
 			},
 			"bitrate_1440p": schema.Int64Attribute{
 				Optional: true,
@@ -380,7 +380,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 1440p videos",
+				Description: "The bitrate used for encoding 1440p videos, in kilobits per second.",
 			},
 			"bitrate_2160p": schema.Int64Attribute{
 				Optional: true,
@@ -392,7 +392,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Validators: []validator.Int64{
 					int64validator.Between(1, 4294967295),
 				},
-				Description: "The bitrate used for encoding 2160p videos",
+				Description: "The bitrate used for encoding 2160p videos, in kilobits per second.",
 			},
 			"watermark_position_left": schema.Int64Attribute{
 				Optional: true,
@@ -401,7 +401,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The left offset of the watermark position (in %)",
+				Description: "The left offset of the watermark position (in %).",
 			},
 			"watermark_position_top": schema.Int64Attribute{
 				Optional: true,
@@ -410,7 +410,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The top offset of the watermark position (in %)",
+				Description: "The top offset of the watermark position (in %).",
 			},
 			"watermark_width": schema.Int64Attribute{
 				Optional: true,
@@ -419,7 +419,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The width of the watermark (in %)",
+				Description: "The width of the watermark (in %).",
 			},
 			"watermark_height": schema.Int64Attribute{
 				Optional: true,
@@ -428,7 +428,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The height of the watermark (in %)",
+				Description: "The height of the watermark (in %).",
 			},
 			"transcribing_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -437,7 +437,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the automatic audio transcribing is currently enabled for this zone.",
+				Description: "Indicates whether the automatic audio transcribing is currently enabled for this zone.",
 			},
 			"transcribing_smart_title_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -446,7 +446,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if automatic transcribing title generation is currently enabled.",
+				Description: "Indicates whether automatic transcribing title generation is currently enabled.",
 			},
 			"transcribing_smart_description_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -455,7 +455,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if automatic transcribing description generation is currently enabled.",
+				Description: "Indicates whether automatic transcribing description generation is currently enabled.",
 			},
 			"transcribing_languages": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -476,7 +476,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines direct play URLs are enabled for the library",
+				Description: "Determines direct play URLs are enabled.",
 			},
 			"referers_allowed": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -485,7 +485,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The list of allowed referrer domains allowed to access the library",
+				Description: "The list of allowed referrer domains allowed to access videos in this library.",
 			},
 			"referers_blocked": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -494,7 +494,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The list of blocked referrer domains blocked from accessing the library",
+				Description: "The list of blocked referrer domains blocked from accessing videos in this library.",
 			},
 			"direct_url_file_access_blocked": schema.BoolAttribute{
 				Optional: true,
@@ -503,7 +503,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the requests without a referrer are blocked",
+				Description: "Indicates whether the requests without a referrer are blocked.",
 			},
 			"view_token_authentication_required": schema.BoolAttribute{
 				Optional: true,
@@ -512,7 +512,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the player token authentication is enabled",
+				Description: "Indicates whether the player token authentication is enabled",
 			},
 			"cdn_token_authentication_required": schema.BoolAttribute{
 				Optional: true,
@@ -521,6 +521,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether CDN token authentication is required.",
 			},
 			"drm_mediacage_basic_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -529,7 +530,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the MediaCage basic DRM is enabled",
+				Description: "Indicates whether the MediaCage basic DRM is enabled",
 			},
 			"webhook_url": schema.StringAttribute{
 				Optional: true,
@@ -538,7 +539,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The webhook URL of the video library",
+				Description: "The URL for webhook notifications.",
 			},
 		},
 	}

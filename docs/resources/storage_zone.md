@@ -3,12 +3,12 @@
 page_title: "bunnynet_storage_zone Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages a bunny.net storage zone. It is used to create and manage storage zones, which serve as containers for storing files and assets that can be delivered via bunny.net’s CDN.
+  This resource manages a bunny.net storage zone. It is used to create and manage storage zones.
 ---
 
 # bunnynet_storage_zone (Resource)
 
-This resource manages a bunny.net storage zone. It is used to create and manage storage zones, which serve as containers for storing files and assets that can be delivered via bunny.net’s CDN.
+This resource manages a bunny.net storage zone. It is used to create and manage storage zones.
 
 ## Example Usage
 
@@ -25,20 +25,20 @@ resource "bunnynet_storage_zone" "example" {
 
 ### Required
 
-- `name` (String) The name of the storage zone
-- `region` (String) The main region used by the storage zone
+- `name` (String) The name of the storage zone.
+- `region` (String) The region where the storage zone is located.
 - `zone_tier` (String) Options: `Edge`, `Standard`
 
 ### Optional
 
-- `custom_404_file_path` (String) The custom 404 error path that will be returned in case of a missing file.
-- `replication_regions` (Set of String) The replication regions enabled for this storage zone
-- `rewrite_404_to_200` (Boolean) Determines if the storage zone will rewrite 404 status codes to 200 status codes
+- `custom_404_file_path` (String) The file path for a custom 404 error page.
+- `replication_regions` (Set of String) A set of regions for data replication.
+- `rewrite_404_to_200` (Boolean) Indicates whether to rewrite 404 errors to 200 status.
 
 ### Read-Only
 
-- `date_modified` (String) The date when the zone was last modified
-- `hostname` (String) Determines the storage hostname for this zone
-- `id` (Number) The ID of the storage zone
-- `password` (String, Sensitive) The API access key or FTP password
-- `password_readonly` (String, Sensitive) The read-only API access key or FTP password
+- `date_modified` (String) The date when the zone was last modified.
+- `hostname` (String) The hostname for accessing the storage zone.
+- `id` (Number) The ID of the storage zone.
+- `password` (String, Sensitive) The password for accessing the storage zone.
+- `password_readonly` (String, Sensitive) The read-only password for accessing the storage zone.

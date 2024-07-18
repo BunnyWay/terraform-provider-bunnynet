@@ -3,12 +3,12 @@
 page_title: "bunnynet_pullzone Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages a bunny.net pull zone. It is used to create and configure pull zones, which are essential for bunny.net’s CDN services. Pull zones fetch content from the origin server and deliver it to end-users, improving website performance and content delivery speed.
+  This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.
 ---
 
 # bunnynet_pullzone (Resource)
 
-This resource manages a bunny.net pull zone. It is used to create and configure pull zones, which are essential for bunny.net’s CDN services. Pull zones fetch content from the origin server and deliver it to end-users, improving website performance and content delivery speed.
+This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.
 
 ## Example Usage
 
@@ -36,95 +36,95 @@ resource "bunnynet_pullzone" "example" {
 
 ### Optional
 
-- `add_canonical_header` (Boolean) Determines if the Add Canonical Header is enabled for this Pull Zone
-- `allow_referers` (Set of String) The list of referrer hostnames that are allowed to access the pull zone. Requests containing the header Referer: hostname that is not on the list will be rejected. If empty, all the referrers are allowed
+- `add_canonical_header` (Boolean) Indicates whether the Canonical header is added to the responses.
+- `allow_referers` (Set of String) The list of referrer hostnames that are allowed to access the pull zone. Requests containing the header "Referer: hostname" that is not on the list will be rejected. If empty, all the referrers are allowed.
 - `block_ips` (Set of String) The list of IPs that are blocked from accessing the pull zone. Requests coming from the following IPs will be rejected. If empty, all the IPs will be allowed
-- `block_no_referer` (Boolean)
-- `block_post_requests` (Boolean) If true, POST requests to the zone will be blocked
-- `block_referers` (Set of String) The list of referrer hostnames that are allowed to access the pull zone. Requests containing the header Referer: hostname that is not on the list will be rejected. If empty, all the referrers are allowed
-- `block_root_path` (Boolean) If true, access to root path will return a 403 error
-- `cache_chunked` (Boolean) Determines if the cache slice (Optimize for video) feature is enabled for the Pull Zone
-- `cache_enabled` (Boolean) Determines if smart caching is enabled for this zone
-- `cache_errors` (Boolean) Determines if bunny.net should be caching error responses
-- `cache_expiration_time` (Number) The override cache time for the pull zone
-- `cache_expiration_time_browser` (Number) The override cache time for the pull zone for the end client
+- `block_no_referer` (Boolean) Indicates whether requests without a referer should be blocked.
+- `block_post_requests` (Boolean) Indicates whether to block POST requests.
+- `block_referers` (Set of String) The list of referrer hostnames that are blocked to access the pull zone. Requests containing the header "Referer: hostname" that is not on the list will be rejected. If empty, all the referrers are allowed.
+- `block_root_path` (Boolean) This property indicates whether to block the root path.
+- `cache_chunked` (Boolean) Indicates whether the cache slice (Optimize for video) feature is enabled for the Pull Zone
+- `cache_enabled` (Boolean) Indicates whether smart caching is enabled.
+- `cache_errors` (Boolean) Indicates whether bunny.net should be caching error responses.
+- `cache_expiration_time` (Number) The override cache time, in seconds.
+- `cache_expiration_time_browser` (Number) The override cache time for the end client, in seconds.
 - `cache_stale` (Set of String) Options: `offline`, `updating`
 - `cache_vary` (Set of String) Options: `avif`, `cookie`, `country`, `hostname`, `mobile`, `querystring`, `webp`
 - `cache_vary_cookie` (Set of String) Contains the list of vary parameters that will be used for vary cache by cookie string. If empty, cookie vary will not be used.
 - `cache_vary_querystring` (Set of String) Contains the list of vary parameters that will be used for vary cache by query string. If empty, all parameters will be used to construct the key
-- `cors_enabled` (Boolean) Determines if the CORS headers should be enabled
-- `cors_extensions` (Set of String) The list of extensions that will return the CORS headers
+- `cors_enabled` (Boolean) Indicates whether CORS (Cross-Origin Resource Sharing) is enabled.
+- `cors_extensions` (Set of String) A list of file extensions for which CORS is enabled.
 - `disable_letsencrypt` (Boolean) If true, the built-in let's encrypt is disabled and requests are passed to the origin.
-- `errorpage_custom_content` (String) Contains the custom error page code that will be returned
-- `errorpage_custom_enabled` (Boolean) Determines if custom error page code should be enabled.
-- `errorpage_statuspage_code` (String) The statuspage code that will be used to build the status widget
-- `errorpage_statuspage_enabled` (Boolean) Determines if the statuspage widget should be displayed on the error pages
-- `errorpage_whitelabel` (Boolean) Determines if the error pages should be whitelabel or not
-- `limit_after` (Number) The amount of data after the rate limit will be activated
-- `limit_bandwidth` (Number)
+- `errorpage_custom_content` (String) Contains the custom error page code that will be returned.
+- `errorpage_custom_enabled` (Boolean) Indicates whether custom error page code should be enabled.
+- `errorpage_statuspage_code` (String) The statuspage code that will be used to build the status widget.
+- `errorpage_statuspage_enabled` (Boolean) Indicates whether the statuspage widget should be displayed on the error pages.
+- `errorpage_whitelabel` (Boolean) Indicates whether the error pages should be white-labelled or not
+- `limit_after` (Number) The amount of data after the rate limit will be activated.
+- `limit_bandwidth` (Number) The maximum bandwidth limit in bytes.
 - `limit_burst` (Number) Excessive requests are delayed until their number exceeds the maximum burst size.
-- `limit_connections` (Number) The number of connections limited per IP for this zone
-- `limit_download_speed` (Number) The maximum rate at which the zone will transfer data in kb/s. 0 for unlimited
-- `limit_requests` (Number) Max number of requests per IP per second
-- `log_anonymized` (Boolean)
+- `limit_connections` (Number) The number of connections limited per IP.
+- `limit_download_speed` (Number) The maximum download speed, in kb/s. Use 0 for unlimited.
+- `limit_requests` (Number) The maximum amount of requests per IP per second.
+- `log_anonymized` (Boolean) Indicates whether logs are anonymized.
 - `log_anonymized_style` (String) Options: `Drop`, `OneDigit`
-- `log_enabled` (Boolean) Determines if the logging is enabled for this Pull Zone
-- `log_forward_enabled` (Boolean) Determines if the log forawrding is enabled
+- `log_enabled` (Boolean) Indicates whether logging is enabled.
+- `log_forward_enabled` (Boolean) Indicates whether log forwarding is enabled.
 - `log_forward_format` (String) Options: `JSON`, `Plain`
-- `log_forward_port` (Number) The log forwarding port
+- `log_forward_port` (Number) The port number for log forwarding.
 - `log_forward_protocol` (String) Options: `DataDog`, `TCP`, `TCPEncrypted`, `UDP`
-- `log_forward_server` (String) The log forwarding hostname
-- `log_forward_token` (String) The log forwarding token value
-- `log_storage_enabled` (Boolean) Determines if the permanent logging feature is enabled
-- `log_storage_zone` (Number) The ID of the logging storage zone that is configured for this Pull Zone
-- `optimizer_classes_force` (Boolean) Determines if the optimizer class list should be enforced
-- `optimizer_dynamic_image_api` (Boolean) Determines the image manipulation should be enabled
-- `optimizer_enabled` (Boolean) Determines if the optimizer should be enabled for this zone
-- `optimizer_minify_css` (Boolean) Determines if the CSS minifcation should be enabled
-- `optimizer_minify_js` (Boolean) Determines if the JavaScript minifcation should be enabled
-- `optimizer_smartimage` (Boolean) Determines if the automatic image optimization should be enabled
-- `optimizer_smartimage_desktop_maxwidth` (Number) Determines the maximum automatic image size for desktop clients
-- `optimizer_smartimage_desktop_quality` (Number) Determines the image quality for desktop clients
-- `optimizer_smartimage_mobile_maxwidth` (Number) Determines the maximum automatic image size for mobile clients
+- `log_forward_server` (String) The server address for log forwarding.
+- `log_forward_token` (String) The token used for log forwarding authentication.
+- `log_storage_enabled` (Boolean) Indicates whether log storage is enabled.
+- `log_storage_zone` (Number) The storage zone ID for log storage.
+- `optimizer_classes_force` (Boolean) Indicates whether the optimizer class list should be enforced.
+- `optimizer_dynamic_image_api` (Boolean) Indicates whether the image manipulation should be enabled.
+- `optimizer_enabled` (Boolean) Indicates whether Bunny Optimizer should be enabled.
+- `optimizer_minify_css` (Boolean) Indicates whether the CSS minifcation should be enabled.
+- `optimizer_minify_js` (Boolean) Indicates whether the JavaScript minifcation should be enabled.
+- `optimizer_smartimage` (Boolean) Indicates whether the automatic image optimization should be enabled.
+- `optimizer_smartimage_desktop_maxwidth` (Number) The maximum automatic image size for desktop clients.
+- `optimizer_smartimage_desktop_quality` (Number) The image quality for desktop clients.
+- `optimizer_smartimage_mobile_maxwidth` (Number) The maximum automatic image size for mobile clients.
 - `optimizer_smartimage_mobile_quality` (Number) Determines the image quality for mobile clients
-- `optimizer_watermark` (Boolean) Determines if image watermarking should be enabled
-- `optimizer_watermark_borderoffset` (Number) Sets the offset of the watermark image
-- `optimizer_watermark_minsize` (Number) Sets the minimum image size to which the watermark will be added
+- `optimizer_watermark` (Boolean) Indicates whether image watermarking should be enabled.
+- `optimizer_watermark_borderoffset` (Number) The offset of the watermark image.
+- `optimizer_watermark_minsize` (Number) The minimum image size to which the watermark will be added.
 - `optimizer_watermark_position` (String) Options: `BottomLeft`, `BottomRight`, `Center`, `CenterStretch`, `TopLeft`, `TopRight`
-- `optimizer_watermark_url` (String) Sets the URL of the watermark image
-- `optimizer_webp` (Boolean) Determines if the WebP optimization should be enabled
+- `optimizer_watermark_url` (String) The URL of the watermark image.
+- `optimizer_webp` (Boolean) Indicates whether the WebP optimization should be enabled.
 - `origin` (Block, Optional) (see [below for nested schema](#nestedblock--origin))
-- `originshield_concurrency_limit` (Boolean) Determines if the origin shield concurrency limit is enabled.
-- `originshield_concurrency_requests` (Number) Determines the number of maximum concurrent requests allowed to the origin.
-- `originshield_enabled` (Boolean) If true the server will use the origin shield feature
-- `originshield_queue_requests` (Number) Determines the max number of origin requests that will remain in the queu
-- `originshield_queue_wait` (Number) Determines the max queue wait time
-- `permacache_storagezone` (Number) The IP of the storage zone used for Perma-Cache
-- `request_coalescing_enabled` (Boolean) Determines if request coalescing is currently enabled.
-- `request_coalescing_timeout` (Number) Determines the lock time for coalesced requests.
+- `originshield_concurrency_limit` (Boolean) Indicates whether there is a concurrency limit for Origin Shield.
+- `originshield_concurrency_requests` (Number) The number of concurrent requests for Origin Shield.
+- `originshield_enabled` (Boolean) Indicates whether Origin Shield is enabled.
+- `originshield_queue_requests` (Number) The number of queued requests for Origin Shield.
+- `originshield_queue_wait` (Number) The maximum wait time for queued requests in Origin Shield, in seconds.
+- `permacache_storagezone` (Number) The storage zone ID for Perma-Cache.
+- `request_coalescing_enabled` (Boolean) Indicates whether request coalescing is enabled.
+- `request_coalescing_timeout` (Number) Specifies the timeout period, in seconds, for request coalescing, determining how long to wait before sending combined requests to the origin.
 - `routing` (Block, Optional) (see [below for nested schema](#nestedblock--routing))
-- `s3_auth_enabled` (Boolean) Determines if the AWS Signing is enabled
-- `s3_auth_key` (String) The AWS Signing region key
-- `s3_auth_region` (String) The AWS Signing region name
-- `s3_auth_secret` (String) The AWS Signing region secret
+- `s3_auth_enabled` (Boolean) Indicates whether requests to origin will be signed with AWS Signature Version 4.
+- `s3_auth_key` (String) The access key used to authenticate the requests.
+- `s3_auth_region` (String) The region name of the bucket used to authenticate the requests.
+- `s3_auth_secret` (String) The secret key used to authenticate the requests.
 - `safehop_connection_timeout` (Number) The amount of seconds to wait when connecting to the origin. Otherwise the request will fail or retry.
 - `safehop_enabled` (Boolean)
 - `safehop_response_timeout` (Number) The amount of seconds to wait when waiting for the origin reply. Otherwise the request will fail or retry.
-- `safehop_retry_count` (Number) The number of retries to the origin server
-- `safehop_retry_delay` (Number) Determines the amount of time that the CDN should wait before retrying an origin request.
+- `safehop_retry_count` (Number) The number of retries to the origin server.
+- `safehop_retry_delay` (Number) The amount of time that the CDN should wait before retrying an origin request.
 - `safehop_retry_reasons` (Set of String) Options: `5xxResponse`, `connectionTimeout`, `responseTimeout`
-- `sort_querystring` (Boolean) If set to true the query string ordering property is enabled.
-- `strip_cookies` (Boolean) Determines if the cookies are disabled for the pull zone
+- `sort_querystring` (Boolean) If enabled, the query parameters will be automatically sorted into a consistent order before checking the cache.
+- `strip_cookies` (Boolean) If enabled, bunny.net will strip all the Set-Cookie headers from the HTTP responses.
 - `tls_support` (Set of String) Options: `TLSv1.0`, `TLSv1.1`
-- `token_auth_enabled` (Boolean) True if the URL secure token authentication security is enabled
-- `token_auth_ip_validation` (Boolean) True if the zone security hash should include the remote IP
-- `use_background_update` (Boolean) Determines if cache update is performed in the background.
+- `token_auth_enabled` (Boolean) Indicates whether requests without a valid token and expiry timestamp will be rejected.
+- `token_auth_ip_validation` (Boolean) Indicates whether the secure hash generated by the server will also include an IP address.
+- `use_background_update` (Boolean) Indicates whether cache update is performed in the background.
 
 ### Read-Only
 
 - `cdn_domain` (String) The CNAME domain of the pull zone for setting up custom hostnames
 - `id` (Number) The unique ID of the pull zone.
-- `token_auth_key` (String, Sensitive) The security key used for secure URL token authentication
+- `token_auth_key` (String, Sensitive) The auth key used for secure URL token authentication.
 
 <a id="nestedblock--origin"></a>
 ### Nested Schema for `origin`
@@ -135,12 +135,12 @@ Required:
 
 Optional:
 
-- `follow_redirects` (Boolean) Determines if the zone will follow origin redirects
-- `forward_host_header` (Boolean) Determines if the Pull Zone should forward the current hostname to the origin
-- `host_header` (String) Determines the host header that will be sent to the origin
-- `storagezone` (Number) The ID of the storage zone that the pull zone is linked to
-- `url` (String) The origin URL of the pull zone where the files are fetched from.
-- `verify_ssl` (Boolean) Determines if the Pull Zone should verify the origin SSL certificate
+- `follow_redirects` (Boolean) Indicates whether the zone will follow origin redirects.
+- `forward_host_header` (Boolean) Indicates whether the current hostname is forwarded to the origin.
+- `host_header` (String) The host header that will be sent to the origin.
+- `storagezone` (Number) The ID of the linked storage zone.
+- `url` (String) The origin URL from where the files are fetched.
+- `verify_ssl` (Boolean) Indicates whether the Origin's TLS certificate should be verified.
 
 
 <a id="nestedblock--routing"></a>
@@ -148,8 +148,8 @@ Optional:
 
 Optional:
 
-- `blocked_countries` (Set of String) The list of blocked countries with the two-letter Alpha2 ISO codes
+- `blocked_countries` (Set of String) The list of blocked countries with the two-letter Alpha2 ISO codes. Traffic connecting from a blocked country will be rejected on the DNS level.
 - `filters` (Set of String) Options: `all`, `eu`
-- `redirected_countries` (Set of String) The list of budget redirected countries with the two-letter Alpha2 ISO codes
+- `redirected_countries` (Set of String) The list of budget redirected countries with the two-letter Alpha2 ISO codes. Traffic from a redirected country will connect to the cheapest possible node in North America or Europe.
 - `tier` (String) Options: `Standard`, `Volume`
 - `zones` (Set of String) Options: `AF`, `ASIA`, `EU`, `SA`, `US`

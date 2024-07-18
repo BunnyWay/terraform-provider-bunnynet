@@ -264,7 +264,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 	}
 
 	resp.Schema = schema.Schema{
-		Description: "This resource manages a bunny.net pull zone. It is used to create and configure pull zones, which are essential for bunny.net’s CDN services. Pull zones fetch content from the origin server and deliver it to end-users, improving website performance and content delivery speed.",
+		Description: "This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -307,7 +307,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if cache update is performed in the background.",
+				Description: "Indicates whether cache update is performed in the background.",
 			},
 			"cache_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -316,7 +316,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if smart caching is enabled for this zone",
+				Description: "Indicates whether smart caching is enabled.",
 			},
 			"cache_expiration_time": schema.Int64Attribute{
 				Optional: true,
@@ -328,7 +328,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(-1, 31919000), // -1 to 1y
 				},
-				Description: "The override cache time for the pull zone",
+				Description: "The override cache time, in seconds.",
 			},
 			"cache_expiration_time_browser": schema.Int64Attribute{
 				Optional: true,
@@ -340,7 +340,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(-1, 31919000), // -1 to 1y
 				},
-				Description: "The override cache time for the pull zone for the end client",
+				Description: "The override cache time for the end client, in seconds.",
 			},
 			"sort_querystring": schema.BoolAttribute{
 				Computed: true,
@@ -349,7 +349,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "If set to true the query string ordering property is enabled.",
+				Description: "If enabled, the query parameters will be automatically sorted into a consistent order before checking the cache.",
 			},
 			"cache_errors": schema.BoolAttribute{
 				Computed: true,
@@ -358,7 +358,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if bunny.net should be caching error responses",
+				Description: "Indicates whether bunny.net should be caching error responses.",
 			},
 			"cache_vary": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -407,7 +407,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the cookies are disabled for the pull zone",
+				Description: "If enabled, bunny.net will strip all the Set-Cookie headers from the HTTP responses.",
 			},
 			"cache_chunked": schema.BoolAttribute{
 				Computed: true,
@@ -416,7 +416,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the cache slice (Optimize for video) feature is enabled for the Pull Zone",
+				Description: "Indicates whether the cache slice (Optimize for video) feature is enabled for the Pull Zone",
 			},
 			"cache_stale": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -440,7 +440,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The IP of the storage zone used for Perma-Cache",
+				Description: "The storage zone ID for Perma-Cache.",
 			},
 			"originshield_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -449,7 +449,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "If true the server will use the origin shield feature",
+				Description: "Indicates whether Origin Shield is enabled.",
 			},
 			"originshield_concurrency_limit": schema.BoolAttribute{
 				Computed: true,
@@ -458,7 +458,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the origin shield concurrency limit is enabled.",
+				Description: "Indicates whether there is a concurrency limit for Origin Shield.",
 			},
 			"originshield_concurrency_requests": schema.Int64Attribute{
 				Optional: true,
@@ -470,7 +470,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Determines the number of maximum concurrent requests allowed to the origin.",
+				Description: "The number of concurrent requests for Origin Shield.",
 			},
 			"originshield_queue_requests": schema.Int64Attribute{
 				Optional: true,
@@ -482,7 +482,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Determines the max number of origin requests that will remain in the queu",
+				Description: "The number of queued requests for Origin Shield.",
 			},
 			"originshield_queue_wait": schema.Int64Attribute{
 				Optional: true,
@@ -494,7 +494,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.OneOf(3, 5, 15, 30, 45),
 				},
-				Description: "Determines the max queue wait time",
+				Description: "The maximum wait time for queued requests in Origin Shield, in seconds.",
 			},
 			"request_coalescing_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -503,7 +503,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if request coalescing is currently enabled.",
+				Description: "Indicates whether request coalescing is enabled.",
 			},
 			"request_coalescing_timeout": schema.Int64Attribute{
 				Optional: true,
@@ -515,7 +515,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.OneOf(3, 5, 10, 15, 30, 60),
 				},
-				Description: "Determines the lock time for coalesced requests.",
+				Description: "Specifies the timeout period, in seconds, for request coalescing, determining how long to wait before sending combined requests to the origin.",
 			},
 			"block_root_path": schema.BoolAttribute{
 				Computed: true,
@@ -524,7 +524,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "If true, access to root path will return a 403 error",
+				Description: "This property indicates whether to block the root path.",
 			},
 			"block_post_requests": schema.BoolAttribute{
 				Computed: true,
@@ -533,7 +533,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "If true, POST requests to the zone will be blocked",
+				Description: "Indicates whether to block POST requests.",
 			},
 			"block_referers": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -548,7 +548,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.LengthAtLeast(1),
 					),
 				},
-				Description: "The list of referrer hostnames that are allowed to access the pull zone. Requests containing the header Referer: hostname that is not on the list will be rejected. If empty, all the referrers are allowed",
+				Description: "The list of referrer hostnames that are blocked to access the pull zone. Requests containing the header \"Referer: hostname\" that is not on the list will be rejected. If empty, all the referrers are allowed.",
 			},
 			"allow_referers": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -563,7 +563,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.LengthAtLeast(1),
 					),
 				},
-				Description: "The list of referrer hostnames that are allowed to access the pull zone. Requests containing the header Referer: hostname that is not on the list will be rejected. If empty, all the referrers are allowed",
+				Description: "The list of referrer hostnames that are allowed to access the pull zone. Requests containing the header \"Referer: hostname\" that is not on the list will be rejected. If empty, all the referrers are allowed.",
 			},
 			"block_no_referer": schema.BoolAttribute{
 				Computed: true,
@@ -572,6 +572,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether requests without a referer should be blocked.",
 			},
 			"block_ips": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -595,7 +596,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the logging is enabled for this Pull Zone",
+				Description: "Indicates whether logging is enabled.",
 			},
 			"log_anonymized": schema.BoolAttribute{
 				Computed: true,
@@ -604,6 +605,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Indicates whether logs are anonymized.",
 			},
 			"log_anonymized_style": schema.StringAttribute{
 				Optional: true,
@@ -624,7 +626,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the log forawrding is enabled",
+				Description: "Indicates whether log forwarding is enabled.",
 			},
 			"log_forward_server": schema.StringAttribute{
 				Optional: true,
@@ -632,7 +634,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The log forwarding hostname",
+				Description: "The server address for log forwarding.",
 			},
 			"log_forward_port": schema.Int64Attribute{
 				Optional: true,
@@ -643,7 +645,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(0, 65535),
 				},
-				Description: "The log forwarding port",
+				Description: "The port number for log forwarding.",
 			},
 			"log_forward_token": schema.StringAttribute{
 				Optional: true,
@@ -651,7 +653,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The log forwarding token value",
+				Description: "The token used for log forwarding authentication.",
 			},
 			"log_forward_protocol": schema.StringAttribute{
 				Optional: true,
@@ -684,7 +686,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the permanent logging feature is enabled",
+				Description: "Indicates whether log storage is enabled.",
 			},
 			"log_storage_zone": schema.Int64Attribute{
 				Optional: true,
@@ -692,7 +694,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The ID of the logging storage zone that is configured for this Pull Zone",
+				Description: "The storage zone ID for log storage.",
 			},
 			"tls_support": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -716,7 +718,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the error pages should be whitelabel or not",
+				Description: "Indicates whether the error pages should be white-labelled or not",
 			},
 			"errorpage_statuspage_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -725,7 +727,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the statuspage widget should be displayed on the error pages",
+				Description: "Indicates whether the statuspage widget should be displayed on the error pages.",
 			},
 			"errorpage_statuspage_code": schema.StringAttribute{
 				Optional: true,
@@ -733,7 +735,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The statuspage code that will be used to build the status widget",
+				Description: "The statuspage code that will be used to build the status widget.",
 			},
 			"errorpage_custom_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -742,7 +744,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if custom error page code should be enabled.",
+				Description: "Indicates whether custom error page code should be enabled.",
 			},
 			"errorpage_custom_content": schema.StringAttribute{
 				Optional: true,
@@ -750,7 +752,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Contains the custom error page code that will be returned",
+				Description: "Contains the custom error page code that will be returned.",
 			},
 			"s3_auth_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -759,7 +761,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the AWS Signing is enabled",
+				Description: "Indicates whether requests to origin will be signed with AWS Signature Version 4.",
 			},
 			"s3_auth_key": schema.StringAttribute{
 				Optional: true,
@@ -768,7 +770,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The AWS Signing region key",
+				Description: "The access key used to authenticate the requests.",
 			},
 			"s3_auth_secret": schema.StringAttribute{
 				Optional: true,
@@ -777,7 +779,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The AWS Signing region secret",
+				Description: "The secret key used to authenticate the requests.",
 			},
 			"s3_auth_region": schema.StringAttribute{
 				Optional: true,
@@ -786,7 +788,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The AWS Signing region name",
+				Description: "The region name of the bucket used to authenticate the requests.",
 			},
 			"token_auth_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -795,7 +797,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "True if the URL secure token authentication security is enabled",
+				Description: "Indicates whether requests without a valid token and expiry timestamp will be rejected.",
 			},
 			"token_auth_ip_validation": schema.BoolAttribute{
 				Computed: true,
@@ -804,7 +806,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "True if the zone security hash should include the remote IP",
+				Description: "Indicates whether the secure hash generated by the server will also include an IP address.",
 			},
 			"token_auth_key": schema.StringAttribute{
 				Computed:  true,
@@ -812,7 +814,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The security key used for secure URL token authentication",
+				Description: "The auth key used for secure URL token authentication.",
 			},
 			"cors_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -821,7 +823,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the CORS headers should be enabled",
+				Description: "Indicates whether CORS (Cross-Origin Resource Sharing) is enabled.",
 			},
 			"cors_extensions": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -836,7 +838,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						stringvalidator.LengthAtLeast(1),
 					),
 				},
-				Description: "The list of extensions that will return the CORS headers",
+				Description: "A list of file extensions for which CORS is enabled.",
 			},
 			"add_canonical_header": schema.BoolAttribute{
 				Computed: true,
@@ -845,7 +847,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the Add Canonical Header is enabled for this Pull Zone",
+				Description: "Indicates whether the Canonical header is added to the responses.",
 			},
 			"limit_download_speed": schema.Float64Attribute{
 				Optional: true,
@@ -857,7 +859,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Float64{
 					float64validator.AtLeast(0.0),
 				},
-				Description: "The maximum rate at which the zone will transfer data in kb/s. 0 for unlimited",
+				Description: "The maximum download speed, in kb/s. Use 0 for unlimited.",
 			},
 			"limit_requests": schema.Int64Attribute{
 				Optional: true,
@@ -869,7 +871,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Max number of requests per IP per second",
+				Description: "The maximum amount of requests per IP per second.",
 			},
 			"limit_after": schema.Float64Attribute{
 				Optional: true,
@@ -881,7 +883,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Float64{
 					float64validator.AtLeast(0.0),
 				},
-				Description: "The amount of data after the rate limit will be activated",
+				Description: "The amount of data after the rate limit will be activated.",
 			},
 			"limit_burst": schema.Int64Attribute{
 				Optional: true,
@@ -905,7 +907,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "The number of connections limited per IP for this zone",
+				Description: "The number of connections limited per IP.",
 			},
 			"limit_bandwidth": schema.Int64Attribute{
 				Optional: true,
@@ -917,6 +919,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
+				Description: "The maximum bandwidth limit in bytes.",
 			},
 			"optimizer_classes_force": schema.BoolAttribute{
 				Optional: true,
@@ -925,7 +928,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the optimizer class list should be enforced",
+				Description: "Indicates whether the optimizer class list should be enforced.",
 			},
 			"optimizer_dynamic_image_api": schema.BoolAttribute{
 				Optional: true,
@@ -934,7 +937,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines the image manipulation should be enabled",
+				Description: "Indicates whether the image manipulation should be enabled.",
 			},
 			"optimizer_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -943,7 +946,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the optimizer should be enabled for this zone",
+				Description: "Indicates whether Bunny Optimizer should be enabled.",
 			},
 			"optimizer_minify_css": schema.BoolAttribute{
 				Optional: true,
@@ -952,7 +955,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the CSS minifcation should be enabled",
+				Description: "Indicates whether the CSS minifcation should be enabled.",
 			},
 			"optimizer_minify_js": schema.BoolAttribute{
 				Optional: true,
@@ -961,7 +964,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the JavaScript minifcation should be enabled",
+				Description: "Indicates whether the JavaScript minifcation should be enabled.",
 			},
 			"optimizer_smartimage": schema.BoolAttribute{
 				Optional: true,
@@ -970,7 +973,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the automatic image optimization should be enabled",
+				Description: "Indicates whether the automatic image optimization should be enabled.",
 			},
 			"optimizer_smartimage_desktop_maxwidth": schema.Int64Attribute{
 				Optional: true,
@@ -982,7 +985,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Determines the maximum automatic image size for desktop clients",
+				Description: "The maximum automatic image size for desktop clients.",
 			},
 			"optimizer_smartimage_desktop_quality": schema.Int64Attribute{
 				Optional: true,
@@ -994,7 +997,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(0, 100),
 				},
-				Description: "Determines the image quality for desktop clients",
+				Description: "The image quality for desktop clients.",
 			},
 			"optimizer_smartimage_mobile_maxwidth": schema.Int64Attribute{
 				Optional: true,
@@ -1006,7 +1009,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Determines the maximum automatic image size for mobile clients",
+				Description: "The maximum automatic image size for mobile clients.",
 			},
 			"optimizer_smartimage_mobile_quality": schema.Int64Attribute{
 				Optional: true,
@@ -1027,7 +1030,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if image watermarking should be enabled",
+				Description: "Indicates whether image watermarking should be enabled.",
 			},
 			"optimizer_watermark_url": schema.StringAttribute{
 				Optional: true,
@@ -1040,7 +1043,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					stringvalidator.LengthAtLeast(1),
 					// @TODO validate URL
 				},
-				Description: "Sets the URL of the watermark image",
+				Description: "The URL of the watermark image.",
 			},
 			"optimizer_watermark_position": schema.StringAttribute{
 				Optional: true,
@@ -1061,7 +1064,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
 				},
-				Description: "Sets the offset of the watermark image",
+				Description: "The offset of the watermark image.",
 			},
 			"optimizer_watermark_minsize": schema.Int64Attribute{
 				Optional: true,
@@ -1073,7 +1076,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Sets the minimum image size to which the watermark will be added",
+				Description: "The minimum image size to which the watermark will be added.",
 			},
 			"optimizer_webp": schema.BoolAttribute{
 				Optional: true,
@@ -1082,7 +1085,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines if the WebP optimization should be enabled",
+				Description: "Indicates whether the WebP optimization should be enabled.",
 			},
 			"safehop_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -1102,7 +1105,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.Between(0, 2),
 				},
-				Description: "The number of retries to the origin server",
+				Description: "The number of retries to the origin server.",
 			},
 			"safehop_retry_delay": schema.Int64Attribute{
 				Optional: true,
@@ -1114,7 +1117,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Validators: []validator.Int64{
 					int64validator.OneOf(0, 1, 3, 5, 10),
 				},
-				Description: "Determines the amount of time that the CDN should wait before retrying an origin request.",
+				Description: "The amount of time that the CDN should wait before retrying an origin request.",
 			},
 			"safehop_retry_reasons": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -1168,35 +1171,35 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					},
 					"url": schema.StringAttribute{
 						Optional:    true,
-						Description: "The origin URL of the pull zone where the files are fetched from.",
+						Description: "The origin URL from where the files are fetched.",
 					},
 					"storagezone": schema.Int64Attribute{
 						Optional:    true,
-						Description: "The ID of the storage zone that the pull zone is linked to",
+						Description: "The ID of the linked storage zone.",
 					},
 					"follow_redirects": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
-						Description: "Determines if the zone will follow origin redirects",
+						Description: "Indicates whether the zone will follow origin redirects.",
 					},
 					"host_header": schema.StringAttribute{
 						Optional:    true,
 						Computed:    true,
 						Default:     stringdefault.StaticString(""),
-						Description: "Determines the host header that will be sent to the origin",
+						Description: "The host header that will be sent to the origin.",
 					},
 					"forward_host_header": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
-						Description: "Determines if the Pull Zone should forward the current hostname to the origin",
+						Description: "Indicates whether the current hostname is forwarded to the origin.",
 					},
 					"verify_ssl": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
-						Description: "Determines if the Pull Zone should verify the origin SSL certificate",
+						Description: "Indicates whether the Origin's TLS certificate should be verified.",
 					},
 				},
 			},
@@ -1252,7 +1255,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-						Description: "The list of blocked countries with the two-letter Alpha2 ISO codes",
+						Description: "The list of blocked countries with the two-letter Alpha2 ISO codes. Traffic connecting from a blocked country will be rejected on the DNS level.",
 					},
 					"redirected_countries": schema.SetAttribute{
 						ElementType: types.StringType,
@@ -1262,7 +1265,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-						Description: "The list of budget redirected countries with the two-letter Alpha2 ISO codes",
+						Description: "The list of budget redirected countries with the two-letter Alpha2 ISO codes. Traffic from a redirected country will connect to the cheapest possible node in North America or Europe.",
 					},
 				},
 				Validators: []validator.Object{

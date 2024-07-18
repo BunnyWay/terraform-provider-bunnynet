@@ -3,12 +3,12 @@
 page_title: "bunnynet_stream_video Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages individual video files in bunny.net Stream. It is used to upload, update, and manage individual video files, providing control over the video content available through bunny.net’s streaming service.
+  This resource manages individual video files in bunny.net Stream. It is used to manage individual video files in a stream library.
 ---
 
 # bunnynet_stream_video (Resource)
 
-This resource manages individual video files in bunny.net Stream. It is used to upload, update, and manage individual video files, providing control over the video content available through bunny.net’s streaming service.
+This resource manages individual video files in bunny.net Stream. It is used to manage individual video files in a stream library.
 
 ## Example Usage
 
@@ -61,19 +61,19 @@ resource "bunnynet_stream_video" "example" {
 
 ### Required
 
-- `library` (Number) The ID of the video library that the video belongs to
-- `title` (String) The title of the video
+- `library` (Number) The ID of the stream library to which the video belongs.
+- `title` (String) The title of the video.
 
 ### Optional
 
-- `chapters` (Set of Object) The list of chapters available for the video (see [below for nested schema](#nestedatt--chapters))
-- `collection` (String) The ID of the collection where the video belongs
-- `description` (String)
-- `moments` (Set of Object) The list of moments available for the video (see [below for nested schema](#nestedatt--moments))
+- `chapters` (Set of Object) The list of chapters available in the video. (see [below for nested schema](#nestedatt--chapters))
+- `collection` (String) The ID of the collection to which the video belongs.
+- `description` (String) The description of the video.
+- `moments` (Set of Object) The list of moments available in the video. (see [below for nested schema](#nestedatt--moments))
 
 ### Read-Only
 
-- `id` (String) The unique ID of the video
+- `id` (String) The unique ID of the video.
 
 <a id="nestedatt--chapters"></a>
 ### Nested Schema for `chapters`

@@ -61,7 +61,7 @@ func (r *StorageZoneResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages a bunny.net storage zone. It is used to create and manage storage zones, which serve as containers for storing files and assets that can be delivered via bunny.net’s CDN.",
+		Description: "This resource manages a bunny.net storage zone. It is used to create and manage storage zones.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -69,7 +69,7 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The ID of the storage zone",
+				Description: "The ID of the storage zone.",
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -79,7 +79,7 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "The name of the storage zone",
+				Description: "The name of the storage zone.",
 			},
 			"region": schema.StringAttribute{
 				Required: true,
@@ -89,12 +89,12 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "The main region used by the storage zone",
+				Description: "The region where the storage zone is located.",
 			},
 			"replication_regions": schema.SetAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
-				Description: "The replication regions enabled for this storage zone",
+				Description: "A set of regions for data replication.",
 			},
 			"zone_tier": schema.StringAttribute{
 				Required: true,
@@ -108,7 +108,7 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Determines the storage hostname for this zone",
+				Description: "The hostname for accessing the storage zone.",
 			},
 			"password": schema.StringAttribute{
 				Computed:  true,
@@ -116,7 +116,7 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The API access key or FTP password",
+				Description: "The password for accessing the storage zone.",
 			},
 			"password_readonly": schema.StringAttribute{
 				Computed:  true,
@@ -124,21 +124,21 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The read-only API access key or FTP password",
+				Description: "The read-only password for accessing the storage zone.",
 			},
 			"custom_404_file_path": schema.StringAttribute{
 				Optional:    true,
-				Description: "The custom 404 error path that will be returned in case of a missing file.",
+				Description: "The file path for a custom 404 error page.",
 			},
 			"rewrite_404_to_200": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
-				Description: "Determines if the storage zone will rewrite 404 status codes to 200 status codes",
+				Description: "Indicates whether to rewrite 404 errors to 200 status.",
 			},
 			"date_modified": schema.StringAttribute{
 				Computed:    true,
-				Description: "The date when the zone was last modified",
+				Description: "The date when the zone was last modified.",
 			},
 		},
 	}

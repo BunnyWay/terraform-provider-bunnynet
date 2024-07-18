@@ -56,7 +56,7 @@ func (r *StorageFileResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *StorageFileResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone, providing an organized and scalable way to manage static content.",
+		Description: "This resource manages files in a bunny.net storage zone. It is used to upload, update, and delete files within a storage zone.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -64,12 +64,14 @@ func (r *StorageFileResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The unique identifier for the file.",
 			},
 			"zone": schema.Int64Attribute{
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
+				Description: "The ID of the storage zone where the file is stored.",
 			},
 			"path": schema.StringAttribute{
 				Required: true,
@@ -79,21 +81,25 @@ func (r *StorageFileResource) Schema(ctx context.Context, req resource.SchemaReq
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
+				Description: "The path of the file within the storage zone.",
 			},
 			"content": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "The to be stored in the file. Use <code>source</code> to upload files from the local disk.",
 			},
 			"source": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				MarkdownDescription: "The path in the local disk for the file to be uploaded to the storage zone. Use <code>content</code> to define the content directly.",
 			},
 			"size": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The size of the file in bytes.",
 			},
 			"content_type": schema.StringAttribute{
 				Optional: true,
@@ -101,21 +107,25 @@ func (r *StorageFileResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "Specifies the content type of the file.",
 			},
 			"date_created": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Description: "The date and time when the file was created.",
 			},
 			"date_modified": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "The date and time when the file was last modified.",
 			},
 			"checksum": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					storageplanmodifier.DetectFileContentsChange(),
 				},
+				Description: "The SHA-256 hash of the stored file.",
 			},
 		},
 	}

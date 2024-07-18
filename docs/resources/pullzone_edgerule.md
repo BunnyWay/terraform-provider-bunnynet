@@ -3,12 +3,12 @@
 page_title: "bunnynet_pullzone_edgerule Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge, such as URL redirects, custom caching policies, and header manipulations.
+  This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge.
 ---
 
 # bunnynet_pullzone_edgerule (Resource)
 
-This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge, such as URL redirects, custom caching policies, and header manipulations.
+This resource manages edge rules for a bunny.net pull zone. It is used to define and configure rules that determine how content is delivered at the edge.
 
 ## Example Usage
 
@@ -38,7 +38,7 @@ resource "bunnynet_pullzone_edgerule" "block_admin" {
 ### Required
 
 - `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
-- `enabled` (Boolean) Determines if the edge rule is currently enabled or not
+- `enabled` (Boolean) Indicates whether the edge rule is enabled.
 - `pullzone` (Number)
 - `triggers` (List of Object) (see [below for nested schema](#nestedatt--triggers))
 
@@ -46,12 +46,12 @@ resource "bunnynet_pullzone_edgerule" "block_admin" {
 
 - `action_parameter1` (String)
 - `action_parameter2` (String)
-- `description` (String) The description of the edge rule
+- `description` (String) The description of the edge rule.
 - `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
 
 ### Read-Only
 
-- `id` (String) The unique GUID of the edge rule
+- `id` (String) The unique GUID of the edge rule.
 
 <a id="nestedatt--triggers"></a>
 ### Nested Schema for `triggers`
