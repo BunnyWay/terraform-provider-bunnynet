@@ -43,8 +43,7 @@ func NewPullzoneResource() resource.Resource {
 }
 
 type PullzoneResource struct {
-	client        *api.Client
-	pullzoneMutex *pullzoneMutex
+	client *api.Client
 }
 
 type PullzoneResourceModel struct {

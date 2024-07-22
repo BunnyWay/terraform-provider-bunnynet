@@ -77,7 +77,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("(.+)\\.(.+)"), "Invalid domain"),
+					stringvalidator.RegexMatches(regexp.MustCompile(`(.+)\.(.+)`), "Invalid domain"),
 				},
 				Description: "The domain name for the DNS zone.",
 			},
@@ -130,7 +130,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
-					stringvalidator.RegexMatches(regexp.MustCompile("(.+)@(.+)\\.(.+)"), "Invalid email address"),
+					stringvalidator.RegexMatches(regexp.MustCompile(`(.+)@(.+)\.(.+)`), "Invalid email address"),
 				},
 				Description: "The email address used in the Start of Authority (SOA) record for the DNS zone.",
 			},

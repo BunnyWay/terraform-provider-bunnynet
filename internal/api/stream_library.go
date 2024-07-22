@@ -299,7 +299,7 @@ func (c *Client) streamLibraryRefererAddRemove(id int64, hostname string, refTyp
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("StreamLibrary %d %s%sReferrer failed: %s", id, method, refType, resp.Status))
+		return fmt.Errorf("StreamLibrary %d %s%sReferrer failed: %s", id, method, refType, resp.Status)
 	}
 
 	return nil

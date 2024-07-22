@@ -114,37 +114,6 @@ func (c *Client) DeleteStorageFile(zoneId int64, path string) error {
 	return nil
 }
 
-func getStorageFileContents(zone StorageZone, path string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/%s/%s", zone.StorageHostname, zone.Name, path), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("AccessKey", zone.Password)
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, err
-	}
-
-	bodyResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	_ = resp.Body.Close()
-	return bodyResp, nil
-}
-
 func getStorageFileInfo(zone StorageZone, path string) (StorageFile, error) {
 	req, err := http.NewRequest("DESCRIBE", fmt.Sprintf("https://%s/%s/%s", zone.StorageHostname, zone.Name, path), nil)
 	if err != nil {

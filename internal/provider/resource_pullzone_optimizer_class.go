@@ -31,8 +31,7 @@ func NewPullzoneOptimizerClassResource() resource.Resource {
 }
 
 type PullzoneOptimizerClassResource struct {
-	client        *api.Client
-	pullzoneMutex *pullzoneMutex
+	client *api.Client
 }
 
 type PullzoneOptimizerClassResourceModel struct {
