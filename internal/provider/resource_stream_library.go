@@ -62,6 +62,7 @@ type StreamLibraryResourceModel struct {
 	EarlyPlayEnabled                    types.Bool   `tfsdk:"early_play_enabled"`
 	ContentTaggingEnabled               types.Bool   `tfsdk:"content_tagging_enabled"`
 	Mp4FallbackEnabled                  types.Bool   `tfsdk:"mp4_fallback_enabled"`
+	MultiAudioTrackSupportEnabled       types.Bool   `tfsdk:"multi_audio_track_support_enabled"`
 	Resolutions                         types.Set    `tfsdk:"resolutions"`
 	Bitrate240p                         types.Int64  `tfsdk:"bitrate_240p"`
 	Bitrate360p                         types.Int64  `tfsdk:"bitrate_360p"`
@@ -299,6 +300,15 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 					boolplanmodifier.UseStateForUnknown(),
 				},
 				Description: "Indicates whether the MP4 fallback feature is enabled.",
+			},
+			"multi_audio_track_support_enabled": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(true),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether multiple output audio track support is enabled.",
 			},
 			"resolutions": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -700,6 +710,7 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 		dataApi.AllowEarlyPlay = dataTf.EarlyPlayEnabled.ValueBool()
 		dataApi.EnableContentTagging = dataTf.ContentTaggingEnabled.ValueBool()
 		dataApi.EnableMP4Fallback = dataTf.Mp4FallbackEnabled.ValueBool()
+		dataApi.EnableMultiAudioTrackSupport = dataTf.MultiAudioTrackSupportEnabled.ValueBool()
 		dataApi.EnabledResolutions = strings.Join(convertSetToStringSlice(dataTf.Resolutions), ",")
 		dataApi.Bitrate240P = uint32(dataTf.Bitrate240p.ValueInt64())
 		dataApi.Bitrate360P = uint32(dataTf.Bitrate360p.ValueInt64())
@@ -791,6 +802,7 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 		dataTf.EarlyPlayEnabled = types.BoolValue(dataApi.AllowEarlyPlay)
 		dataTf.ContentTaggingEnabled = types.BoolValue(dataApi.EnableContentTagging)
 		dataTf.Mp4FallbackEnabled = types.BoolValue(dataApi.EnableMP4Fallback)
+		dataTf.MultiAudioTrackSupportEnabled = types.BoolValue(dataApi.EnableMultiAudioTrackSupport)
 		dataTf.Bitrate240p = types.Int64Value(int64(dataApi.Bitrate240P))
 		dataTf.Bitrate360p = types.Int64Value(int64(dataApi.Bitrate360P))
 		dataTf.Bitrate480p = types.Int64Value(int64(dataApi.Bitrate480P))

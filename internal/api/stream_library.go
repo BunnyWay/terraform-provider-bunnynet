@@ -31,6 +31,7 @@ type StreamLibrary struct {
 	AllowEarlyPlay                          bool     `json:"AllowEarlyPlay"`
 	EnableContentTagging                    bool     `json:"EnableContentTagging"`
 	EnableMP4Fallback                       bool     `json:"EnableMP4Fallback"`
+	EnableMultiAudioTrackSupport            bool     `json:"EnableMultiAudioTrackSupport"`
 	EnabledResolutions                      string   `json:"EnabledResolutions"`
 	Bitrate240P                             uint32   `json:"Bitrate240p"`
 	Bitrate360P                             uint32   `json:"Bitrate360p"`
