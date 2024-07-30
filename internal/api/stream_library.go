@@ -94,7 +94,10 @@ func (c *Client) GetStreamLibrary(id int64) (StreamLibrary, error) {
 }
 
 func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) {
-	body, err := json.Marshal(data)
+	body, err := json.Marshal(map[string]string{
+		"Name": data.Name,
+	})
+
 	if err != nil {
 		return StreamLibrary{}, err
 	}
@@ -135,7 +138,8 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 		return dataApiResult, err
 	}
 
-	return dataApiResult, nil
+	data.Id = dataApiResult.Id
+	return c.UpdateStreamLibrary(data)
 }
 
 func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, error) {
