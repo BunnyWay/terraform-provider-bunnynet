@@ -37,7 +37,9 @@ resource "bunnynet_pullzone_hostname" "custom" {
 ### Optional
 
 - `force_ssl` (Boolean) Indicates whether SSL should be enforced for the hostname.
+- `tls_enabled` (Boolean) Indicates whether a Domain-validated TLS certificate should be automatically obtained and managed for this hostname.
 
 ### Read-Only
 
 - `id` (Number) The unique ID of the hostname.
+- `is_internal` (Boolean) Indicates whether the hostname is internal (in the CDN domain) or provided by the user.

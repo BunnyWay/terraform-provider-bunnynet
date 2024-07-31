@@ -39,6 +39,8 @@ type PullzoneHostnameResourceModel struct {
 	Id         types.Int64  `tfsdk:"id"`
 	PullzoneId types.Int64  `tfsdk:"pullzone"`
 	Name       types.String `tfsdk:"name"`
+	IsInternal types.Bool   `tfsdk:"is_internal"`
+	TLSEnabled types.Bool   `tfsdk:"tls_enabled"`
 	ForceSSL   types.Bool   `tfsdk:"force_ssl"`
 }
 
@@ -74,6 +76,21 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 					stringvalidator.RegexMatches(regexp.MustCompile(`(.+)\.(.+)`), "Invalid domain"),
 				},
 				Description: "The hostname value for the domain name.",
+			},
+			"is_internal": schema.BoolAttribute{
+				Computed:    true,
+				Description: "Indicates whether the hostname is internal (in the CDN domain) or provided by the user.",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"tls_enabled": schema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether a Domain-validated TLS certificate should be automatically obtained and managed for this hostname.",
 			},
 			"force_ssl": schema.BoolAttribute{
 				Optional: true,
@@ -158,9 +175,16 @@ func (r *PullzoneHostnameResource) Update(ctx context.Context, req resource.Upda
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.UpdatePullzoneHostname(dataApi)
+
+	var previousData PullzoneHostnameResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &previousData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	previousDataApi := r.convertModelToApi(ctx, previousData)
+
+	dataApi, err := r.client.UpdatePullzoneHostname(dataApi, previousDataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating hostname", err.Error()))
 		return
@@ -227,6 +251,8 @@ func (r *PullzoneHostnameResource) convertModelToApi(ctx context.Context, dataTf
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.Name = dataTf.Name.ValueString()
+	dataApi.IsSystemHostname = dataTf.IsInternal.ValueBool()
+	dataApi.HasCertificate = dataTf.TLSEnabled.ValueBool()
 	dataApi.ForceSSL = dataTf.ForceSSL.ValueBool()
 
 	return dataApi
@@ -237,6 +263,8 @@ func (r *PullzoneHostnameResource) convertApiToModel(dataApi api.PullzoneHostnam
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Name = types.StringValue(dataApi.Name)
+	dataTf.IsInternal = types.BoolValue(dataApi.IsSystemHostname)
+	dataTf.TLSEnabled = types.BoolValue(dataApi.HasCertificate)
 	dataTf.ForceSSL = types.BoolValue(dataApi.ForceSSL)
 
 	return dataTf, nil
