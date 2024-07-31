@@ -144,6 +144,22 @@ func (c *Client) GetPullzoneHostname(pullzoneId int64, id int64) (PullzoneHostna
 	return PullzoneHostname{}, errors.New("Hostname not found")
 }
 
+func (c *Client) GetPullzoneHostnameByName(pullzoneId int64, hostname string) (PullzoneHostname, error) {
+	pullzone, err := c.GetPullzone(pullzoneId)
+	if err != nil {
+		return PullzoneHostname{}, err
+	}
+
+	for _, v := range pullzone.Hostnames {
+		if v.Name == hostname {
+			v.PullzoneId = pullzoneId
+			return v, nil
+		}
+	}
+
+	return PullzoneHostname{}, errors.New("Hostname not found")
+}
+
 func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error {
 	body, err := json.Marshal(map[string]interface{}{
 		"Hostname": hostname,
