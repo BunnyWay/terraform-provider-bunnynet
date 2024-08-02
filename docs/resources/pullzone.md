@@ -153,3 +153,11 @@ Optional:
 - `redirected_countries` (Set of String) The list of budget redirected countries with the two-letter Alpha2 ISO codes. Traffic from a redirected country will connect to the cheapest possible node in North America or Europe.
 - `tier` (String) Options: `Standard`, `Volume`
 - `zones` (Set of String) Options: `AF`, `ASIA`, `EU`, `SA`, `US`
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_pullzone.test 123
+```

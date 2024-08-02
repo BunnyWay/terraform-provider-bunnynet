@@ -92,3 +92,11 @@ Optional:
 
 - `label` (String)
 - `timestamp` (String)
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_stream_video.test "$LIBRARY_ID|$VIDEO_GUID"
+```

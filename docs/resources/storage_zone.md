@@ -42,3 +42,11 @@ resource "bunnynet_storage_zone" "example" {
 - `id` (Number) The ID of the storage zone.
 - `password` (String, Sensitive) The password for accessing the storage zone.
 - `password_readonly` (String, Sensitive) The read-only password for accessing the storage zone.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_storage_zone.test 123
+```

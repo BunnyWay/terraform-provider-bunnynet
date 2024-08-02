@@ -54,3 +54,11 @@ resource "bunnynet_dns_record" "MX" {
 ### Read-Only
 
 - `id` (Number) The unique identifier for the DNS record.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_dns_record.test "$ZONE_ID|$RECORD_ID"
+```

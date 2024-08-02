@@ -46,3 +46,11 @@ resource "bunnynet_storage_file" "homepage" {
 - `date_modified` (String) The date and time when the file was last modified.
 - `id` (String) The unique identifier for the file.
 - `size` (Number) The size of the file in bytes.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_storage_file.test "$STORAGE_ZONE_ID|blog/index.html"
+```

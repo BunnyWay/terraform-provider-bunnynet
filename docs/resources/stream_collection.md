@@ -30,3 +30,11 @@ resource "bunnynet_stream_collection" "example" {
 ### Read-Only
 
 - `id` (String) The unique identifier for the stream collection.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_stream_collection.test "$LIBRARY_ID|$COLLECTION_GUID"
+```

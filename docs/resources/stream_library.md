@@ -82,3 +82,11 @@ resource "bunnynet_stream_library" "example" {
 - `id` (Number) The ID of this resource.
 - `pullzone` (Number) The ID of the linked pullzone.
 - `storage_zone` (Number) The ID of the linked storage zone.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_stream_library.test 123
+```

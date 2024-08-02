@@ -38,3 +38,11 @@ resource "bunnynet_dns_zone" "example" {
 ### Read-Only
 
 - `id` (Number) The unique identifier for the DNS zone.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_dns_zone.test 123
+```

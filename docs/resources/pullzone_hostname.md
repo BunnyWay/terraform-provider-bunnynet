@@ -43,3 +43,11 @@ resource "bunnynet_pullzone_hostname" "custom" {
 
 - `id` (Number) The unique ID of the hostname.
 - `is_internal` (Boolean) Indicates whether the hostname is internal (in the CDN domain) or provided by the user.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_pullzone_hostname.test "$PULLZONE_ID|example.com"
+```

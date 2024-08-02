@@ -48,3 +48,11 @@ resource "bunnynet_pullzone_optimizer_class" "thumbnail" {
 - `sepia` (Number) The level of sepia tone to apply to images.
 - `sharpen` (Boolean) Indicates whether to sharpen images.
 - `width` (Number) The width to which images should be resized.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import bunnynet_pullzone_optimizer_class.test "$PULLZONE_ID|thumbnail"
+```

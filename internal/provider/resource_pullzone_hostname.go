@@ -215,7 +215,7 @@ func (r *PullzoneHostnameResource) Delete(ctx context.Context, req resource.Dele
 func (r *PullzoneHostnameResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	pullzoneIdStr, hostname, ok := strings.Cut(req.ID, "|")
 	if !ok {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding hostname", "Use \"<pullzoneId>|<hostnameId>\" as ID on terraform import command"))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding hostname", "Use \"<pullzoneId>|<hostname>\" as ID on terraform import command"))
 		return
 	}
 
