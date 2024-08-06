@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -98,6 +99,9 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				Default:  booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Bool{
+					boolvalidator.RequiresAttributeAsTrue("tls_enabled"),
 				},
 				Description: "Indicates whether SSL should be enforced for the hostname.",
 			},

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 ### Added
 - Import command example for all resources
+### Changed
+- resource pullzone_hostname: force_ssl can only be enabled when tls_enabled is true
 
 ## [0.3.4] - 2024-08-01
 ### Added
