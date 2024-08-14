@@ -30,7 +30,7 @@ func (v requiresAttributeAsTrue) ValidateBool(ctx context.Context, request valid
 	var attr2Value bool
 	request.Config.GetAttribute(ctx, path.Root(v.attributeName), &attr2Value)
 
-	if attr1Value && attr2Value {
+	if attr1Value && !attr2Value {
 		response.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(
 			request.Path,
 			"Incompatible Attribute Combination",
