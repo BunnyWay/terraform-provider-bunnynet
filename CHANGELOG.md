@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - resource dns_zone: run Create() in two passes
 - resource dns_zone: refactored custom nameserver validation
+- resource storage_zone: run Create() in two passes
 
 ## [0.3.6] - 2024-08-14
 ### Fixed

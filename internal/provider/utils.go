@@ -4,14 +4,8 @@
 package provider
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -107,30 +101,4 @@ func generateMarkdownMapOptions[T comparable](m map[T]string) string {
 func generateMarkdownSliceOptions(s []string) string {
 	slices.Sort(s)
 	return "Options: `" + strings.Join(s, "`, `") + "`"
-}
-
-const enforceDefaultDiagSummary = "Attribute must use default value during creating"
-const enforceDefaultDiagError = "Unfortunately our API does not support setting this attribute at creation time. Create the resource using default values, then change them and apply your changes once again."
-
-func planAttrBoolEnforceDefault(ctx context.Context, plan tfsdk.Plan, attrName string) diag.Diagnostics {
-	attrPath := path.Root(attrName)
-	attrAtPath, diags := plan.Schema.AttributeAtPath(ctx, attrPath)
-	if diags.HasError() {
-		return diags
-	}
-
-	attr := attrAtPath.(schema.BoolAttribute)
-	req := defaults.BoolRequest{Path: attrPath}
-	resp := defaults.BoolResponse{}
-	attr.Default.DefaultBool(ctx, req, &resp)
-
-	var attrValue bool
-	plan.GetAttribute(ctx, attrPath, &attrValue)
-	defaultValue := resp.PlanValue.ValueBool()
-
-	if attrValue != defaultValue {
-		return diag.Diagnostics{diag.NewAttributeErrorDiagnostic(attrPath, enforceDefaultDiagSummary, enforceDefaultDiagError)}
-	}
-
-	return nil
 }

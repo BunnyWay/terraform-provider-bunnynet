@@ -52,7 +52,12 @@ func (c *Client) GetStorageZone(id int64) (StorageZone, error) {
 }
 
 func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
-	body, err := json.Marshal(data)
+	body, err := json.Marshal(map[string]interface{}{
+		"Name":               data.Name,
+		"ZoneTier":           data.ZoneTier,
+		"Region":             data.Region,
+		"ReplicationRegions": data.ReplicationRegions,
+	})
 	if err != nil {
 		return StorageZone{}, err
 	}
@@ -93,7 +98,12 @@ func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
 		return dataApiResult, err
 	}
 
-	return dataApiResult, nil
+	data.Id = dataApiResult.Id
+	dataApiResult, err = c.UpdateStorageZone(data)
+	if err != nil {
+		_ = c.DeleteStorageZone(data.Id)
+	}
+	return dataApiResult, err
 }
 
 func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {

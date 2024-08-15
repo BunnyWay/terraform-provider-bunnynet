@@ -169,12 +169,6 @@ func (r *StorageZoneResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	diags := planAttrBoolEnforceDefault(ctx, req.Plan, "rewrite_404_to_200")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	dataApi, err := r.client.CreateStorageZone(dataApi)
 	if err != nil {
@@ -183,7 +177,7 @@ func (r *StorageZoneResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	tflog.Trace(ctx, "created storage zone "+dataApi.Name)
-	dataTf, diags = r.convertApiToModel(dataApi)
+	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
