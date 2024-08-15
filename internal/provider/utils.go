@@ -39,7 +39,7 @@ func mapKeyToValue[T constraints.Integer](mapped map[T]string, value T) string {
 	panic("key not found in map")
 }
 
-// Mutex to manage concurrent changes to pullzone sub-resources (i.e. bunnynet_pullzone_optimizer_class)
+// Mutex to manage concurrent changes to pullzone sub-resources (i.e. bunnynet_pullzone_edgerule and bunnynet_pullzone_optimizer_class)
 // Based on https://discuss.hashicorp.com/t/cooping-with-parallelism-is-there-a-way-to-prioritise-resource-types/55690
 var pzMutex *pullzoneMutex
 

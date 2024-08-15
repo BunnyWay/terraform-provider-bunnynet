@@ -214,8 +214,11 @@ func (r *PullzoneEdgeruleResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	pullzoneId := dataTf.PullzoneId.ValueInt64()
+	pzMutex.Lock(pullzoneId)
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	dataApi, err := r.client.CreatePullzoneEdgerule(dataApi)
+	pzMutex.Unlock(pullzoneId)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create edgerule", err.Error())
 		return
@@ -238,7 +241,10 @@ func (r *PullzoneEdgeruleResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
+	pullzoneId := data.PullzoneId.ValueInt64()
+	pzMutex.Lock(pullzoneId)
 	dataApi, err := r.client.GetPullzoneEdgerule(data.PullzoneId.ValueInt64(), data.Id.ValueString())
+	pzMutex.Unlock(pullzoneId)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching edgerule", err.Error()))
 		return
@@ -260,8 +266,11 @@ func (r *PullzoneEdgeruleResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	pullzoneId := data.PullzoneId.ValueInt64()
+	pzMutex.Lock(pullzoneId)
 	dataApi := r.convertModelToApi(ctx, data)
 	dataApi, err := r.client.CreatePullzoneEdgerule(dataApi)
+	pzMutex.Unlock(pullzoneId)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating edgerule", err.Error()))
 		return
@@ -283,7 +292,10 @@ func (r *PullzoneEdgeruleResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
+	pullzoneId := data.PullzoneId.ValueInt64()
+	pzMutex.Lock(pullzoneId)
 	err := r.client.DeletePullzoneEdgerule(data.PullzoneId.ValueInt64(), data.Id.ValueString())
+	pzMutex.Unlock(pullzoneId)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting edgerule", err.Error()))
 	}
