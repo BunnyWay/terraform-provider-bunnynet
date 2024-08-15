@@ -7,10 +7,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/dnszoneresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -88,13 +87,6 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Validators: []validator.Bool{
-					boolvalidator.AlsoRequires(
-						path.MatchRoot("nameserver1"),
-						path.MatchRoot("nameserver2"),
-						path.MatchRoot("soa_email"),
-					),
-				},
 				Description: "Indicates whether custom nameservers are used.",
 			},
 			"nameserver1": schema.StringAttribute{
@@ -168,6 +160,12 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 	}
 }
 
+func (r *DnsZoneResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		dnszoneresourcevalidator.CustomNameserver(),
+	}
+}
+
 func (r *DnsZoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -191,48 +189,6 @@ func (r *DnsZoneResource) Create(ctx context.Context, req resource.CreateRequest
 	var diags diag.Diagnostics
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	diags = planAttrBoolEnforceDefault(ctx, req.Plan, "nameserver_custom")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	diags = planAttrStringEnforceDefault(ctx, req.Plan, "soa_email")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	diags = planAttrStringEnforceDefault(ctx, req.Plan, "nameserver1")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	diags = planAttrStringEnforceDefault(ctx, req.Plan, "nameserver2")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	diags = planAttrBoolEnforceDefault(ctx, req.Plan, "log_enabled")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	diags = planAttrBoolEnforceDefault(ctx, req.Plan, "log_anonymized")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	diags = planAttrStringEnforceDefault(ctx, req.Plan, "log_anonymized_style")
-	if diags != nil {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 

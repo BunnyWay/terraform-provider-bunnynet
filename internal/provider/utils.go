@@ -134,26 +134,3 @@ func planAttrBoolEnforceDefault(ctx context.Context, plan tfsdk.Plan, attrName s
 
 	return nil
 }
-
-func planAttrStringEnforceDefault(ctx context.Context, plan tfsdk.Plan, attrName string) diag.Diagnostics {
-	attrPath := path.Root(attrName)
-	attrAtPath, diags := plan.Schema.AttributeAtPath(ctx, attrPath)
-	if diags.HasError() {
-		return diags
-	}
-
-	attr := attrAtPath.(schema.StringAttribute)
-	req := defaults.StringRequest{Path: attrPath}
-	resp := defaults.StringResponse{}
-	attr.Default.DefaultString(ctx, req, &resp)
-
-	var attrValue string
-	plan.GetAttribute(ctx, attrPath, &attrValue)
-	defaultValue := resp.PlanValue.ValueString()
-
-	if attrValue != defaultValue {
-		return diag.Diagnostics{diag.NewAttributeErrorDiagnostic(attrPath, enforceDefaultDiagSummary, enforceDefaultDiagError)}
-	}
-
-	return nil
-}
