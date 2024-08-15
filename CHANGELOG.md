@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 ### Fixed
 - resource pullzone_edgerule: creating multiple edgerules for the same pullzone causes inconsistencies in tfstate
+- resource storage_zone: zone_tier cannot be changed
 ### Changed
 - resource dns_zone: run Create() in two passes
 - resource dns_zone: refactored custom nameserver validation

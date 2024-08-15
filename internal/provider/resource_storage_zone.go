@@ -98,6 +98,9 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"zone_tier": schema.StringAttribute{
 				Required: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(storageZoneTierMap)...),
 				},
