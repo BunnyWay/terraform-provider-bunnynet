@@ -51,7 +51,9 @@ func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
 }
 
 func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
-	body, err := json.Marshal(data)
+	body, err := json.Marshal(map[string]string{
+		"Domain": data.Domain,
+	})
 	if err != nil {
 		return DnsZone{}, err
 	}
@@ -92,7 +94,12 @@ func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
 		return dataApiResult, err
 	}
 
-	return dataApiResult, nil
+	data.Id = dataApiResult.Id
+	dataApiResult, err = c.UpdateDnsZone(data)
+	if err != nil {
+		_ = c.DeleteDnsZone(data.Id)
+	}
+	return dataApiResult, err
 }
 
 func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
