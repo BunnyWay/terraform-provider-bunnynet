@@ -7,9 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
-## [Unreleased]
+## [0.3.8] - 2024-08-19
 ### Added
 - resource pullzone: originshield_zone attribute
+- resource dns_record: document how to set an apex domain record
 
 ## [0.3.7] - 2024-08-15
 ### Fixed
