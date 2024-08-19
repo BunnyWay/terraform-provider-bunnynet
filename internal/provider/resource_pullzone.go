@@ -69,6 +69,7 @@ type PullzoneResourceModel struct {
 	OriginShieldConcurrencyRequests    types.Int64   `tfsdk:"originshield_concurrency_requests"`
 	OriginShieldQueueRequests          types.Int64   `tfsdk:"originshield_queue_requests"`
 	OriginShieldQueueWait              types.Int64   `tfsdk:"originshield_queue_wait"`
+	OriginShieldZone                   types.String  `tfsdk:"originshield_zone"`
 	RequestCoalescingEnabled           types.Bool    `tfsdk:"request_coalescing_enabled"`
 	RequestCoalescingTimeout           types.Int64   `tfsdk:"request_coalescing_timeout"`
 	CorsEnabled                        types.Bool    `tfsdk:"cors_enabled"`
@@ -180,6 +181,7 @@ var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxRespo
 var pullzoneRoutingZonesOptions = []string{"AF", "ASIA", "EU", "SA", "US"}
 var pullzoneRoutingFiltersOptions = []string{"all", "eu"}
 var pullzoneCorsExtensionsDefault = []string{"css", "eot", "gif", "jpeg", "jpg", "js", "mp3", "mp4", "mpeg", "png", "svg", "ttf", "webm", "webp", "woff", "woff2"}
+var pullzoneOriginShieldZoneOptions = []string{"IL", "FR"}
 
 var pullzoneLogAnonymizedStyleMap = map[uint8]string{
 	0: "OneDigit",
@@ -494,6 +496,17 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					int64validator.OneOf(3, 5, 15, 30, 45),
 				},
 				Description: "The maximum wait time for queued requests in Origin Shield, in seconds.",
+			},
+			"originshield_zone": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(pullzoneOriginShieldZoneOptions...),
+				},
+				MarkdownDescription: generateMarkdownSliceOptions(pullzoneOriginShieldZoneOptions),
 			},
 			"request_coalescing_enabled": schema.BoolAttribute{
 				Computed: true,
@@ -1492,6 +1505,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.OriginShieldMaxConcurrentRequests = uint64(dataTf.OriginShieldConcurrencyRequests.ValueInt64())
 		dataApi.OriginShieldMaxQueuedRequests = uint64(dataTf.OriginShieldQueueRequests.ValueInt64())
 		dataApi.OriginShieldQueueMaxWaitTime = uint64(dataTf.OriginShieldQueueWait.ValueInt64())
+		dataApi.OriginShieldZoneCode = dataTf.OriginShieldZone.ValueString()
 		dataApi.EnableRequestCoalescing = dataTf.RequestCoalescingEnabled.ValueBool()
 		dataApi.RequestCoalescingTimeout = uint64(dataTf.RequestCoalescingTimeout.ValueInt64())
 	}
@@ -1753,6 +1767,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.OriginShieldConcurrencyRequests = types.Int64Value(int64(dataApi.OriginShieldMaxConcurrentRequests))
 		dataTf.OriginShieldQueueRequests = types.Int64Value(int64(dataApi.OriginShieldMaxQueuedRequests))
 		dataTf.OriginShieldQueueWait = types.Int64Value(int64(dataApi.OriginShieldQueueMaxWaitTime))
+		dataTf.OriginShieldZone = types.StringValue(dataApi.OriginShieldZoneCode)
 		dataTf.RequestCoalescingEnabled = types.BoolValue(dataApi.EnableRequestCoalescing)
 		dataTf.RequestCoalescingTimeout = types.Int64Value(int64(dataApi.RequestCoalescingTimeout))
 	}

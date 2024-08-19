@@ -99,6 +99,7 @@ resource "bunnynet_pullzone" "example" {
 - `originshield_enabled` (Boolean) Indicates whether Origin Shield is enabled.
 - `originshield_queue_requests` (Number) The number of queued requests for Origin Shield.
 - `originshield_queue_wait` (Number) The maximum wait time for queued requests in Origin Shield, in seconds.
+- `originshield_zone` (String) Options: `FR`, `IL`
 - `permacache_storagezone` (Number) The storage zone ID for Perma-Cache.
 - `request_coalescing_enabled` (Boolean) Indicates whether request coalescing is enabled.
 - `request_coalescing_timeout` (Number) Specifies the timeout period, in seconds, for request coalescing, determining how long to wait before sending combined requests to the origin.
