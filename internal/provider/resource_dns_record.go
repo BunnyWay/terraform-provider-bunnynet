@@ -163,7 +163,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
-				Description: "The name of the DNS record.",
+				MarkdownDescription: `The name of the DNS record. Use <code>name = ""</code> for apex domain records.`,
 			},
 			"weight": schema.Int64Attribute{
 				Optional: true,

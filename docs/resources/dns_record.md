@@ -27,7 +27,7 @@ resource "bunnynet_dns_record" "MX" {
 
 ### Required
 
-- `name` (String) The name of the DNS record.
+- `name` (String) The name of the DNS record. Use <code>name = ""</code> for apex domain records.
 - `type` (String) Options: `A`, `AAAA`, `CAA`, `CNAME`, `Flatten`, `MX`, `NS`, `PTR`, `PullZone`, `Redirect`, `SRV`, `Script`, `TXT`
 - `value` (String) The value of the DNS record.
 - `zone` (Number) ID of the related DNS zone.
