@@ -360,7 +360,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 			})
 
 			if diags != nil {
-				panic(diags)
+				return StreamVideoResourceModel{}, diags
 			}
 
 			chaptersValues = append(chaptersValues, chapterObj)
@@ -368,7 +368,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 
 		chaptersSet, diags := types.SetValue(streamVideoChapterType, chaptersValues)
 		if diags != nil {
-			panic(diags)
+			return StreamVideoResourceModel{}, diags
 		}
 
 		dataTf.Chapters = chaptersSet
@@ -386,7 +386,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 			})
 
 			if diags != nil {
-				panic(diags)
+				return StreamVideoResourceModel{}, diags
 			}
 
 			momentsValues = append(momentsValues, momentObj)
@@ -394,7 +394,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 
 		momentsSet, diags := types.SetValue(streamVideoMomentType, momentsValues)
 		if diags != nil {
-			panic(diags)
+			return StreamVideoResourceModel{}, diags
 		}
 
 		dataTf.Moments = momentsSet
