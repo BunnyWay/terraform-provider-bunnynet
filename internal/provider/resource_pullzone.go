@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -37,6 +39,7 @@ import (
 
 var _ resource.Resource = &PullzoneResource{}
 var _ resource.ResourceWithImportState = &PullzoneResource{}
+var _ resource.ResourceWithModifyPlan = &PullzoneResource{}
 
 func NewPullzoneResource() resource.Resource {
 	return &PullzoneResource{}
@@ -1288,6 +1291,12 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 	}
 }
 
+func (r *PullzoneResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		pullzoneresourcevalidator.PermacacheCacheExpirationTime(),
+	}
+}
+
 func (r *PullzoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -1351,6 +1360,26 @@ func (r *PullzoneResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
+}
+
+func (r *PullzoneResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePermacacheStoragezone int64
+	req.State.GetAttribute(ctx, path.Root("permacache_storagezone"), &statePermacacheStoragezone)
+
+	var planPermacacheStoragezone int64
+	req.Plan.GetAttribute(ctx, path.Root("permacache_storagezone"), &planPermacacheStoragezone)
+
+	if planPermacacheStoragezone > 0 {
+		resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), pullzoneresourcevalidator.DefaultCacheExpirationTimeForPermacache)
+	}
+
+	if planPermacacheStoragezone == 0 && statePermacacheStoragezone > 0 {
+		resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), -1)
+	}
 }
 
 func (r *PullzoneResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
