@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestCustomNameserverValidateResource(t *testing.T) {
+func TestPermacacheCacheExpirationTime(t *testing.T) {
 	type testCase struct {
 		ExpectedError bool
 		PlanValues    map[string]tftypes.Value
