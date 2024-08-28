@@ -35,7 +35,6 @@ resource "bunnynet_dns_record" "MX" {
 ### Optional
 
 - `accelerated` (Boolean) Indicates whether the DNS record should utilize bunny.net’s acceleration services.
-- `accelerated_pullzone` (Number) The ID of the accelerated pull zone.
 - `comment` (String) This property allows users to add descriptive notes for documentation and management purposes.
 - `enabled` (Boolean) Indicates whether the DNS record is enabled.
 - `flags` (Number) Flags for advanced DNS settings.
@@ -53,6 +52,7 @@ resource "bunnynet_dns_record" "MX" {
 
 ### Read-Only
 
+- `accelerated_pullzone` (Number) The ID of the accelerated pull zone.
 - `id` (Number) The unique identifier for the DNS record.
 
 ## Import

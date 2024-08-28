@@ -231,9 +231,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Description: "Indicates whether the DNS record should utilize bunny.net’s acceleration services.",
 			},
 			"accelerated_pullzone": schema.Int64Attribute{
-				Optional: true,
 				Computed: true,
-				Default:  int64default.StaticInt64(0),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
