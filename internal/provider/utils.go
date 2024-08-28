@@ -53,8 +53,8 @@ func (p *pullzoneMutex) Lock(id int64) {
 		v.Lock()
 	} else {
 		p.pullzones[id] = &sync.Mutex{}
-		p.mu.Unlock()
 		p.pullzones[id].Lock()
+		p.mu.Unlock()
 	}
 }
 
@@ -62,7 +62,6 @@ func (p *pullzoneMutex) Unlock(id int64) {
 	p.mu.Lock()
 	if _, ok := p.pullzones[id]; ok {
 		p.pullzones[id].Unlock()
-		delete(p.pullzones, id)
 	}
 	p.mu.Unlock()
 }
