@@ -1294,6 +1294,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 func (r *PullzoneResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		pullzoneresourcevalidator.PermacacheCacheExpirationTime(),
+		pullzoneresourcevalidator.CacheStaleBackgroundUpdate(),
 	}
 }
 
@@ -1367,18 +1368,38 @@ func (r *PullzoneResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 		return
 	}
 
-	var statePermacacheStoragezone int64
-	req.State.GetAttribute(ctx, path.Root("permacache_storagezone"), &statePermacacheStoragezone)
+	// permacache_storagezone
+	{
+		var statePermacacheStoragezone int64
+		req.State.GetAttribute(ctx, path.Root("permacache_storagezone"), &statePermacacheStoragezone)
 
-	var planPermacacheStoragezone int64
-	req.Plan.GetAttribute(ctx, path.Root("permacache_storagezone"), &planPermacacheStoragezone)
+		var planPermacacheStoragezone int64
+		req.Plan.GetAttribute(ctx, path.Root("permacache_storagezone"), &planPermacacheStoragezone)
 
-	if planPermacacheStoragezone > 0 {
-		resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), pullzoneresourcevalidator.DefaultCacheExpirationTimeForPermacache)
+		if planPermacacheStoragezone > 0 {
+			resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), pullzoneresourcevalidator.DefaultCacheExpirationTimeForPermacache)
+		}
+
+		if planPermacacheStoragezone == 0 && statePermacacheStoragezone > 0 {
+			resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), -1)
+		}
 	}
 
-	if planPermacacheStoragezone == 0 && statePermacacheStoragezone > 0 {
-		resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), -1)
+	// cache_stale
+	{
+		var stateCacheStale []string
+		req.State.GetAttribute(ctx, path.Root("cache_stale"), &stateCacheStale)
+
+		var planCacheStale []string
+		req.Plan.GetAttribute(ctx, path.Root("cache_stale"), &planCacheStale)
+
+		if len(planCacheStale) > 0 {
+			resp.Plan.SetAttribute(ctx, path.Root("use_background_update"), true)
+		}
+
+		if len(planCacheStale) == 0 && len(stateCacheStale) > 0 {
+			resp.Plan.SetAttribute(ctx, path.Root("use_background_update"), false)
+		}
 	}
 }
 
