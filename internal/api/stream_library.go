@@ -108,22 +108,12 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamLibrary{}, err
+		} else {
+			return StreamLibrary{}, errors.New("create stream library failed with " + resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return StreamLibrary{}, err
-		}
-
-		return StreamLibrary{}, errors.New(obj.Message)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -156,22 +146,12 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamLibrary{}, err
+		} else {
+			return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return StreamLibrary{}, err
-		}
-
-		return StreamLibrary{}, errors.New(obj.Message)
 	}
 
 	// update EnableTokenAuthentication
@@ -189,22 +169,12 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			bodyResp, err := io.ReadAll(resp.Body)
+			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return StreamLibrary{}, err
+			} else {
+				return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 			}
-
-			_ = resp.Body.Close()
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return StreamLibrary{}, err
-			}
-
-			return StreamLibrary{}, errors.New(obj.Message)
 		}
 	}
 

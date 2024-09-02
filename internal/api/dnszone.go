@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -64,22 +65,12 @@ func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return DnsZone{}, err
+		} else {
+			return DnsZone{}, errors.New("create DNS zone failed with " + resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return DnsZone{}, err
-		}
-
-		return DnsZone{}, errors.New(obj.Message)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -116,22 +107,12 @@ func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return DnsZone{}, err
+		} else {
+			return DnsZone{}, errors.New("update DNS zone failed with " + resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return DnsZone{}, err
-		}
-
-		return DnsZone{}, errors.New(obj.Message)
 	}
 
 	dataApiResult, err := c.GetDnsZone(id)

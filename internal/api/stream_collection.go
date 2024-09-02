@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -66,22 +67,12 @@ func (c *Client) CreateStreamCollection(dataApi StreamCollection) (StreamCollect
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamCollection{}, err
+		} else {
+			return StreamCollection{}, errors.New("create stream collection failed with " + resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return StreamCollection{}, err
-		}
-
-		return StreamCollection{}, errors.New(obj.Message)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -118,22 +109,12 @@ func (c *Client) UpdateStreamCollection(dataApi StreamCollection) (StreamCollect
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamCollection{}, err
+		} else {
+			return StreamCollection{}, errors.New("update stream collection failed with " + resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return StreamCollection{}, err
-		}
-
-		return StreamCollection{}, errors.New(obj.Message)
 	}
 
 	dataApiResult, err := c.GetStreamCollection(dataApi.LibraryId, id)
