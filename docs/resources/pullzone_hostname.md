@@ -20,9 +20,14 @@ resource "bunnynet_pullzone_hostname" "bunnynet" {
 }
 
 resource "bunnynet_pullzone_hostname" "custom" {
-  pullzone  = bunnynet_pullzone.example.id
-  name      = "cdn.example.com"
-  force_ssl = true
+  pullzone    = bunnynet_pullzone.example.id
+  name        = "cdn.example.com"
+  tls_enabled = true
+  force_ssl   = true
+
+  # Uploads a custom certificate. To use a managed certificate (Let's Encrypt), omit both attributes.
+  certificate     = file("cdn.example.com.cert")
+  certificate_key = file("cdn.example.com.key")
 }
 ```
 
@@ -36,8 +41,10 @@ resource "bunnynet_pullzone_hostname" "custom" {
 
 ### Optional
 
+- `certificate` (String) The certificate for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate data, so you'll have to make sure you're importing the correct certificate.
+- `certificate_key` (String) The certificate private key for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate key, so you'll have to make sure you're importing the correct certificate key.
 - `force_ssl` (Boolean) Indicates whether SSL should be enforced for the hostname.
-- `tls_enabled` (Boolean) Indicates whether a Domain-validated TLS certificate should be automatically obtained and managed for this hostname.
+- `tls_enabled` (Boolean) Indicates whether the hostname should support HTTPS. If a custom certificate is not provided via the <code>certificate</code> attribute, a Domain-validated TLS certificate will be automatically obtained and managed by Bunny. ***Important***: it is not possible to tell managed and custom certificates apart for imported resources.
 
 ### Read-Only
 

@@ -8,14 +8,17 @@ import (
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/boolvalidator"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzonehostnameresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -37,12 +40,14 @@ type PullzoneHostnameResource struct {
 }
 
 type PullzoneHostnameResourceModel struct {
-	Id         types.Int64  `tfsdk:"id"`
-	PullzoneId types.Int64  `tfsdk:"pullzone"`
-	Name       types.String `tfsdk:"name"`
-	IsInternal types.Bool   `tfsdk:"is_internal"`
-	TLSEnabled types.Bool   `tfsdk:"tls_enabled"`
-	ForceSSL   types.Bool   `tfsdk:"force_ssl"`
+	Id             types.Int64  `tfsdk:"id"`
+	PullzoneId     types.Int64  `tfsdk:"pullzone"`
+	Name           types.String `tfsdk:"name"`
+	IsInternal     types.Bool   `tfsdk:"is_internal"`
+	TLSEnabled     types.Bool   `tfsdk:"tls_enabled"`
+	ForceSSL       types.Bool   `tfsdk:"force_ssl"`
+	Certificate    types.String `tfsdk:"certificate"`
+	CertificateKey types.String `tfsdk:"certificate_key"`
 }
 
 func (r *PullzoneHostnameResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -88,10 +93,11 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 			"tls_enabled": schema.BoolAttribute{
 				Computed: true,
 				Optional: true,
+				Default:  booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether a Domain-validated TLS certificate should be automatically obtained and managed for this hostname.",
+				MarkdownDescription: `Indicates whether the hostname should support HTTPS. If a custom certificate is not provided via the <code>certificate</code> attribute, a Domain-validated TLS certificate will be automatically obtained and managed by Bunny. ***Important***: it is not possible to tell managed and custom certificates apart for imported resources.`,
 			},
 			"force_ssl": schema.BoolAttribute{
 				Optional: true,
@@ -105,7 +111,39 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				},
 				Description: "Indicates whether SSL should be enforced for the hostname.",
 			},
+			"certificate": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+					stringvalidator.AlsoRequires(path.MatchRoot("certificate_key")),
+				},
+				MarkdownDescription: `The certificate for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate data, so you'll have to make sure you're importing the correct certificate.`,
+			},
+			"certificate_key": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+					stringvalidator.AlsoRequires(path.MatchRoot("certificate")),
+				},
+				MarkdownDescription: `The certificate private key for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate key, so you'll have to make sure you're importing the correct certificate key.`,
+			},
 		},
+	}
+}
+
+func (r *PullzoneHostnameResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		pullzonehostnameresourcevalidator.CustomCertificate(),
 	}
 }
 
@@ -135,7 +173,13 @@ func (r *PullzoneHostnameResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
+	certificate := dataApi.Certificate
+	certificateKey := dataApi.CertificateKey
+
 	dataApi, err := r.client.CreatePullzoneHostname(dataApi)
+	dataApi.Certificate = certificate
+	dataApi.CertificateKey = certificateKey
+
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create hostname", err.Error())
 		return
@@ -159,6 +203,9 @@ func (r *PullzoneHostnameResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	dataApi, err := r.client.GetPullzoneHostname(data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
+	dataApi.Certificate = data.Certificate.ValueString()
+	dataApi.CertificateKey = data.CertificateKey.ValueString()
+
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching hostname", err.Error()))
 		return
@@ -188,13 +235,21 @@ func (r *PullzoneHostnameResource) Update(ctx context.Context, req resource.Upda
 	}
 	previousDataApi := r.convertModelToApi(ctx, previousData)
 
-	dataApi, err := r.client.UpdatePullzoneHostname(dataApi, previousDataApi)
+	dataApiResult, err := r.client.UpdatePullzoneHostname(dataApi, previousDataApi)
+	if len(dataApi.Certificate) > 0 {
+		dataApiResult.Certificate = dataApi.Certificate
+	}
+
+	if len(dataApi.CertificateKey) > 0 {
+		dataApiResult.CertificateKey = dataApi.CertificateKey
+	}
+
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating hostname", err.Error()))
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := r.convertApiToModel(dataApiResult)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -252,6 +307,8 @@ func (r *PullzoneHostnameResource) convertModelToApi(ctx context.Context, dataTf
 	dataApi.IsSystemHostname = dataTf.IsInternal.ValueBool()
 	dataApi.HasCertificate = dataTf.TLSEnabled.ValueBool()
 	dataApi.ForceSSL = dataTf.ForceSSL.ValueBool()
+	dataApi.Certificate = dataTf.Certificate.ValueString()
+	dataApi.CertificateKey = dataTf.CertificateKey.ValueString()
 
 	return dataApi
 }
@@ -264,6 +321,8 @@ func (r *PullzoneHostnameResource) convertApiToModel(dataApi api.PullzoneHostnam
 	dataTf.IsInternal = types.BoolValue(dataApi.IsSystemHostname)
 	dataTf.TLSEnabled = types.BoolValue(dataApi.HasCertificate)
 	dataTf.ForceSSL = types.BoolValue(dataApi.ForceSSL)
+	dataTf.Certificate = types.StringValue(dataApi.Certificate)
+	dataTf.CertificateKey = types.StringValue(dataApi.CertificateKey)
 
 	return dataTf, nil
 }

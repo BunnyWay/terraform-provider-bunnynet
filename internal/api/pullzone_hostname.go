@@ -5,9 +5,11 @@ package api
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -18,6 +20,8 @@ type PullzoneHostname struct {
 	IsSystemHostname bool   `json:"IsSystemHostname"`
 	HasCertificate   bool   `json:"HasCertificate"`
 	ForceSSL         bool   `json:"ForceSSL"`
+	Certificate      string `json:"Certificate"`
+	CertificateKey   string `json:"CertificateKey"`
 }
 
 func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname, error) {
@@ -50,10 +54,15 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 
 	for _, hostname := range pullzone.Hostnames {
 		if hostname.Name == data.Name {
-			previousData := PullzoneHostname{HasCertificate: hostname.HasCertificate}
+			previousData := PullzoneHostname{
+				HasCertificate: hostname.HasCertificate,
+				ForceSSL:       hostname.ForceSSL,
+			}
 			hostname.PullzoneId = pullzoneId
 			hostname.HasCertificate = data.HasCertificate
 			hostname.ForceSSL = data.ForceSSL
+			hostname.Certificate = data.Certificate
+			hostname.CertificateKey = data.CertificateKey
 
 			return c.UpdatePullzoneHostname(hostname, previousData)
 		}
@@ -72,8 +81,16 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		return PullzoneHostname{}, errors.New("removing a certificate from an internal hostname is not supported")
 	}
 
-	// remove existing certificate
-	if !data.IsSystemHostname && previousData.HasCertificate && !data.HasCertificate {
+	shouldRemoveCustomCertificate := len(previousData.Certificate) > 0 && len(data.Certificate) == 0
+	didNotHaveAManagedCertificate := (!previousData.HasCertificate && data.HasCertificate) || (shouldRemoveCustomCertificate)
+	hasCustomCertificate := len(data.Certificate) > 0 && len(data.CertificateKey) > 0
+
+	shouldRemoveCertificate := !data.IsSystemHostname && (shouldRemoveCustomCertificate || previousData.HasCertificate && !data.HasCertificate)
+	shouldAddCustomCertificate := !data.IsSystemHostname && data.HasCertificate && hasCustomCertificate && data.Certificate != previousData.Certificate
+	shouldAddManagedCertificate := !data.IsSystemHostname && data.HasCertificate && !hasCustomCertificate && didNotHaveAManagedCertificate
+	shouldSetForceSsl := previousData.ForceSSL != data.ForceSSL
+
+	if shouldRemoveCertificate {
 		body, err := json.Marshal(map[string]interface{}{
 			"Hostname": data.Name,
 		})
@@ -92,8 +109,32 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		}
 	}
 
-	// manage free TLS certificate
-	if !data.IsSystemHostname && !previousData.HasCertificate && data.HasCertificate {
+	if shouldAddCustomCertificate {
+		certificateB64 := base64.StdEncoding.EncodeToString([]byte(data.Certificate))
+		certificateKeyB64 := base64.StdEncoding.EncodeToString([]byte(data.CertificateKey))
+
+		body, err := json.Marshal(map[string]interface{}{
+			"Hostname":       data.Name,
+			"Certificate":    certificateB64,
+			"CertificateKey": certificateKeyB64,
+		})
+
+		if err != nil {
+			return PullzoneHostname{}, err
+		}
+
+		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/addCertificate", c.apiUrl, pullzoneId), bytes.NewReader(body))
+		if err != nil {
+			return PullzoneHostname{}, err
+		}
+
+		if resp.StatusCode != http.StatusNoContent {
+			bodyStr, _ := io.ReadAll(resp.Body)
+			return PullzoneHostname{}, errors.New("addCertificate failed with " + resp.Status + string(bodyStr))
+		}
+	}
+
+	if shouldAddManagedCertificate {
 		resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/pullzone/loadFreeCertificate?hostname=%s", c.apiUrl, data.Name), nil)
 		if err != nil {
 			return PullzoneHostname{}, err
@@ -104,8 +145,7 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		}
 	}
 
-	// force SSL
-	{
+	if shouldSetForceSsl {
 		body, err := json.Marshal(map[string]interface{}{
 			"ForceSSL": data.ForceSSL,
 			"Hostname": data.Name,
