@@ -3,6 +3,13 @@
 
 package utils
 
+import (
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+)
+
 func SliceDiff[T comparable](s1 []T, s2 []T) []T {
 	diff := make([]T, 0)
 
@@ -21,4 +28,23 @@ func SliceDiff[T comparable](s1 []T, s2 []T) []T {
 	}
 
 	return diff
+}
+
+func ExtractErrorMessage(response *http.Response) error {
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil
+	}
+
+	_ = response.Body.Close()
+	var responseObj struct {
+		Message string `json:"Message"`
+	}
+
+	err = json.Unmarshal(bodyBytes, &responseObj)
+	if err != nil {
+		return nil
+	}
+
+	return errors.New(responseObj.Message)
 }
