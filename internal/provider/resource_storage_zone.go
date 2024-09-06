@@ -348,6 +348,8 @@ func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (Storag
 
 	if len(dataApi.Custom404FilePath) > 0 {
 		dataTf.Custom404FilePath = types.StringValue(dataApi.Custom404FilePath)
+	} else {
+		dataTf.Custom404FilePath = types.StringNull()
 	}
 
 	return dataTf, nil

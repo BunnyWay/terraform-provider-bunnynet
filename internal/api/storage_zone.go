@@ -101,13 +101,9 @@ func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 	id := dataApi.Id
 
 	dataUpdate := map[string]interface{}{
-		"Rewrite404To200":  dataApi.Rewrite404To200,
-		"ReplicationZones": dataApi.ReplicationRegions,
-	}
-
-	// @TODO API can't unset Custom404FilePath
-	if dataApi.Custom404FilePath != "" {
-		dataUpdate["Custom404FilePath"] = dataApi.Custom404FilePath
+		"Rewrite404To200":   dataApi.Rewrite404To200,
+		"ReplicationZones":  dataApi.ReplicationRegions,
+		"Custom404FilePath": dataApi.Custom404FilePath,
 	}
 
 	body, err := json.Marshal(dataUpdate)
