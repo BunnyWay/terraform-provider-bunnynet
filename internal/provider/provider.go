@@ -121,6 +121,8 @@ func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Reso
 
 func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewDnsRecordDataSource,
+		NewDnsZoneDataSource,
 		NewRegionDataSource,
 		NewVideoLanguageDataSource,
 	}

@@ -68,7 +68,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The unique identifier for the DNS zone.",
+				Description: dnsZoneDescription.Id,
 			},
 			"domain": schema.StringAttribute{
 				Required: true,
@@ -78,7 +78,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile(`(.+)\.(.+)`), "Invalid domain"),
 				},
-				Description: "The domain name for the DNS zone.",
+				Description: dnsZoneDescription.Domain,
 			},
 			"nameserver_custom": schema.BoolAttribute{
 				Optional: true,
@@ -87,7 +87,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether custom nameservers are used.",
+				Description: dnsZoneDescription.NameserverCustom,
 			},
 			"nameserver1": schema.StringAttribute{
 				Optional: true,
@@ -99,7 +99,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "The primary nameserver for the DNS zone.",
+				Description: dnsZoneDescription.Nameserver1,
 			},
 			"nameserver2": schema.StringAttribute{
 				Optional: true,
@@ -111,7 +111,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "The secondary nameserver for the DNS zone.",
+				Description: dnsZoneDescription.Nameserver2,
 			},
 			"soa_email": schema.StringAttribute{
 				Optional: true,
@@ -124,7 +124,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 					stringvalidator.LengthAtLeast(1),
 					stringvalidator.RegexMatches(regexp.MustCompile(`(.+)@(.+)\.(.+)`), "Invalid email address"),
 				},
-				Description: "The email address used in the Start of Authority (SOA) record for the DNS zone.",
+				Description: dnsZoneDescription.SoaEmail,
 			},
 			"log_enabled": schema.BoolAttribute{
 				Optional: true,
@@ -133,7 +133,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether permanent logging for DNS queries is enabled.",
+				Description: dnsZoneDescription.LogEnabled,
 			},
 			"log_anonymized": schema.BoolAttribute{
 				Optional: true,
@@ -142,7 +142,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether DNS logs are anonymized.",
+				Description: dnsZoneDescription.LogAnonymized,
 			},
 			"log_anonymized_style": schema.StringAttribute{
 				Optional: true,
@@ -154,7 +154,7 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneLogAnonymizedStyleMap)...),
 				},
-				MarkdownDescription: generateMarkdownMapOptions(pullzoneLogAnonymizedStyleMap),
+				MarkdownDescription: dnsZoneDescription.LogAnonymizedStyle,
 			},
 		},
 	}
@@ -200,7 +200,7 @@ func (r *DnsZoneResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	tflog.Trace(ctx, "created dns zone "+dataApi.Domain)
-	dataTf, diags = r.convertApiToModel(dataApi)
+	dataTf, diags = dnsZoneApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -223,7 +223,7 @@ func (r *DnsZoneResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsZoneApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -247,7 +247,7 @@ func (r *DnsZoneResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsZoneApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -282,7 +282,7 @@ func (r *DnsZoneResource) ImportState(ctx context.Context, req resource.ImportSt
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsZoneApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -306,7 +306,7 @@ func (r *DnsZoneResource) convertModelToApi(ctx context.Context, dataTf DnsZoneR
 	return dataApi
 }
 
-func (r *DnsZoneResource) convertApiToModel(dataApi api.DnsZone) (DnsZoneResourceModel, diag.Diagnostics) {
+func dnsZoneApiToTf(dataApi api.DnsZone) (DnsZoneResourceModel, diag.Diagnostics) {
 	dataTf := DnsZoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Domain = types.StringValue(dataApi.Domain)

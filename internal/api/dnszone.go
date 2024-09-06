@@ -51,6 +51,41 @@ func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
 	return data, nil
 }
 
+func (c *Client) GetDnsZoneByDomain(domain string) (DnsZone, error) {
+	var data DnsZone
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/dnszone", c.apiUrl), nil)
+	if err != nil {
+		return data, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return data, errors.New(resp.Status)
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return data, err
+	}
+
+	_ = resp.Body.Close()
+	var result struct {
+		Items []DnsZone `json:"Items"`
+	}
+
+	err = json.Unmarshal(bodyResp, &result)
+	if err != nil {
+		return data, err
+	}
+
+	for _, record := range result.Items {
+		if record.Domain == domain {
+			return record, nil
+		}
+	}
+
+	return data, fmt.Errorf("DNS zone \"%s\" not found", domain)
+}
+
 func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
 	body, err := json.Marshal(map[string]string{
 		"Domain": data.Domain,

@@ -108,14 +108,14 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The unique identifier for the DNS record.",
+				Description: dnsRecordDescription.Id,
 			},
 			"zone": schema.Int64Attribute{
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "ID of the related DNS zone.",
+				Description: dnsRecordDescription.Zone,
 			},
 			"enabled": schema.BoolAttribute{
 				Optional: true,
@@ -124,7 +124,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether the DNS record is enabled.",
+				Description: dnsRecordDescription.Enabled,
 			},
 			"type": schema.StringAttribute{
 				Required: true,
@@ -134,7 +134,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(dnsRecordTypeMap)...),
 				},
-				MarkdownDescription: generateMarkdownMapOptions(dnsRecordTypeMap),
+				MarkdownDescription: dnsRecordDescription.Type,
 			},
 			"ttl": schema.Int64Attribute{
 				Optional: true,
@@ -146,7 +146,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "The time-to-live value for the DNS record.",
+				Description: dnsRecordDescription.TTL,
 			},
 			"value": schema.StringAttribute{
 				Required: true,
@@ -156,14 +156,14 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "The value of the DNS record.",
+				Description: dnsRecordDescription.Value,
 			},
 			"name": schema.StringAttribute{
 				Required: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
-				MarkdownDescription: `The name of the DNS record. Use <code>name = ""</code> for apex domain records.`,
+				MarkdownDescription: dnsRecordDescription.Name,
 			},
 			"weight": schema.Int64Attribute{
 				Optional: true,
@@ -175,7 +175,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "The weight of the DNS record. It is used in load balancing scenarios to distribute traffic based on the specified weight.",
+				Description: dnsRecordDescription.Weight,
 			},
 			"priority": schema.Int64Attribute{
 				Optional: true,
@@ -187,7 +187,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "The priority of the DNS record.",
+				Description: dnsRecordDescription.Priority,
 			},
 			"port": schema.Int64Attribute{
 				Optional: true,
@@ -199,7 +199,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.Between(0, 65535),
 				},
-				Description: "The port number for services that require a specific port.",
+				Description: dnsRecordDescription.Port,
 			},
 			"flags": schema.Int64Attribute{
 				Optional: true,
@@ -211,7 +211,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
 				},
-				Description: "Flags for advanced DNS settings.",
+				Description: dnsRecordDescription.Flags,
 			},
 			"tag": schema.StringAttribute{
 				Optional: true,
@@ -220,7 +220,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "A tag for the DNS record.",
+				Description: dnsRecordDescription.Tag,
 			},
 			"accelerated": schema.BoolAttribute{
 				Optional: true,
@@ -228,14 +228,14 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether the DNS record should utilize bunny.net’s acceleration services.",
+				Description: dnsRecordDescription.Accelerated,
 			},
 			"accelerated_pullzone": schema.Int64Attribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
-				Description: "The ID of the accelerated pull zone.",
+				Description: dnsRecordDescription.AcceleratedPullzone,
 			},
 			"link_name": schema.StringAttribute{
 				Optional: true,
@@ -244,7 +244,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The name of the linked resource.",
+				Description: dnsRecordDescription.Link,
 			},
 			"monitor_type": schema.StringAttribute{
 				Optional: true,
@@ -256,7 +256,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(dnsRecordMonitorTypeMap)...),
 				},
-				MarkdownDescription: generateMarkdownMapOptions(dnsRecordMonitorTypeMap),
+				MarkdownDescription: dnsRecordDescription.MonitorType,
 			},
 			"geolocation_lat": schema.Float64Attribute{
 				Optional: true,
@@ -268,7 +268,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Float64{
 					float64validator.Between(-180.0, 180.0),
 				},
-				Description: "The latitude for geolocation-based routing.",
+				Description: dnsRecordDescription.GeolocationLat,
 			},
 			"geolocation_long": schema.Float64Attribute{
 				Optional: true,
@@ -280,7 +280,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.Float64{
 					float64validator.Between(-180.0, 180.0),
 				},
-				Description: "The longitude for geolocation-based routing.",
+				Description: dnsRecordDescription.GeolocationLong,
 			},
 			"latency_zone": schema.StringAttribute{
 				Optional: true,
@@ -292,7 +292,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				Description: "The latency zone for latency-based routing.",
+				Description: dnsRecordDescription.LatencyZone,
 			},
 			"smart_routing_type": schema.StringAttribute{
 				Optional: true,
@@ -304,7 +304,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(dnsRecordSmartRoutingTypeMap)...),
 				},
-				MarkdownDescription: generateMarkdownMapOptions(dnsRecordSmartRoutingTypeMap),
+				MarkdownDescription: dnsRecordDescription.SmartRoutingType,
 			},
 			"comment": schema.StringAttribute{
 				Optional: true,
@@ -313,7 +313,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "This property allows users to add descriptive notes for documentation and management purposes.",
+				Description: dnsRecordDescription.Comment,
 			},
 		},
 	}
@@ -352,7 +352,7 @@ func (r *DnsRecordResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("created dns record %s %s", mapKeyToValue(dnsRecordTypeMap, dataApi.Type), dataApi.Name))
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsRecordApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -375,7 +375,7 @@ func (r *DnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsRecordApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -399,7 +399,7 @@ func (r *DnsRecordResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsRecordApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -446,7 +446,7 @@ func (r *DnsRecordResource) ImportState(ctx context.Context, req resource.Import
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := dnsRecordApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -482,7 +482,7 @@ func (r *DnsRecordResource) convertModelToApi(ctx context.Context, dataTf DnsRec
 	return dataApi
 }
 
-func (r *DnsRecordResource) convertApiToModel(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagnostics) {
+func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagnostics) {
 	dataTf := DnsRecordResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Zone = types.Int64Value(dataApi.Zone)
