@@ -380,7 +380,7 @@ func (r *PullzoneOptimizerClassResource) convertModelToApi(ctx context.Context, 
 	}
 
 	if !dataTf.AspectRatio.IsNull() {
-		properties["aspect_ratio"] = dataTf.AspectRatio.String()
+		properties["aspect_ratio"] = dataTf.AspectRatio.ValueString()
 	}
 
 	if !dataTf.Quality.IsNull() {
@@ -401,11 +401,11 @@ func (r *PullzoneOptimizerClassResource) convertModelToApi(ctx context.Context, 
 	}
 
 	if !dataTf.Crop.IsNull() {
-		properties["crop"] = dataTf.Crop.String()
+		properties["crop"] = dataTf.Crop.ValueString()
 	}
 
 	if !dataTf.CropGravity.IsNull() {
-		properties["crop_gravity"] = dataTf.CropGravity.String()
+		properties["crop_gravity"] = dataTf.CropGravity.ValueString()
 	}
 
 	if !dataTf.Flip.IsNull() {
@@ -443,7 +443,7 @@ func (r *PullzoneOptimizerClassResource) convertModelToApi(ctx context.Context, 
 	}
 
 	if !dataTf.AutoOptimize.IsNull() {
-		properties["auto_optimize"] = dataTf.AutoOptimize.String()
+		properties["auto_optimize"] = dataTf.AutoOptimize.ValueString()
 	}
 
 	if !dataTf.Sepia.IsNull() {
