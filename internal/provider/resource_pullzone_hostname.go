@@ -265,6 +265,11 @@ func (r *PullzoneHostnameResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
+	// b-cdn.net hostnames cannot be deleted
+	if data.IsInternal.ValueBool() {
+		return
+	}
+
 	err := r.client.DeletePullzoneHostname(data.PullzoneId.ValueInt64(), data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting hostname", err.Error()))

@@ -10,7 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"golang.org/x/exp/slices"
 	"net/http"
+	"strings"
 )
 
 type PullzoneHostname struct {
@@ -28,6 +30,26 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 	pullzoneId := data.PullzoneId
 	if pullzoneId == 0 {
 		return PullzoneHostname{}, errors.New("pullzone is required")
+	}
+
+	pullzone, err := c.GetPullzone(data.PullzoneId)
+	if err != nil {
+		return PullzoneHostname{}, err
+	}
+
+	// if creating the default hostname, return existing
+	if strings.HasSuffix(data.Name, "."+pullzone.CnameDomain) {
+		hostnameIdx := slices.IndexFunc(pullzone.Hostnames, func(hostname PullzoneHostname) bool {
+			return hostname.IsSystemHostname && hostname.Name == data.Name
+		})
+
+		if hostnameIdx > -1 {
+			data.Id = pullzone.Hostnames[hostnameIdx].Id
+			data.PullzoneId = pullzone.Id
+			return c.UpdatePullzoneHostname(data, pullzone.Hostnames[hostnameIdx])
+		}
+
+		// if system hostname not found, try to create it, the API should return an error
 	}
 
 	body, err := json.Marshal(map[string]string{
@@ -52,7 +74,7 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 		}
 	}
 
-	pullzone, err := c.GetPullzone(pullzoneId)
+	pullzone, err = c.GetPullzone(pullzoneId)
 	if err != nil {
 		return PullzoneHostname{}, err
 	}
