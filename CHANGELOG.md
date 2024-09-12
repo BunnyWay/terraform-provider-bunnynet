@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.3.15] - 2024-09-12
+## Added
+- resource pullzone_edgerule: multi-actions support
+
 ## [0.3.14] - 2024-09-10
 ## Changed
 - resource pullzone_hostname: deleting an internal hostname (`*.b-cdn.net`) will remove the resource from state without deleting it, as internal hostnames cannot be deleted;

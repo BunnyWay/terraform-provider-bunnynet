@@ -37,15 +37,16 @@ resource "bunnynet_pullzone_edgerule" "block_admin" {
 
 ### Required
 
-- `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
 - `enabled` (Boolean) Indicates whether the edge rule is enabled.
 - `pullzone` (Number)
 - `triggers` (List of Object) (see [below for nested schema](#nestedatt--triggers))
 
 ### Optional
 
+- `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
 - `action_parameter1` (String)
 - `action_parameter2` (String)
+- `actions` (List of Object) List of actions for the edge rule. (see [below for nested schema](#nestedatt--actions))
 - `description` (String) The description of the edge rule.
 - `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
 
@@ -62,6 +63,16 @@ Required:
 - `parameter1` (String)
 - `parameter2` (String)
 - `patterns` (List of String)
+- `type` (String)
+
+
+<a id="nestedatt--actions"></a>
+### Nested Schema for `actions`
+
+Optional:
+
+- `parameter1` (String)
+- `parameter2` (String)
 - `type` (String)
 
 ## Import

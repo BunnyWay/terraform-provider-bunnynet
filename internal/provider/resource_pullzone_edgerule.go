@@ -7,9 +7,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -45,6 +48,7 @@ type PullzoneEdgeruleResourceModel struct {
 	ActionParameter1 types.String `tfsdk:"action_parameter1"`
 	ActionParameter2 types.String `tfsdk:"action_parameter2"`
 	MatchType        types.String `tfsdk:"match_type"`
+	Actions          types.List   `tfsdk:"actions"`
 	Triggers         types.List   `tfsdk:"triggers"`
 }
 
@@ -97,6 +101,14 @@ func (r *PullzoneEdgeruleResource) Metadata(ctx context.Context, req resource.Me
 	resp.TypeName = req.ProviderTypeName + "_pullzone_edgerule"
 }
 
+var pullzoneEdgeruleActionType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"type":       types.StringType,
+		"parameter1": types.StringType,
+		"parameter2": types.StringType,
+	},
+}
+
 var pullzoneEdgeruleTriggerType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
 		"type":       types.StringType,
@@ -135,27 +147,24 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				Description: "Indicates whether the edge rule is enabled.",
 			},
 			"action": schema.StringAttribute{
-				Required: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleActionMap)...),
+					stringvalidator.ConflictsWith(path.MatchRoot("actions")),
 				},
 				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleActionMap),
 			},
 			"action_parameter1": schema.StringAttribute{
-				Computed: true,
 				Optional: true,
-				Default:  stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"action_parameter2": schema.StringAttribute{
-				Computed: true,
 				Optional: true,
-				Default:  stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -181,11 +190,34 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				},
 				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleMatchTypeMap),
 			},
+			"actions": schema.ListAttribute{
+				Optional:    true,
+				Computed:    true,
+				ElementType: pullzoneEdgeruleActionType,
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+					listvalidator.ConflictsWith(
+						path.MatchRoot("action"),
+						path.MatchRoot("action_parameter1"),
+						path.MatchRoot("action_parameter2"),
+					),
+				},
+				Description: "List of actions for the edge rule.",
+			},
 			"triggers": schema.ListAttribute{
 				Required:    true,
 				ElementType: pullzoneEdgeruleTriggerType,
 			},
 		},
+	}
+}
+
+func (r *PullzoneEdgeruleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.AtLeastOneOf(
+			path.MatchRoot("action"),
+			path.MatchRoot("actions"),
+		),
 	}
 }
 
@@ -225,7 +257,7 @@ func (r *PullzoneEdgeruleResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("created edgerule for pullzone %d", dataApi.PullzoneId))
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := r.convertApiToModel(dataApi, !dataTf.Action.IsNull())
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -250,7 +282,7 @@ func (r *PullzoneEdgeruleResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := r.convertApiToModel(dataApi, !data.Action.IsNull())
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -276,7 +308,7 @@ func (r *PullzoneEdgeruleResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := r.convertApiToModel(dataApi, !data.Action.IsNull())
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -320,7 +352,7 @@ func (r *PullzoneEdgeruleResource) ImportState(ctx context.Context, req resource
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(edgerule)
+	dataTf, diags := r.convertApiToModel(edgerule, false)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -334,92 +366,120 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 	dataApi.Id = dataTf.Id.ValueString()
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.Enabled = dataTf.Enabled.ValueBool()
-	dataApi.Action = mapValueToKey(pullzoneEdgeruleActionMap, dataTf.Action.ValueString())
-	dataApi.ActionParameter1 = dataTf.ActionParameter1.ValueString()
-	dataApi.ActionParameter2 = dataTf.ActionParameter2.ValueString()
 	dataApi.Description = dataTf.Description.ValueString()
 	dataApi.MatchType = mapValueToKey(pullzoneEdgeruleMatchTypeMap, dataTf.MatchType.ValueString())
 
-	triggerElements := dataTf.Triggers.Elements()
-	triggers := make([]api.PullzoneEdgeruleTrigger, len(triggerElements))
-	for i, el := range triggerElements {
-		trigger := el.(types.Object).Attributes()
+	// actions
+	{
+		actionsElements := dataTf.Actions.Elements()
 
-		patternElements := trigger["patterns"].(types.List).Elements()
-		patterns := make([]string, len(patternElements))
-		for j, pattern := range patternElements {
-			patterns[j] = pattern.(types.String).ValueString()
-		}
+		// action field
+		if len(actionsElements) == 0 {
+			dataApi.Action = mapValueToKey(pullzoneEdgeruleActionMap, dataTf.Action.ValueString())
+			dataApi.ActionParameter1 = dataTf.ActionParameter1.ValueString()
+			dataApi.ActionParameter2 = dataTf.ActionParameter2.ValueString()
+			dataApi.ExtraActions = []api.PullzoneEdgeruleExtraAction{}
+		} else {
+			// actions list
+			actions := make([]api.PullzoneEdgeruleExtraAction, len(actionsElements))
+			for i, el := range actionsElements {
+				action := el.(types.Object).Attributes()
+				parameter1 := ""
+				if t, ok := action["parameter1"]; ok && !t.(types.String).IsNull() {
+					parameter1 = t.(types.String).ValueString()
+				}
 
-		parameter1 := ""
-		if t, ok := trigger["parameter1"]; ok && !t.(types.String).IsNull() {
-			parameter1 = t.(types.String).ValueString()
-		}
+				parameter2 := ""
+				if t, ok := action["parameter2"]; ok && !t.(types.String).IsNull() {
+					parameter2 = t.(types.String).ValueString()
+				}
 
-		parameter2 := ""
-		if t, ok := trigger["parameter2"]; ok && !t.(types.String).IsNull() {
-			parameter2 = t.(types.String).ValueString()
-		}
+				actions[i] = api.PullzoneEdgeruleExtraAction{
+					ActionType:       mapValueToKey(pullzoneEdgeruleActionMap, action["type"].(types.String).ValueString()),
+					ActionParameter1: parameter1,
+					ActionParameter2: parameter2,
+				}
+			}
 
-		triggers[i] = api.PullzoneEdgeruleTrigger{
-			Type:       mapValueToKey(pullzoneEdgeruleTriggerTypeMap, trigger["type"].(types.String).ValueString()),
-			MatchType:  mapValueToKey(pullzoneEdgeruleMatchTypeMap, trigger["match_type"].(types.String).ValueString()),
-			Patterns:   patterns,
-			Parameter1: parameter1,
-			Parameter2: parameter2,
+			dataApi.Action = actions[0].ActionType
+			dataApi.ActionParameter1 = actions[0].ActionParameter1
+			dataApi.ActionParameter2 = actions[0].ActionParameter2
+
+			if len(actions) > 1 {
+				dataApi.ExtraActions = actions[1:]
+			}
 		}
 	}
 
-	dataApi.Triggers = triggers
+	// triggers
+	{
+		triggerElements := dataTf.Triggers.Elements()
+		triggers := make([]api.PullzoneEdgeruleTrigger, len(triggerElements))
+		for i, el := range triggerElements {
+			trigger := el.(types.Object).Attributes()
+
+			patternElements := trigger["patterns"].(types.List).Elements()
+			patterns := make([]string, len(patternElements))
+			for j, pattern := range patternElements {
+				patterns[j] = pattern.(types.String).ValueString()
+			}
+
+			parameter1 := ""
+			if t, ok := trigger["parameter1"]; ok && !t.(types.String).IsNull() {
+				parameter1 = t.(types.String).ValueString()
+			}
+
+			parameter2 := ""
+			if t, ok := trigger["parameter2"]; ok && !t.(types.String).IsNull() {
+				parameter2 = t.(types.String).ValueString()
+			}
+
+			triggers[i] = api.PullzoneEdgeruleTrigger{
+				Type:       mapValueToKey(pullzoneEdgeruleTriggerTypeMap, trigger["type"].(types.String).ValueString()),
+				MatchType:  mapValueToKey(pullzoneEdgeruleMatchTypeMap, trigger["match_type"].(types.String).ValueString()),
+				Patterns:   patterns,
+				Parameter1: parameter1,
+				Parameter2: parameter2,
+			}
+		}
+
+		dataApi.Triggers = triggers
+	}
 
 	return dataApi
 }
 
-func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerule) (PullzoneEdgeruleResourceModel, diag.Diagnostics) {
+func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerule, useSingleAction bool) (PullzoneEdgeruleResourceModel, diag.Diagnostics) {
 	dataTf := PullzoneEdgeruleResourceModel{}
 	dataTf.Id = types.StringValue(dataApi.Id)
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Enabled = types.BoolValue(dataApi.Enabled)
-	dataTf.Action = types.StringValue(mapKeyToValue(pullzoneEdgeruleActionMap, dataApi.Action))
-	dataTf.ActionParameter1 = types.StringValue(dataApi.ActionParameter1)
-	dataTf.ActionParameter2 = types.StringValue(dataApi.ActionParameter2)
 	dataTf.Description = types.StringValue(dataApi.Description)
 	dataTf.MatchType = types.StringValue(mapKeyToValue(pullzoneEdgeruleMatchTypeMap, dataApi.MatchType))
 
-	if len(dataApi.Triggers) == 0 {
-		dataTf.Triggers = types.ListNull(types.ObjectType{})
-	} else {
-		triggers := make([]attr.Value, len(dataApi.Triggers))
+	// actions
+	{
+		i := 0
+		actions := make([]attr.Value, len(dataApi.ExtraActions)+1)
 
-		for i, tr := range dataApi.Triggers {
-			patterns := make([]attr.Value, len(tr.Patterns))
-			for j, value := range tr.Patterns {
-				patterns[j] = types.StringValue(value)
-			}
-
-			patternsList, diags := types.ListValue(types.StringType, patterns)
-			if diags != nil {
-				return PullzoneEdgeruleResourceModel{}, diags
-			}
-
+		// main action
+		{
 			var parameter1 attr.Value
-			if tr.Parameter1 == "" {
+			if dataApi.ActionParameter1 == "" {
 				parameter1 = types.StringNull()
 			} else {
-				parameter1 = types.StringValue(tr.Parameter1)
+				parameter1 = types.StringValue(dataApi.ActionParameter1)
 			}
 
 			var parameter2 attr.Value
-			if tr.Parameter2 == "" {
+			if dataApi.ActionParameter2 == "" {
 				parameter2 = types.StringNull()
 			} else {
-				parameter2 = types.StringValue(tr.Parameter2)
+				parameter2 = types.StringValue(dataApi.ActionParameter2)
 			}
 
-			triggerValue, diags := types.ObjectValue(pullzoneEdgeruleTriggerType.AttrTypes, map[string]attr.Value{
-				"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleTriggerTypeMap, tr.Type)),
-				"match_type": types.StringValue(mapKeyToValue(pullzoneEdgeruleMatchTypeMap, tr.MatchType)),
-				"patterns":   patternsList,
+			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
+				"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleActionMap, dataApi.Action)),
 				"parameter1": parameter1,
 				"parameter2": parameter2,
 			})
@@ -428,15 +488,110 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 				return PullzoneEdgeruleResourceModel{}, diags
 			}
 
-			triggers[i] = triggerValue
+			actions[i] = actionValue
+			i++
 		}
 
-		triggersList, diags := types.ListValue(pullzoneEdgeruleTriggerType, triggers)
-		if diags != nil {
-			return PullzoneEdgeruleResourceModel{}, diags
+		// extra actions
+		for _, extraAction := range dataApi.ExtraActions {
+			var parameter1 attr.Value
+			if extraAction.ActionParameter1 == "" {
+				parameter1 = types.StringNull()
+			} else {
+				parameter1 = types.StringValue(extraAction.ActionParameter1)
+			}
+
+			var parameter2 attr.Value
+			if extraAction.ActionParameter2 == "" {
+				parameter2 = types.StringNull()
+			} else {
+				parameter2 = types.StringValue(extraAction.ActionParameter2)
+			}
+
+			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
+				"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleActionMap, extraAction.ActionType)),
+				"parameter1": parameter1,
+				"parameter2": parameter2,
+			})
+
+			if diags != nil {
+				return PullzoneEdgeruleResourceModel{}, diags
+			}
+
+			actions[i] = actionValue
+			i++
 		}
 
-		dataTf.Triggers = triggersList
+		if len(actions) == 1 && useSingleAction {
+			actionAttr := actions[0].(types.Object).Attributes()
+			dataTf.Action = actionAttr["type"].(types.String)
+			dataTf.ActionParameter1 = actionAttr["parameter1"].(types.String)
+			dataTf.ActionParameter2 = actionAttr["parameter2"].(types.String)
+			dataTf.Actions = types.ListNull(pullzoneEdgeruleActionType)
+		} else {
+			actionsList, diags := types.ListValue(pullzoneEdgeruleActionType, actions)
+			if diags != nil {
+				return PullzoneEdgeruleResourceModel{}, diags
+			}
+
+			dataTf.Actions = actionsList
+		}
+	}
+
+	// triggers
+	{
+		if len(dataApi.Triggers) == 0 {
+			dataTf.Triggers = types.ListNull(types.ObjectType{})
+		} else {
+			triggers := make([]attr.Value, len(dataApi.Triggers))
+
+			for i, tr := range dataApi.Triggers {
+				patterns := make([]attr.Value, len(tr.Patterns))
+				for j, value := range tr.Patterns {
+					patterns[j] = types.StringValue(value)
+				}
+
+				patternsList, diags := types.ListValue(types.StringType, patterns)
+				if diags != nil {
+					return PullzoneEdgeruleResourceModel{}, diags
+				}
+
+				var parameter1 attr.Value
+				if tr.Parameter1 == "" {
+					parameter1 = types.StringNull()
+				} else {
+					parameter1 = types.StringValue(tr.Parameter1)
+				}
+
+				var parameter2 attr.Value
+				if tr.Parameter2 == "" {
+					parameter2 = types.StringNull()
+				} else {
+					parameter2 = types.StringValue(tr.Parameter2)
+				}
+
+				triggerValue, diags := types.ObjectValue(pullzoneEdgeruleTriggerType.AttrTypes, map[string]attr.Value{
+					"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleTriggerTypeMap, tr.Type)),
+					"match_type": types.StringValue(mapKeyToValue(pullzoneEdgeruleMatchTypeMap, tr.MatchType)),
+					"patterns":   patternsList,
+					"parameter1": parameter1,
+					"parameter2": parameter2,
+				})
+
+				if diags != nil {
+					return PullzoneEdgeruleResourceModel{}, diags
+				}
+
+				triggers[i] = triggerValue
+			}
+
+			triggersList, diags := types.ListValue(pullzoneEdgeruleTriggerType, triggers)
+			if diags != nil {
+				return PullzoneEdgeruleResourceModel{}, diags
+			}
+
+			dataTf.Triggers = triggersList
+		}
 	}
 
 	return dataTf, nil
