@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneedgeruleresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -50,51 +51,6 @@ type PullzoneEdgeruleResourceModel struct {
 	MatchType        types.String `tfsdk:"match_type"`
 	Actions          types.List   `tfsdk:"actions"`
 	Triggers         types.List   `tfsdk:"triggers"`
-}
-
-var pullzoneEdgeruleMatchTypeMap = map[uint8]string{
-	0: "MatchAny",
-	1: "MatchAll",
-	2: "MatchNone",
-}
-
-var pullzoneEdgeruleActionMap = map[uint8]string{
-	0:  "ForceSSL",
-	1:  "Redirect",
-	2:  "OriginUrl",
-	3:  "OverrideCacheTime",
-	4:  "BlockRequest",
-	5:  "SetResponseHeader",
-	6:  "SetRequestHeader",
-	7:  "ForceDownload",
-	8:  "DisableTokenAuthentication",
-	9:  "EnableTokenAuthentication",
-	10: "OverrideCacheTimePublic",
-	11: "IgnoreQueryString",
-	12: "DisableOptimizer",
-	13: "ForceCompression",
-	14: "SetStatusCode",
-	15: "BypassPermaCache",
-	16: "OverrideBrowserCacheTime",
-	17: "OriginStorage",
-	18: "SetNetworkRateLimit",
-	19: "SetConnectionLimit",
-	20: "SetRequestsPerSecondLimit",
-}
-
-var pullzoneEdgeruleTriggerTypeMap = map[uint8]string{
-	0:  "Url",
-	1:  "RequestHeader",
-	2:  "ResponseHeader",
-	3:  "UrlExtension",
-	4:  "CountryCode",
-	5:  "RemoteIP",
-	6:  "UrlQueryString",
-	7:  "RandomChance",
-	8:  "StatusCode",
-	9:  "RequestMethod",
-	10: "CookieValue",
-	11: "CountryStateCode",
 }
 
 func (r *PullzoneEdgeruleResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -152,10 +108,10 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleActionMap)...),
+					stringvalidator.OneOf(maps.Values(pullzoneedgeruleresourcevalidator.ActionMap)...),
 					stringvalidator.ConflictsWith(path.MatchRoot("actions")),
 				},
-				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleActionMap),
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneedgeruleresourcevalidator.ActionMap),
 			},
 			"action_parameter1": schema.StringAttribute{
 				Optional: true,
@@ -186,9 +142,9 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(maps.Values(pullzoneEdgeruleMatchTypeMap)...),
+					stringvalidator.OneOf(maps.Values(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap)...),
 				},
-				MarkdownDescription: generateMarkdownMapOptions(pullzoneEdgeruleMatchTypeMap),
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap),
 			},
 			"actions": schema.ListAttribute{
 				Optional:    true,
@@ -214,6 +170,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 
 func (r *PullzoneEdgeruleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
+		pullzoneedgeruleresourcevalidator.TriggerObject(),
 		resourcevalidator.AtLeastOneOf(
 			path.MatchRoot("action"),
 			path.MatchRoot("actions"),
@@ -367,7 +324,7 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.Enabled = dataTf.Enabled.ValueBool()
 	dataApi.Description = dataTf.Description.ValueString()
-	dataApi.MatchType = mapValueToKey(pullzoneEdgeruleMatchTypeMap, dataTf.MatchType.ValueString())
+	dataApi.MatchType = mapValueToKey(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, dataTf.MatchType.ValueString())
 
 	// actions
 	{
@@ -375,7 +332,7 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 
 		// action field
 		if len(actionsElements) == 0 {
-			dataApi.Action = mapValueToKey(pullzoneEdgeruleActionMap, dataTf.Action.ValueString())
+			dataApi.Action = mapValueToKey(pullzoneedgeruleresourcevalidator.ActionMap, dataTf.Action.ValueString())
 			dataApi.ActionParameter1 = dataTf.ActionParameter1.ValueString()
 			dataApi.ActionParameter2 = dataTf.ActionParameter2.ValueString()
 			dataApi.ExtraActions = []api.PullzoneEdgeruleExtraAction{}
@@ -395,7 +352,7 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 				}
 
 				actions[i] = api.PullzoneEdgeruleExtraAction{
-					ActionType:       mapValueToKey(pullzoneEdgeruleActionMap, action["type"].(types.String).ValueString()),
+					ActionType:       mapValueToKey(pullzoneedgeruleresourcevalidator.ActionMap, action["type"].(types.String).ValueString()),
 					ActionParameter1: parameter1,
 					ActionParameter2: parameter2,
 				}
@@ -435,8 +392,8 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 			}
 
 			triggers[i] = api.PullzoneEdgeruleTrigger{
-				Type:       mapValueToKey(pullzoneEdgeruleTriggerTypeMap, trigger["type"].(types.String).ValueString()),
-				MatchType:  mapValueToKey(pullzoneEdgeruleMatchTypeMap, trigger["match_type"].(types.String).ValueString()),
+				Type:       mapValueToKey(pullzoneedgeruleresourcevalidator.TriggerTypeMap, trigger["type"].(types.String).ValueString()),
+				MatchType:  mapValueToKey(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, trigger["match_type"].(types.String).ValueString()),
 				Patterns:   patterns,
 				Parameter1: parameter1,
 				Parameter2: parameter2,
@@ -455,7 +412,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Enabled = types.BoolValue(dataApi.Enabled)
 	dataTf.Description = types.StringValue(dataApi.Description)
-	dataTf.MatchType = types.StringValue(mapKeyToValue(pullzoneEdgeruleMatchTypeMap, dataApi.MatchType))
+	dataTf.MatchType = types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, dataApi.MatchType))
 
 	// actions
 	{
@@ -479,7 +436,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 			}
 
 			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
-				"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleActionMap, dataApi.Action)),
+				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, dataApi.Action)),
 				"parameter1": parameter1,
 				"parameter2": parameter2,
 			})
@@ -509,7 +466,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 			}
 
 			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
-				"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleActionMap, extraAction.ActionType)),
+				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, extraAction.ActionType)),
 				"parameter1": parameter1,
 				"parameter2": parameter2,
 			})
@@ -571,8 +528,8 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 				}
 
 				triggerValue, diags := types.ObjectValue(pullzoneEdgeruleTriggerType.AttrTypes, map[string]attr.Value{
-					"type":       types.StringValue(mapKeyToValue(pullzoneEdgeruleTriggerTypeMap, tr.Type)),
-					"match_type": types.StringValue(mapKeyToValue(pullzoneEdgeruleMatchTypeMap, tr.MatchType)),
+					"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.TriggerTypeMap, tr.Type)),
+					"match_type": types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, tr.MatchType)),
 					"patterns":   patternsList,
 					"parameter1": parameter1,
 					"parameter2": parameter2,
