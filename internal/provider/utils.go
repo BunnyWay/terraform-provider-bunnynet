@@ -97,7 +97,9 @@ func generateMarkdownMapOptions[T comparable](m map[T]string) string {
 	return generateMarkdownSliceOptions(s)
 }
 
-func generateMarkdownSliceOptions(s []string) string {
+func generateMarkdownSliceOptions(options []string) string {
+	// sorting a copy of the slice to avoid concurrency issues with validators
+	s := slices.Clone(options)
 	slices.Sort(s)
 	return "Options: `" + strings.Join(s, "`, `") + "`"
 }

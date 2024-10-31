@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - negative number validation for all integer attributes
 ## Fixed
 - resource pullzone_edgerule: validate trigger fields ([#17](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/17))
+- concurrent resource creation with set attributes causes intermixed values
 
 ## [0.3.15] - 2024-09-12
 ## Added
