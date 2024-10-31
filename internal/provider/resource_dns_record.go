@@ -115,6 +115,9 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: dnsRecordDescription.Zone,
 			},
 			"enabled": schema.BoolAttribute{

@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ datasource.DataSource = &DnsRecordDataSource{}
@@ -38,6 +40,9 @@ func (d *DnsRecordDataSource) Schema(ctx context.Context, req datasource.SchemaR
 			"zone": schema.Int64Attribute{
 				Required:    true,
 				Description: dnsRecordDescription.Zone,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"enabled": schema.BoolAttribute{
 				Computed:    true,

@@ -69,6 +69,9 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The ID of the linked pull zone.",
 			},
 			"name": schema.StringAttribute{
@@ -86,12 +89,18 @@ func (r *PullzoneOptimizerClassResource) Schema(ctx context.Context, req resourc
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The width to which images should be resized.",
 			},
 			"height": schema.Int64Attribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 				Description: "The height to which images should be resized.",
 			},

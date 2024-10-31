@@ -233,6 +233,9 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The font size of the captions in the video player.",
 			},
 			"player_captions_background_color": schema.StringAttribute{
@@ -411,6 +414,9 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The left offset of the watermark position (in %).",
 			},
 			"watermark_position_top": schema.Int64Attribute{
@@ -419,6 +425,9 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Default:  int64default.StaticInt64(0),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 				Description: "The top offset of the watermark position (in %).",
 			},
@@ -429,6 +438,9 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The width of the watermark (in %).",
 			},
 			"watermark_height": schema.Int64Attribute{
@@ -437,6 +449,9 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Default:  int64default.StaticInt64(0),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 				Description: "The height of the watermark (in %).",
 			},

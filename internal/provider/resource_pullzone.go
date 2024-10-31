@@ -444,6 +444,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The storage zone ID for Perma-Cache.",
 			},
 			"originshield_enabled": schema.BoolAttribute{
@@ -708,6 +711,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Computed: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
 				},
 				Description: "The storage zone ID for log storage.",
 			},
@@ -1168,6 +1174,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "The amount of seconds to wait when waiting for the origin reply. Otherwise the request will fail or retry.",
 			},
 		},
@@ -1191,6 +1200,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					"storagezone": schema.Int64Attribute{
 						Optional:    true,
 						Description: "The ID of the linked storage zone.",
+						Validators: []validator.Int64{
+							int64validator.AtLeast(0),
+						},
 					},
 					"follow_redirects": schema.BoolAttribute{
 						Optional:    true,

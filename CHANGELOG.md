@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
 ## [Unreleased]
+## Added
+- negative number validation for all integer attributes
 ## Fixed
 - resource pullzone_edgerule: validate trigger fields ([#17](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/17))
 
