@@ -105,6 +105,8 @@ func (p *BunnynetProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewComputeScriptResource,
+		NewComputeScriptVariableResource,
 		NewDnsRecordResourceResource,
 		NewDnsZoneResourceResource,
 		NewPullzoneResource,

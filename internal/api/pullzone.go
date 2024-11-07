@@ -103,13 +103,15 @@ type Pullzone struct {
 	OptimizerClasses []PullzoneOptimizerClass `json:"OptimizerClasses"`
 
 	// origin
-	OriginType       uint8  `json:"OriginType"`
-	OriginUrl        string `json:"OriginUrl,omitempty"`
-	StorageZoneId    int64  `json:"StorageZoneId,omitempty"`
-	OriginHostHeader string `json:"OriginHostHeader,omitempty"`
-	AddHostHeader    bool   `json:"AddHostHeader"`
-	VerifyOriginSSL  bool   `json:"VerifyOriginSSL"`
-	FollowRedirects  bool   `json:"FollowRedirects"`
+	OriginType         uint8  `json:"OriginType"`
+	OriginUrl          string `json:"OriginUrl,omitempty"`
+	StorageZoneId      int64  `json:"StorageZoneId,omitempty"`
+	OriginHostHeader   string `json:"OriginHostHeader,omitempty"`
+	AddHostHeader      bool   `json:"AddHostHeader"`
+	VerifyOriginSSL    bool   `json:"VerifyOriginSSL"`
+	FollowRedirects    bool   `json:"FollowRedirects"`
+	EdgeScriptId       int64  `json:"EdgeScriptId,omitempty"`
+	MiddlewareScriptId int64  `json:"MiddlewareScriptId"`
 
 	// routing
 	Type                      uint8    `json:"Type"`

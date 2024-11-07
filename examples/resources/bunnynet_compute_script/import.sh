@@ -1,0 +1,1 @@
+terraform import bunnynet_compute_script.test 123

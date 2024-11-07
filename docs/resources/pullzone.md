@@ -132,13 +132,15 @@ resource "bunnynet_pullzone" "example" {
 
 Required:
 
-- `type` (String) Options: `DnsAccelerate`, `OriginUrl`, `StorageZone`
+- `type` (String) Options: `ComputeScript`, `DnsAccelerate`, `OriginUrl`, `StorageZone`
 
 Optional:
 
 - `follow_redirects` (Boolean) Indicates whether the zone will follow origin redirects.
 - `forward_host_header` (Boolean) Indicates whether the current hostname is forwarded to the origin.
 - `host_header` (String) The host header that will be sent to the origin.
+- `middleware_script` (Number) The ID of the compute script used as a middleware.
+- `script` (Number) The ID of the linked compute script.
 - `storagezone` (Number) The ID of the linked storage zone.
 - `url` (String) The origin URL from where the files are fetched.
 - `verify_ssl` (Boolean) Indicates whether the Origin's TLS certificate should be verified.
@@ -150,7 +152,7 @@ Optional:
 Optional:
 
 - `blocked_countries` (Set of String) The list of blocked countries with the two-letter Alpha2 ISO codes. Traffic connecting from a blocked country will be rejected on the DNS level.
-- `filters` (Set of String) Options: `all`, `eu`
+- `filters` (Set of String) Options: `all`, `eu`, `scripting`
 - `redirected_countries` (Set of String) The list of budget redirected countries with the two-letter Alpha2 ISO codes. Traffic from a redirected country will connect to the cheapest possible node in North America or Europe.
 - `tier` (String) Options: `Standard`, `Volume`
 - `zones` (Set of String) Options: `AF`, `ASIA`, `EU`, `SA`, `US`

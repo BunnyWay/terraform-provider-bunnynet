@@ -148,6 +148,8 @@ var pullzoneOriginTypes = map[string]attr.Type{
 	"host_header":         types.StringType,
 	"forward_host_header": types.BoolType,
 	"verify_ssl":          types.BoolType,
+	"script":              types.Int64Type,
+	"middleware_script":   types.Int64Type,
 }
 
 var pullzoneRoutingTypes = map[string]attr.Type{
@@ -170,6 +172,7 @@ var pullzoneOriginTypeMap = map[uint8]string{
 	0: "OriginUrl",
 	1: "DnsAccelerate",
 	2: "StorageZone",
+	4: "ComputeScript",
 }
 
 var pullzoneRoutingTierMap = map[uint8]string{
@@ -182,7 +185,7 @@ var pullzoneCacheStaleOptions = []string{"offline", "updating"}
 var pullzoneTlsSupportOptions = []string{"TLSv1.0", "TLSv1.1"}
 var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxResponse", "responseTimeout"}
 var pullzoneRoutingZonesOptions = []string{"AF", "ASIA", "EU", "SA", "US"}
-var pullzoneRoutingFiltersOptions = []string{"all", "eu"}
+var pullzoneRoutingFiltersOptions = []string{"all", "eu", "scripting"}
 var pullzoneCorsExtensionsDefault = []string{"css", "eot", "gif", "jpeg", "jpg", "js", "mp3", "mp4", "mpeg", "png", "svg", "ttf", "webm", "webp", "woff", "woff2"}
 var pullzoneOriginShieldZoneOptions = []string{"IL", "FR"}
 
@@ -1228,6 +1231,16 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Default:     booldefault.StaticBool(false),
 						Description: "Indicates whether the Origin's TLS certificate should be verified.",
 					},
+					"script": schema.Int64Attribute{
+						Optional:    true,
+						Description: "The ID of the linked compute script.",
+					},
+					"middleware_script": schema.Int64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(0),
+						Description: "The ID of the compute script used as a middleware.",
+					},
 				},
 			},
 			"routing": schema.SingleNestedBlock{
@@ -1305,6 +1318,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 
 func (r *PullzoneResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
+		pullzoneresourcevalidator.MiddlewareScript(),
 		pullzoneresourcevalidator.PermacacheCacheExpirationTime(),
 		pullzoneresourcevalidator.CacheStaleBackgroundUpdate(),
 	}
@@ -1676,6 +1690,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.AddHostHeader = origin["forward_host_header"].(types.Bool).ValueBool()
 	dataApi.VerifyOriginSSL = origin["verify_ssl"].(types.Bool).ValueBool()
 	dataApi.FollowRedirects = origin["follow_redirects"].(types.Bool).ValueBool()
+	dataApi.EdgeScriptId = origin["script"].(types.Int64).ValueInt64()
+	dataApi.MiddlewareScriptId = origin["middleware_script"].(types.Int64).ValueInt64()
 
 	// routing
 	dataApi.Type = mapValueToKey(pullzoneRoutingTierMap, routing["tier"].(types.String).ValueString())
@@ -1972,6 +1988,13 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 			originValues["storagezone"] = types.Int64Value(dataApi.StorageZoneId)
 		}
 
+		if dataApi.EdgeScriptId <= 0 {
+			originValues["script"] = types.Int64Null()
+		} else {
+			originValues["script"] = types.Int64Value(dataApi.EdgeScriptId)
+		}
+
+		originValues["middleware_script"] = types.Int64Value(dataApi.MiddlewareScriptId)
 		originValues["follow_redirects"] = types.BoolValue(dataApi.FollowRedirects)
 		originValues["host_header"] = types.StringValue(dataApi.OriginHostHeader)
 		originValues["forward_host_header"] = types.BoolValue(dataApi.AddHostHeader)
