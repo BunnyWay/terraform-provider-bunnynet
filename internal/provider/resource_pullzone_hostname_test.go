@@ -18,7 +18,7 @@ resource "bunnynet_pullzone" "test" {
 
   origin {
     type = "OriginUrl"
-    url = "https://192.0.2.1"
+    url = "https://bunny.net/"
   }
 
   routing {
