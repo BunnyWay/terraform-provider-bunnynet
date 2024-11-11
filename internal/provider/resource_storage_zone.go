@@ -9,7 +9,6 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -329,27 +328,17 @@ func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (Storag
 	dataTf.Rewrite404To200 = types.BoolValue(dataApi.Rewrite404To200)
 	dataTf.StorageHostname = types.StringValue(dataApi.StorageHostname)
 	dataTf.DateModified = types.StringValue(dataApi.DateModified)
+	dataTf.Custom404FilePath = typeStringOrNull(dataApi.Custom404FilePath)
 
 	if len(dataApi.ReplicationRegions) == 0 {
 		dataTf.ReplicationRegions = types.SetNull(types.StringType)
 	} else {
-		regions := make([]attr.Value, len(dataApi.ReplicationRegions))
-		for i, region := range dataApi.ReplicationRegions {
-			regions[i] = types.StringValue(region)
-		}
-
-		replicationRegions, err := types.SetValue(types.StringType, regions)
+		replicationRegions, err := utils.ConvertStringSliceToSet(dataApi.ReplicationRegions)
 		if err != nil {
 			return dataTf, err
 		}
 
 		dataTf.ReplicationRegions = replicationRegions
-	}
-
-	if len(dataApi.Custom404FilePath) > 0 {
-		dataTf.Custom404FilePath = types.StringValue(dataApi.Custom404FilePath)
-	} else {
-		dataTf.Custom404FilePath = types.StringNull()
 	}
 
 	return dataTf, nil

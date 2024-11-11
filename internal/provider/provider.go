@@ -7,8 +7,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -136,27 +134,4 @@ func New(version string) func() provider.Provider {
 			version: version,
 		}
 	}
-}
-
-func convertSetToStringSlice(set types.Set) []string {
-	filters := set.Elements()
-	values := make([]string, len(filters))
-	for i, filter := range filters {
-		values[i] = filter.(types.String).ValueString()
-	}
-	return values
-}
-
-func convertStringSliceToSet(values []string) (types.Set, diag.Diagnostics) {
-	setValues := make([]attr.Value, len(values))
-	for i, v := range values {
-		setValues[i] = types.StringValue(v)
-	}
-
-	filters, diags := types.SetValue(types.StringType, setValues)
-	if diags != nil {
-		return types.Set{}, diags
-	}
-
-	return filters, nil
 }

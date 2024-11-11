@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -706,7 +707,7 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 		dataApi.UILanguage = dataTf.PlayerLanguage.ValueString()
 		dataApi.FontFamily = dataTf.PlayerFontFamily.ValueString()
 		dataApi.PlayerKeyColor = dataTf.PlayerPrimaryColor.ValueString()
-		dataApi.Controls = strings.Join(convertSetToStringSlice(dataTf.PlayerControls), ",")
+		dataApi.Controls = strings.Join(utils.ConvertSetToStringSlice(dataTf.PlayerControls), ",")
 		dataApi.CaptionsFontColor = dataTf.PlayerCaptionsFontColor.ValueString()
 		dataApi.CaptionsFontSize = uint16(dataTf.PlayerCaptionsFontSize.ValueInt64())
 		dataApi.CaptionsBackground = dataTf.PlayerCaptionsBackgroundColor.ValueString()
@@ -726,7 +727,7 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 		dataApi.EnableContentTagging = dataTf.ContentTaggingEnabled.ValueBool()
 		dataApi.EnableMP4Fallback = dataTf.Mp4FallbackEnabled.ValueBool()
 		dataApi.EnableMultiAudioTrackSupport = dataTf.MultiAudioTrackSupportEnabled.ValueBool()
-		dataApi.EnabledResolutions = strings.Join(convertSetToStringSlice(dataTf.Resolutions), ",")
+		dataApi.EnabledResolutions = strings.Join(utils.ConvertSetToStringSlice(dataTf.Resolutions), ",")
 		dataApi.Bitrate240P = uint32(dataTf.Bitrate240p.ValueInt64())
 		dataApi.Bitrate360P = uint32(dataTf.Bitrate360p.ValueInt64())
 		dataApi.Bitrate480P = uint32(dataTf.Bitrate480p.ValueInt64())
@@ -744,13 +745,13 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 	dataApi.EnableTranscribing = dataTf.TranscribingEnabled.ValueBool()
 	dataApi.EnableTranscribingTitleGeneration = dataTf.TranscribingSmartTitleEnabled.ValueBool()
 	dataApi.EnableTranscribingDescriptionGeneration = dataTf.TranscribingSmartDescriptionEnabled.ValueBool()
-	dataApi.TranscribingCaptionLanguages = convertSetToStringSlice(dataTf.TranscribingLanguages)
+	dataApi.TranscribingCaptionLanguages = utils.ConvertSetToStringSlice(dataTf.TranscribingLanguages)
 
 	// security
 	{
 		dataApi.AllowDirectPlay = dataTf.DirectPlayEnabled.ValueBool()
-		dataApi.AllowedReferrers = convertSetToStringSlice(dataTf.ReferersAllowed)
-		dataApi.BlockedReferrers = convertSetToStringSlice(dataTf.ReferersBlocked)
+		dataApi.AllowedReferrers = utils.ConvertSetToStringSlice(dataTf.ReferersAllowed)
+		dataApi.BlockedReferrers = utils.ConvertSetToStringSlice(dataTf.ReferersBlocked)
 		dataApi.BlockNoneReferrer = dataTf.DirectUrlFileAccessBlocked.ValueBool()
 		dataApi.PlayerTokenAuthenticationEnabled = dataTf.ViewTokenAuthenticationRequired.ValueBool()
 		dataApi.EnableTokenAuthentication = dataTf.CdnTokenAuthenticationRequired.ValueBool()
@@ -784,21 +785,13 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 
 		// controls
 		{
-			if len(dataApi.Controls) == 0 {
-				dataTf.PlayerControls = types.SetValueMust(types.StringType, []attr.Value{})
-			} else {
-				var values []attr.Value
-				for _, control := range strings.Split(dataApi.Controls, ",") {
-					values = append(values, types.StringValue(control))
-				}
-
-				controlSet, diags := types.SetValue(types.StringType, values)
-				if diags != nil {
-					return dataTf, diags
-				}
-
-				dataTf.PlayerControls = controlSet
+			controls := utils.ConvertCSVToStringSlice(dataApi.Controls)
+			controlSet, diags := utils.ConvertStringSliceToSet(controls)
+			if diags != nil {
+				return dataTf, diags
 			}
+
+			dataTf.PlayerControls = controlSet
 		}
 
 		if dataApi.CustomHTML == nil {
@@ -828,21 +821,13 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 
 		// resolution
 		{
-			if len(dataApi.EnabledResolutions) == 0 {
-				dataTf.Resolutions = types.SetValueMust(types.StringType, []attr.Value{})
-			} else {
-				var values []attr.Value
-				for _, resolution := range strings.Split(dataApi.EnabledResolutions, ",") {
-					values = append(values, types.StringValue(resolution))
-				}
-
-				resolutionSet, diags := types.SetValue(types.StringType, values)
-				if diags != nil {
-					return dataTf, diags
-				}
-
-				dataTf.Resolutions = resolutionSet
+			resolutions := utils.ConvertCSVToStringSlice(dataApi.EnabledResolutions)
+			resolutionSet, diags := utils.ConvertStringSliceToSet(resolutions)
+			if diags != nil {
+				return dataTf, diags
 			}
+
+			dataTf.Resolutions = resolutionSet
 		}
 
 		dataTf.WatermarkPositionLeft = types.Int64Value(int64(dataApi.WatermarkPositionLeft))
@@ -853,7 +838,7 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 
 	// transcribing
 	{
-		transcribingLanguages, diags := convertStringSliceToSet(dataApi.TranscribingCaptionLanguages)
+		transcribingLanguages, diags := utils.ConvertStringSliceToSet(dataApi.TranscribingCaptionLanguages)
 		if diags != nil {
 			return dataTf, diags
 		}
@@ -866,12 +851,12 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 
 	// security
 	{
-		referersAllowed, diags := convertStringSliceToSet(dataApi.AllowedReferrers)
+		referersAllowed, diags := utils.ConvertStringSliceToSet(dataApi.AllowedReferrers)
 		if diags != nil {
 			return dataTf, diags
 		}
 
-		referersBlocked, diags := convertStringSliceToSet(dataApi.BlockedReferrers)
+		referersBlocked, diags := utils.ConvertStringSliceToSet(dataApi.BlockedReferrers)
 		if diags != nil {
 			return dataTf, diags
 		}

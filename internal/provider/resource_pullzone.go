@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneresourcevalidator"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
@@ -232,7 +233,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 		return
 	}
 
-	pullzoneCorsExtensionsSetDefault, diags := convertStringSliceToSet(pullzoneCorsExtensionsDefault)
+	pullzoneCorsExtensionsSetDefault, diags := utils.ConvertStringSliceToSet(pullzoneCorsExtensionsDefault)
 	if diags != nil {
 		resp.Diagnostics = append(resp.Diagnostics, diags...)
 		return
@@ -1437,7 +1438,7 @@ func (r *PullzoneResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	if data.CorsExtensions.IsNull() {
-		extensions, diags := convertStringSliceToSet(pullzoneCorsExtensionsDefault)
+		extensions, diags := utils.ConvertStringSliceToSet(pullzoneCorsExtensionsDefault)
 		if diags != nil {
 			resp.Diagnostics.Append(diags...)
 			return
@@ -1517,9 +1518,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	// caching
 	{
 		// CacheVary
-		vary := dataTf.CacheVary.Elements()
 		dataApi.IgnoreQueryStrings = true
-		for _, v := range vary {
+		for _, v := range dataTf.CacheVary.Elements() {
 			if v.(types.String).ValueString() == "querystring" {
 				dataApi.IgnoreQueryStrings = false
 			}
@@ -1543,21 +1543,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 			}
 		}
 
-		// CacheVaryQueryStringValues
-		varyQueryString := []string{}
-		for _, v := range dataTf.CacheVaryQueryStringValues.Elements() {
-			varyQueryString = append(varyQueryString, v.(types.String).ValueString())
-		}
-
-		// CacheVaryCookieValues
-		varyCookie := []string{}
-		for _, v := range dataTf.CacheVaryCookieValues.Elements() {
-			varyCookie = append(varyCookie, v.(types.String).ValueString())
-		}
-
 		// CacheStale
-		stale := dataTf.CacheStale.Elements()
-		for _, v := range stale {
+		for _, v := range dataTf.CacheStale.Elements() {
 			if v.(types.String).ValueString() == "offline" {
 				dataApi.UseStaleWhileOffline = true
 			}
@@ -1571,8 +1558,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.CacheControlPublicMaxAgeOverride = dataTf.CacheExpirationTimeBrowser.ValueInt64()
 		dataApi.EnableQueryStringOrdering = dataTf.SortQueryString.ValueBool()
 		dataApi.CacheErrorResponses = dataTf.CacheErrors.ValueBool()
-		dataApi.QueryStringVaryParameters = varyQueryString
-		dataApi.CookieVaryParameters = varyCookie
+		dataApi.QueryStringVaryParameters = utils.ConvertSetToStringSlice(dataTf.CacheVaryQueryStringValues)
+		dataApi.CookieVaryParameters = utils.ConvertSetToStringSlice(dataTf.CacheVaryCookieValues)
 		dataApi.DisableCookies = dataTf.StripCookies.ValueBool()
 		dataApi.EnableCacheSlice = dataTf.CacheChunked.ValueBool()
 		dataApi.PermaCacheStorageZoneId = uint64(dataTf.PermacacheStoragezone.ValueInt64())
@@ -1588,27 +1575,12 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 	// security
 	{
-		referersAllowed := []string{}
-		for _, v := range dataTf.ReferersAllowed.Elements() {
-			referersAllowed = append(referersAllowed, v.(types.String).ValueString())
-		}
-
-		referersBlocked := []string{}
-		for _, v := range dataTf.ReferersBlocked.Elements() {
-			referersBlocked = append(referersBlocked, v.(types.String).ValueString())
-		}
-
-		ipsBlocked := []string{}
-		for _, v := range dataTf.IPsBlocked.Elements() {
-			ipsBlocked = append(ipsBlocked, v.(types.String).ValueString())
-		}
-
 		dataApi.BlockRootPathAccess = dataTf.BlockRootPath.ValueBool()
 		dataApi.BlockPostRequests = dataTf.BlockPostRequests.ValueBool()
-		dataApi.AllowedReferrers = referersAllowed
-		dataApi.BlockedReferrers = referersBlocked
+		dataApi.AllowedReferrers = utils.ConvertSetToStringSlice(dataTf.ReferersAllowed)
+		dataApi.BlockedReferrers = utils.ConvertSetToStringSlice(dataTf.ReferersBlocked)
 		dataApi.BlockNoneReferrer = dataTf.BlockNoReferer.ValueBool()
-		dataApi.BlockedIps = ipsBlocked
+		dataApi.BlockedIps = utils.ConvertSetToStringSlice(dataTf.IPsBlocked)
 		dataApi.EnableLogging = dataTf.LogEnabled.ValueBool()
 		dataApi.LoggingIPAnonymizationEnabled = dataTf.LogAnonymized.ValueBool()
 		dataApi.LogAnonymizationType = mapValueToKey(pullzoneLogAnonymizedStyleMap, dataTf.LogAnonymizedStyle.ValueString())
@@ -1632,8 +1604,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.ZoneSecurityEnabled = dataTf.TokenAuthEnabled.ValueBool()
 		dataApi.ZoneSecurityIncludeHashRemoteIP = dataTf.TokenAuthIpValidation.ValueBool()
 
-		tlsSupport := dataTf.TlsSupport.Elements()
-		for _, v := range tlsSupport {
+		for _, v := range dataTf.TlsSupport.Elements() {
 			if v.(types.String).ValueString() == "TLSv1.0" {
 				dataApi.EnableTLS1 = true
 			}
@@ -1645,14 +1616,11 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 	// headers
 	{
-		values := []string{}
-		for _, extension := range dataTf.CorsExtensions.Elements() {
-			values = append(values, extension.(types.String).ValueString())
-		}
-		slices.Sort(values)
+		extensions := utils.ConvertSetToStringSlice(dataTf.CorsExtensions)
+		slices.Sort(extensions)
 
 		dataApi.EnableAccessControlOriginHeader = dataTf.CorsEnabled.ValueBool()
-		dataApi.AccessControlOriginHeaderExtensions = values
+		dataApi.AccessControlOriginHeaderExtensions = extensions
 		dataApi.AddCanonicalHeader = dataTf.AddCanonicalHeader.ValueBool()
 	}
 
@@ -1695,14 +1663,13 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 	// routing
 	dataApi.Type = mapValueToKey(pullzoneRoutingTierMap, routing["tier"].(types.String).ValueString())
-	dataApi.RoutingFilters = convertSetToStringSlice(routing["filters"].(types.Set))
-	dataApi.BlockedCountries = convertSetToStringSlice(routing["blocked_countries"].(types.Set))
-	dataApi.BudgetRedirectedCountries = convertSetToStringSlice(routing["redirected_countries"].(types.Set))
+	dataApi.RoutingFilters = utils.ConvertSetToStringSlice(routing["filters"].(types.Set))
+	dataApi.BlockedCountries = utils.ConvertSetToStringSlice(routing["blocked_countries"].(types.Set))
+	dataApi.BudgetRedirectedCountries = utils.ConvertSetToStringSlice(routing["redirected_countries"].(types.Set))
 
 	// routing.zones
 	{
-		zones := routing["zones"].(types.Set).Elements()
-		for _, zone := range zones {
+		for _, zone := range routing["zones"].(types.Set).Elements() {
 			if zone.(types.String).ValueString() == "AF" {
 				dataApi.EnableGeoZoneAF = true
 			}
@@ -1729,8 +1696,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.OriginConnectTimeout = uint64(dataTf.SafehopConnectionTimeout.ValueInt64())
 		dataApi.OriginResponseTimeout = uint64(dataTf.SafehopResponseTimeout.ValueInt64())
 
-		reasons := dataTf.SafehopRetryReasons.Elements()
-		for _, reason := range reasons {
+		for _, reason := range dataTf.SafehopRetryReasons.Elements() {
 			if reason.(types.String).ValueString() == "connectionTimeout" {
 				dataApi.OriginRetryConnectionTimeout = true
 			}
@@ -1792,23 +1758,13 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		}
 
 		// CacheVaryQueryStringParams
-		var varyQueryStringValues []attr.Value
-		for _, qsParam := range dataApi.QueryStringVaryParameters {
-			varyQueryStringValues = append(varyQueryStringValues, types.StringValue(qsParam))
-		}
-
-		varyQueryString, diags := types.SetValue(types.StringType, varyQueryStringValues)
+		varyQueryString, diags := utils.ConvertStringSliceToSet(dataApi.QueryStringVaryParameters)
 		if diags != nil {
 			return dataTf, diags
 		}
 
 		// CacheVaryCookieParams
-		var varyCookieValues []attr.Value
-		for _, cookieParam := range dataApi.CookieVaryParameters {
-			varyCookieValues = append(varyCookieValues, types.StringValue(cookieParam))
-		}
-
-		varyCookie, diags := types.SetValue(types.StringType, varyCookieValues)
+		varyCookie, diags := utils.ConvertStringSliceToSet(dataApi.CookieVaryParameters)
 		if diags != nil {
 			return dataTf, diags
 		}
@@ -1852,32 +1808,17 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 	// security
 	{
-		var referersAllowedValues []attr.Value
-		for _, v := range dataApi.AllowedReferrers {
-			referersAllowedValues = append(referersAllowedValues, types.StringValue(v))
-		}
-
-		referersAllowed, diags := types.SetValue(types.StringType, referersAllowedValues)
+		referersAllowed, diags := utils.ConvertStringSliceToSet(dataApi.AllowedReferrers)
 		if diags != nil {
 			return dataTf, diags
 		}
 
-		var referersBlockedValues []attr.Value
-		for _, v := range dataApi.BlockedReferrers {
-			referersBlockedValues = append(referersBlockedValues, types.StringValue(v))
-		}
-
-		referersBlocked, diags := types.SetValue(types.StringType, referersBlockedValues)
+		referersBlocked, diags := utils.ConvertStringSliceToSet(dataApi.BlockedReferrers)
 		if diags != nil {
 			return dataTf, diags
 		}
 
-		var ipsBlockedValues []attr.Value
-		for _, v := range dataApi.BlockedIps {
-			ipsBlockedValues = append(ipsBlockedValues, types.StringValue(v))
-		}
-
-		ipsBlocked, diags := types.SetValue(types.StringType, ipsBlockedValues)
+		ipsBlocked, diags := utils.ConvertStringSliceToSet(dataApi.BlockedIps)
 		if diags != nil {
 			return dataTf, diags
 		}
@@ -1929,12 +1870,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 	// headers
 	{
-		var extensionValues []attr.Value
-		for _, extension := range dataApi.AccessControlOriginHeaderExtensions {
-			extensionValues = append(extensionValues, types.StringValue(extension))
-		}
-
-		extensions, diags := types.SetValue(types.StringType, extensionValues)
+		extensions, diags := utils.ConvertStringSliceToSet(dataApi.AccessControlOriginHeaderExtensions)
 		if diags != nil {
 			return dataTf, diags
 		}
@@ -1974,12 +1910,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	{
 		originValues := map[string]attr.Value{
 			"type": types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
-		}
-
-		if dataApi.OriginUrl == "" {
-			originValues["url"] = types.StringNull()
-		} else {
-			originValues["url"] = types.StringValue(dataApi.OriginUrl)
+			"url":  typeStringOrNull(dataApi.OriginUrl),
 		}
 
 		if dataApi.StorageZoneId == 0 || dataApi.StorageZoneId == -1 {
@@ -2047,7 +1978,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		// filters
 		{
-			filters, diags := convertStringSliceToSet(dataApi.RoutingFilters)
+			filters, diags := utils.ConvertStringSliceToSet(dataApi.RoutingFilters)
 			if diags != nil {
 				return dataTf, diags
 			}
@@ -2056,7 +1987,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		// blocked countries
 		{
-			blockedCountries, diags := convertStringSliceToSet(dataApi.BlockedCountries)
+			blockedCountries, diags := utils.ConvertStringSliceToSet(dataApi.BlockedCountries)
 			if diags != nil {
 				return dataTf, diags
 			}
@@ -2065,7 +1996,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		// redirected countries
 		{
-			redirectedCountries, diags := convertStringSliceToSet(dataApi.BudgetRedirectedCountries)
+			redirectedCountries, diags := utils.ConvertStringSliceToSet(dataApi.BudgetRedirectedCountries)
 			if diags != nil {
 				return dataTf, diags
 			}

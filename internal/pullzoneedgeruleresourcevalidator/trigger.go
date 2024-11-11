@@ -43,7 +43,7 @@ func (v triggerObjectValidator) ValidateResource(ctx context.Context, request re
 				response.Diagnostics.AddAttributeError(
 					triggerPath,
 					"Trigger match_type must be valid",
-					fmt.Sprintf("Trigger \"match_type\" must be one of %s.", utils.StringSliceToTerraformSet(values)),
+					fmt.Sprintf("Trigger \"match_type\" must be one of %s.", utils.ConvertStringSliceToSetMust(values)),
 				)
 				return
 			}
@@ -72,7 +72,7 @@ func (v triggerObjectValidator) ValidateResource(ctx context.Context, request re
 				response.Diagnostics.AddAttributeError(
 					triggerPath,
 					"Trigger type must be valid",
-					fmt.Sprintf("Trigger \"type\" must be one of %s.", utils.StringSliceToTerraformSet(values)),
+					fmt.Sprintf("Trigger \"type\" must be one of %s.", utils.ConvertStringSliceToSetMust(values)),
 				)
 				return
 			}

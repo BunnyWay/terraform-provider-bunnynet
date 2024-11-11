@@ -425,24 +425,10 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 
 		// main action
 		{
-			var parameter1 attr.Value
-			if dataApi.ActionParameter1 == "" {
-				parameter1 = types.StringNull()
-			} else {
-				parameter1 = types.StringValue(dataApi.ActionParameter1)
-			}
-
-			var parameter2 attr.Value
-			if dataApi.ActionParameter2 == "" {
-				parameter2 = types.StringNull()
-			} else {
-				parameter2 = types.StringValue(dataApi.ActionParameter2)
-			}
-
 			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
 				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, dataApi.Action)),
-				"parameter1": parameter1,
-				"parameter2": parameter2,
+				"parameter1": typeStringOrNull(dataApi.ActionParameter1),
+				"parameter2": typeStringOrNull(dataApi.ActionParameter2),
 			})
 
 			if diags != nil {
@@ -455,24 +441,10 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 
 		// extra actions
 		for _, extraAction := range dataApi.ExtraActions {
-			var parameter1 attr.Value
-			if extraAction.ActionParameter1 == "" {
-				parameter1 = types.StringNull()
-			} else {
-				parameter1 = types.StringValue(extraAction.ActionParameter1)
-			}
-
-			var parameter2 attr.Value
-			if extraAction.ActionParameter2 == "" {
-				parameter2 = types.StringNull()
-			} else {
-				parameter2 = types.StringValue(extraAction.ActionParameter2)
-			}
-
 			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
 				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, extraAction.ActionType)),
-				"parameter1": parameter1,
-				"parameter2": parameter2,
+				"parameter1": typeStringOrNull(extraAction.ActionParameter1),
+				"parameter2": typeStringOrNull(extraAction.ActionParameter2),
 			})
 
 			if diags != nil {
@@ -517,26 +489,12 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 					return PullzoneEdgeruleResourceModel{}, diags
 				}
 
-				var parameter1 attr.Value
-				if tr.Parameter1 == "" {
-					parameter1 = types.StringNull()
-				} else {
-					parameter1 = types.StringValue(tr.Parameter1)
-				}
-
-				var parameter2 attr.Value
-				if tr.Parameter2 == "" {
-					parameter2 = types.StringNull()
-				} else {
-					parameter2 = types.StringValue(tr.Parameter2)
-				}
-
 				triggerValue, diags := types.ObjectValue(pullzoneEdgeruleTriggerType.AttrTypes, map[string]attr.Value{
 					"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.TriggerTypeMap, tr.Type)),
 					"match_type": types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, tr.MatchType)),
 					"patterns":   patternsList,
-					"parameter1": parameter1,
-					"parameter2": parameter2,
+					"parameter1": typeStringOrNull(tr.Parameter1),
+					"parameter2": typeStringOrNull(tr.Parameter2),
 				})
 
 				if diags != nil {

@@ -6,6 +6,7 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -102,4 +103,12 @@ func generateMarkdownSliceOptions(options []string) string {
 	s := slices.Clone(options)
 	slices.Sort(s)
 	return "Options: `" + strings.Join(s, "`, `") + "`"
+}
+
+func typeStringOrNull(value string) types.String {
+	if value != "" {
+		return types.StringValue(value)
+	}
+
+	return types.StringNull()
 }

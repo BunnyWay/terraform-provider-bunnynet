@@ -497,7 +497,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["quality"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid quality value")}
 		}
 
 		dataTf.Quality = types.Int64Value(int64(value))
@@ -510,7 +510,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["blur"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid blur value")}
 		}
 
 		dataTf.Blur = types.Int64Value(int64(value))
@@ -535,7 +535,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["brightness"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid brightness value")}
 		}
 
 		dataTf.Brightness = types.Int64Value(int64(value))
@@ -544,7 +544,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["saturation"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid saturation value")}
 		}
 
 		dataTf.Saturation = types.Int64Value(int64(value))
@@ -553,7 +553,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["hue"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid hue value")}
 		}
 
 		dataTf.Hue = types.Int64Value(int64(value))
@@ -562,7 +562,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["contrast"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid contrast value")}
 		}
 
 		dataTf.Contrast = types.Int64Value(int64(value))
@@ -575,7 +575,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	if v, ok := dataApi.Properties["sepia"]; ok {
 		value, err := strconv.Atoi(v)
 		if err != nil {
-			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid height value")}
+			return PullzoneOptimizerClassResourceModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Error converting API data", "Invalid sepia value")}
 		}
 
 		dataTf.Sepia = types.Int64Value(int64(value))
