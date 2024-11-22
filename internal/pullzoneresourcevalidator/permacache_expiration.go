@@ -28,7 +28,7 @@ func (v permacacheCacheExpirationTimeValidator) ValidateResource(ctx context.Con
 	var permacacheStoragezone types.Int64
 	request.Config.GetAttribute(ctx, path.Root("permacache_storagezone"), &permacacheStoragezone)
 
-	if permacacheStoragezone.IsNull() {
+	if permacacheStoragezone.IsUnknown() || permacacheStoragezone.IsNull() {
 		return
 	}
 
@@ -36,7 +36,7 @@ func (v permacacheCacheExpirationTimeValidator) ValidateResource(ctx context.Con
 	var cacheExpirationTime types.Int64
 	request.Config.GetAttribute(ctx, attr, &cacheExpirationTime)
 
-	if cacheExpirationTime.IsNull() || cacheExpirationTime.ValueInt64() == DefaultCacheExpirationTimeForPermacache {
+	if cacheExpirationTime.IsUnknown() || cacheExpirationTime.IsNull() || cacheExpirationTime.ValueInt64() == DefaultCacheExpirationTimeForPermacache {
 		return
 	}
 

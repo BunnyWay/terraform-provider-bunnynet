@@ -26,7 +26,7 @@ func (v customCertificateValidator) ValidateResource(ctx context.Context, reques
 	var certificate types.String
 	request.Config.GetAttribute(ctx, path.Root("certificate"), &certificate)
 
-	if certificate.IsNull() || len(certificate.ValueString()) == 0 {
+	if certificate.IsUnknown() || certificate.IsNull() || len(certificate.ValueString()) == 0 {
 		return
 	}
 
@@ -34,7 +34,7 @@ func (v customCertificateValidator) ValidateResource(ctx context.Context, reques
 	var tlsEnabled types.Bool
 	request.Config.GetAttribute(ctx, tlsEnabledAttr, &tlsEnabled)
 
-	if tlsEnabled.ValueBool() {
+	if tlsEnabled.IsUnknown() || tlsEnabled.ValueBool() {
 		return
 	}
 

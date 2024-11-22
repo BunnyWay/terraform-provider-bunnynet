@@ -26,7 +26,7 @@ func (v cacheStaleBackgroundUpdateValidator) ValidateResource(ctx context.Contex
 	var cacheStale types.Set
 	request.Config.GetAttribute(ctx, path.Root("cache_stale"), &cacheStale)
 
-	if cacheStale.IsNull() || len(cacheStale.Elements()) == 0 {
+	if cacheStale.IsUnknown() || cacheStale.IsNull() || len(cacheStale.Elements()) == 0 {
 		return
 	}
 
@@ -34,7 +34,7 @@ func (v cacheStaleBackgroundUpdateValidator) ValidateResource(ctx context.Contex
 	var useBackgroundUpdate types.Bool
 	request.Config.GetAttribute(ctx, attr, &useBackgroundUpdate)
 
-	if useBackgroundUpdate.IsNull() || useBackgroundUpdate.ValueBool() {
+	if useBackgroundUpdate.IsUnknown() || useBackgroundUpdate.IsNull() || useBackgroundUpdate.ValueBool() {
 		return
 	}
 

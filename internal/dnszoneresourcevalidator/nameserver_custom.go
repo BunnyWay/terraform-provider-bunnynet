@@ -29,6 +29,10 @@ func (v customNameserverValidator) ValidateResource(ctx context.Context, request
 	request.Config.GetAttribute(ctx, path.Root("nameserver_custom"), &nameserverCustom)
 	mustBeDefault := !nameserverCustom.ValueBool()
 
+	if nameserverCustom.IsUnknown() {
+		return
+	}
+
 	attrs := []path.Path{
 		path.Root("nameserver1"),
 		path.Root("nameserver2"),
@@ -43,6 +47,10 @@ func (v customNameserverValidator) ValidateResource(ctx context.Context, request
 		}
 
 		attrType := v.getStringValue(ctx, request, attr)
+		if attrType.IsUnknown() {
+			return
+		}
+
 		if attrType.IsNull() {
 			attrDefault = attrType.ValueString()
 		}

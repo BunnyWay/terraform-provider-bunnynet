@@ -31,11 +31,15 @@ func (v triggerObjectValidator) ValidateResource(ctx context.Context, request re
 	var triggers types.List
 	request.Config.GetAttribute(ctx, triggerPath, &triggers)
 
+	if triggers.IsUnknown() {
+		return
+	}
+
 	for _, trigger := range triggers.Elements() {
 		triggerAttrs := trigger.(types.Object).Attributes()
 
 		// trigger.match_type
-		{
+		if !triggerAttrs["match_type"].IsUnknown() {
 			matchType := triggerAttrs["match_type"].(types.String).ValueString()
 			values := maps.Values(TriggerMatchTypeMap)
 
@@ -50,9 +54,8 @@ func (v triggerObjectValidator) ValidateResource(ctx context.Context, request re
 		}
 
 		// trigger.patterns
-		{
+		if !triggerAttrs["patterns"].IsUnknown() {
 			patterns := triggerAttrs["patterns"].(types.List).Elements()
-
 			if len(patterns) < 1 {
 				response.Diagnostics.AddAttributeError(
 					triggerPath,
@@ -64,7 +67,7 @@ func (v triggerObjectValidator) ValidateResource(ctx context.Context, request re
 		}
 
 		// trigger.type
-		{
+		if !triggerAttrs["type"].IsUnknown() {
 			triggerType := triggerAttrs["type"].(types.String).ValueString()
 			values := maps.Values(TriggerTypeMap)
 

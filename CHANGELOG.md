@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.4.1] - 2024-11-22
+## Fixed
+- ValidateResource has unknown values on first pass if they use variables ([#18](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/18))
+
 ## [0.4.0] - 2024-11-07
 ## Added
 - Support for Compute Script
