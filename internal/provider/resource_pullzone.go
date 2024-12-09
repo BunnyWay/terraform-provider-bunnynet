@@ -1351,7 +1351,10 @@ func (r *PullzoneResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
+	pzMutex.Lock(0)
 	dataApi, err := r.client.CreatePullzone(dataApi)
+	pzMutex.Unlock(0)
+
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create pullzone", err.Error())
 		return
