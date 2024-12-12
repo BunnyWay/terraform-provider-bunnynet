@@ -22,6 +22,7 @@ func TestAction(t *testing.T) {
 				"action":            tftypes.NewValue(tftypes.String, "Redirect"),
 				"action_parameter1": tftypes.NewValue(tftypes.String, "https://bunny.net"),
 				"action_parameter2": tftypes.NewValue(tftypes.String, nil),
+				"action_parameter3": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
@@ -30,6 +31,7 @@ func TestAction(t *testing.T) {
 				"action":            tftypes.NewValue(tftypes.String, "Redirect"),
 				"action_parameter1": tftypes.NewValue(tftypes.String, "https://bunny.net"),
 				"action_parameter2": tftypes.NewValue(tftypes.String, "301"),
+				"action_parameter3": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
@@ -38,6 +40,7 @@ func TestAction(t *testing.T) {
 				"action":            tftypes.NewValue(tftypes.String, "Redirect"),
 				"action_parameter1": tftypes.NewValue(tftypes.String, "https://bunny.net"),
 				"action_parameter2": tftypes.NewValue(tftypes.String, "400"),
+				"action_parameter3": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
@@ -46,6 +49,7 @@ func TestAction(t *testing.T) {
 				"action":            tftypes.NewValue(tftypes.String, "Redirect"),
 				"action_parameter1": tftypes.NewValue(tftypes.String, "https://bunny.net"),
 				"action_parameter2": tftypes.NewValue(tftypes.String, "abc"),
+				"action_parameter3": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 	}
@@ -55,6 +59,7 @@ func TestAction(t *testing.T) {
 			"action":            schema.StringAttribute{},
 			"action_parameter1": schema.StringAttribute{},
 			"action_parameter2": schema.StringAttribute{},
+			"action_parameter3": schema.StringAttribute{},
 		},
 	}
 
@@ -63,6 +68,7 @@ func TestAction(t *testing.T) {
 			"action":            tftypes.String,
 			"action_parameter1": tftypes.String,
 			"action_parameter2": tftypes.String,
+			"action_parameter3": tftypes.String,
 		},
 	}
 

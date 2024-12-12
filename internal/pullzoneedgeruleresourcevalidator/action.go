@@ -37,6 +37,7 @@ func (v actionParameters) ValidateResource(ctx context.Context, request resource
 				actionAttr["type"].(types.String).ValueString(),
 				actionAttr["parameter1"].(types.String).ValueString(),
 				actionAttr["parameter2"].(types.String).ValueString(),
+				actionAttr["parameter3"].(types.String).ValueString(),
 			)
 
 			if err != nil {
@@ -50,12 +51,14 @@ func (v actionParameters) ValidateResource(ctx context.Context, request resource
 		var actionType string
 		var actionParam1 string
 		var actionParam2 string
+		var actionParam3 string
 
 		request.Config.GetAttribute(ctx, actionPath, &actionType)
 		request.Config.GetAttribute(ctx, path.Root("action_parameter1"), &actionParam1)
 		request.Config.GetAttribute(ctx, path.Root("action_parameter2"), &actionParam2)
+		request.Config.GetAttribute(ctx, path.Root("action_parameter3"), &actionParam2)
 
-		err := v.validateAction(actionType, actionParam1, actionParam2)
+		err := v.validateAction(actionType, actionParam1, actionParam2, actionParam3)
 		if err != nil {
 			response.Diagnostics.AddAttributeError(actionPath, "Invalid attribute configuration", err.Error())
 			return
@@ -63,7 +66,7 @@ func (v actionParameters) ValidateResource(ctx context.Context, request resource
 	}
 }
 
-func (v actionParameters) validateAction(action string, parameter1 string, parameter2 string) error {
+func (v actionParameters) validateAction(action string, parameter1 string, parameter2 string, parameter3 string) error {
 	switch action {
 	case "Redirect":
 		if len(parameter1) == 0 {

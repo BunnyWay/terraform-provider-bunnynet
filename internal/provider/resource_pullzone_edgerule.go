@@ -49,6 +49,7 @@ type PullzoneEdgeruleResourceModel struct {
 	Action           types.String `tfsdk:"action"`
 	ActionParameter1 types.String `tfsdk:"action_parameter1"`
 	ActionParameter2 types.String `tfsdk:"action_parameter2"`
+	ActionParameter3 types.String `tfsdk:"action_parameter3"`
 	MatchType        types.String `tfsdk:"match_type"`
 	Actions          types.List   `tfsdk:"actions"`
 	Triggers         types.List   `tfsdk:"triggers"`
@@ -63,6 +64,7 @@ var pullzoneEdgeruleActionType = types.ObjectType{
 		"type":       types.StringType,
 		"parameter1": types.StringType,
 		"parameter2": types.StringType,
+		"parameter3": types.StringType,
 	},
 }
 
@@ -124,6 +126,12 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 				},
 			},
 			"action_parameter2": schema.StringAttribute{
+				Optional: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"action_parameter3": schema.StringAttribute{
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -340,6 +348,7 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 			dataApi.Action = mapValueToKey(pullzoneedgeruleresourcevalidator.ActionMap, dataTf.Action.ValueString())
 			dataApi.ActionParameter1 = dataTf.ActionParameter1.ValueString()
 			dataApi.ActionParameter2 = dataTf.ActionParameter2.ValueString()
+			dataApi.ActionParameter3 = dataTf.ActionParameter3.ValueString()
 			dataApi.ExtraActions = []api.PullzoneEdgeruleExtraAction{}
 		} else {
 			// actions list
@@ -356,16 +365,23 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 					parameter2 = t.(types.String).ValueString()
 				}
 
+				parameter3 := ""
+				if t, ok := action["parameter3"]; ok && !t.(types.String).IsNull() {
+					parameter3 = t.(types.String).ValueString()
+				}
+
 				actions[i] = api.PullzoneEdgeruleExtraAction{
 					ActionType:       mapValueToKey(pullzoneedgeruleresourcevalidator.ActionMap, action["type"].(types.String).ValueString()),
 					ActionParameter1: parameter1,
 					ActionParameter2: parameter2,
+					ActionParameter3: parameter3,
 				}
 			}
 
 			dataApi.Action = actions[0].ActionType
 			dataApi.ActionParameter1 = actions[0].ActionParameter1
 			dataApi.ActionParameter2 = actions[0].ActionParameter2
+			dataApi.ActionParameter3 = actions[0].ActionParameter3
 
 			if len(actions) > 1 {
 				dataApi.ExtraActions = actions[1:]
@@ -430,6 +446,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, dataApi.Action)),
 				"parameter1": typeStringOrNull(dataApi.ActionParameter1),
 				"parameter2": typeStringOrNull(dataApi.ActionParameter2),
+				"parameter3": typeStringOrNull(dataApi.ActionParameter3),
 			})
 
 			if diags != nil {
@@ -446,6 +463,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, extraAction.ActionType)),
 				"parameter1": typeStringOrNull(extraAction.ActionParameter1),
 				"parameter2": typeStringOrNull(extraAction.ActionParameter2),
+				"parameter3": typeStringOrNull(extraAction.ActionParameter3),
 			})
 
 			if diags != nil {
@@ -461,6 +479,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 			dataTf.Action = actionAttr["type"].(types.String)
 			dataTf.ActionParameter1 = actionAttr["parameter1"].(types.String)
 			dataTf.ActionParameter2 = actionAttr["parameter2"].(types.String)
+			dataTf.ActionParameter3 = actionAttr["parameter3"].(types.String)
 			dataTf.Actions = types.ListNull(pullzoneEdgeruleActionType)
 		} else {
 			actionsList, diags := types.ListValue(pullzoneEdgeruleActionType, actions)

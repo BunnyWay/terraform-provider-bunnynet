@@ -13,11 +13,19 @@ This resource manages edge rules for a bunny.net pull zone. It is used to define
 ## Example Usage
 
 ```terraform
-resource "bunnynet_pullzone_edgerule" "block_admin" {
+resource "bunnynet_pullzone_edgerule" "redirect_admin" {
   enabled     = true
   pullzone    = bunnynet_pullzone.example.id
-  action      = "BlockRequest"
-  description = "Block access to admin"
+  description = "Redirect to homepage"
+
+  actions = [
+    {
+      type       = "Redirect"
+      parameter1 = "https://www.example.com"
+      parameter2 = "302"
+      parameter3 = null
+    }
+  ]
 
   match_type = "MatchAny"
   triggers = [
@@ -46,6 +54,7 @@ resource "bunnynet_pullzone_edgerule" "block_admin" {
 - `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
 - `action_parameter1` (String)
 - `action_parameter2` (String)
+- `action_parameter3` (String)
 - `actions` (List of Object) List of actions for the edge rule. (see [below for nested schema](#nestedatt--actions))
 - `description` (String) The description of the edge rule.
 - `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
@@ -73,6 +82,7 @@ Optional:
 
 - `parameter1` (String)
 - `parameter2` (String)
+- `parameter3` (String)
 - `type` (String)
 
 ## Import

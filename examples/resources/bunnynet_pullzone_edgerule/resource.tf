@@ -1,8 +1,16 @@
-resource "bunnynet_pullzone_edgerule" "block_admin" {
+resource "bunnynet_pullzone_edgerule" "redirect_admin" {
   enabled     = true
   pullzone    = bunnynet_pullzone.example.id
-  action      = "BlockRequest"
-  description = "Block access to admin"
+  description = "Redirect to homepage"
+
+  actions = [
+    {
+      type       = "Redirect"
+      parameter1 = "https://www.example.com"
+      parameter2 = "302"
+      parameter3 = null
+    }
+  ]
 
   match_type = "MatchAny"
   triggers = [

@@ -19,6 +19,7 @@ type PullzoneEdgerule struct {
 	Action           uint8                         `json:"ActionType"`
 	ActionParameter1 string                        `json:"ActionParameter1"`
 	ActionParameter2 string                        `json:"ActionParameter2"`
+	ActionParameter3 string                        `json:"ActionParameter3"`
 	ExtraActions     []PullzoneEdgeruleExtraAction `json:"ExtraActions"`
 	MatchType        uint8                         `json:"TriggerMatchingType"`
 	Triggers         []PullzoneEdgeruleTrigger     `json:"Triggers"`
@@ -29,6 +30,7 @@ type PullzoneEdgeruleExtraAction struct {
 	ActionType       uint8  `json:"ActionType"`
 	ActionParameter1 string `json:"ActionParameter1"`
 	ActionParameter2 string `json:"ActionParameter2"`
+	ActionParameter3 string `json:"ActionParameter3"`
 }
 
 type PullzoneEdgeruleTrigger struct {
