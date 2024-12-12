@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.5.0] - 2024-12-12
+### Changed
+- Bumped minimum Go version to 1.22
+- update dependencies
+### Added
+- resource pullzone_edgerule: support ActionParameter3
+- resource pullzone_edgerule: validate Redirect action parameters
+
 ## [0.4.2] - 2024-12-09
 ### Fixed
 - resource pullzone: create multiple at once throws 502 Bad Gateway
