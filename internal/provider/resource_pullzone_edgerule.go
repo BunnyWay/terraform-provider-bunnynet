@@ -175,6 +175,7 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 func (r *PullzoneEdgeruleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		pullzoneedgeruleresourcevalidator.TriggerObject(),
+		pullzoneedgeruleresourcevalidator.ActionParameters(),
 		resourcevalidator.AtLeastOneOf(
 			path.MatchRoot("action"),
 			path.MatchRoot("actions"),
