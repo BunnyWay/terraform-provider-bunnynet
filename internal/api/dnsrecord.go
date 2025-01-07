@@ -11,7 +11,10 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
+	"strconv"
 )
+
+const DnsRecordTypePZ = 7
 
 type DnsRecord struct {
 	Zone                  int64   `json:"-"`
@@ -19,6 +22,7 @@ type DnsRecord struct {
 	Type                  uint8   `json:"Type"`
 	Ttl                   int64   `json:"Ttl"`
 	Value                 string  `json:"Value"`
+	PullzoneId            int64   `json:"PullZoneId,omitempty"`
 	Name                  string  `json:"Name"`
 	Weight                int64   `json:"Weight"`
 	Priority              int64   `json:"Priority"`
@@ -27,7 +31,7 @@ type DnsRecord struct {
 	Tag                   string  `json:"Tag"`
 	Accelerated           bool    `json:"Accelerated"`
 	AcceleratedPullZoneId int64   `json:"AcceleratedPullZoneId"`
-	LinkName              string  `json:"LinkName"`
+	LinkName              string  `json:"LinkName,omitempty"`
 	MonitorType           uint8   `json:"MonitorType"`
 	GeolocationLatitude   float64 `json:"GeolocationLatitude"`
 	GeolocationLongitude  float64 `json:"GeolocationLongitude"`
@@ -58,6 +62,11 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 	dnsZoneId := data.Zone
 	if dnsZoneId == 0 {
 		return DnsRecord{}, errors.New("zone is required")
+	}
+
+	data, err := convertDnsRecordForApiSave(data)
+	if err != nil {
+		return DnsRecord{}, err
 	}
 
 	body, err := json.Marshal(data)
@@ -100,6 +109,11 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 	id := dataApi.Id
 	zoneId := dataApi.Zone
 
+	dataApi, err := convertDnsRecordForApiSave(dataApi)
+	if err != nil {
+		return DnsRecord{}, err
+	}
+
 	body, err := json.Marshal(dataApi)
 	if err != nil {
 		return DnsRecord{}, err
@@ -125,6 +139,25 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 	}
 
 	return dataApiResult, nil
+}
+
+func convertDnsRecordForApiSave(record DnsRecord) (DnsRecord, error) {
+	if record.Type == DnsRecordTypePZ {
+		if len(record.LinkName) == 0 {
+			return DnsRecord{}, errors.New("linkname should contain the Pullzone ID")
+		}
+
+		id, err := strconv.ParseInt(record.LinkName, 10, 64)
+		if err != nil {
+			return DnsRecord{}, err
+		}
+
+		record.PullzoneId = id
+		record.LinkName = ""
+		record.Value = ""
+	}
+
+	return record, nil
 }
 
 func (c *Client) DeleteDnsRecord(zoneId int64, id int64) error {
