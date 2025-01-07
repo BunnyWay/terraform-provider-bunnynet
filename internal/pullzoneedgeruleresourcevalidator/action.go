@@ -33,6 +33,11 @@ func (v actionParameters) ValidateResource(ctx context.Context, request resource
 	if !actions.IsNull() {
 		for _, action := range actions.Elements() {
 			actionAttr := action.(types.Object).Attributes()
+
+			if actionAttr["parameter1"].IsUnknown() || actionAttr["parameter2"].IsUnknown() || actionAttr["parameter3"].IsUnknown() {
+				return
+			}
+
 			err := v.validateAction(
 				actionAttr["type"].(types.String).ValueString(),
 				actionAttr["parameter1"].(types.String).ValueString(),
@@ -48,17 +53,21 @@ func (v actionParameters) ValidateResource(ctx context.Context, request resource
 	} else {
 		actionPath := path.Root("action")
 
-		var actionType string
-		var actionParam1 string
-		var actionParam2 string
-		var actionParam3 string
+		var actionType types.String
+		var actionParam1 types.String
+		var actionParam2 types.String
+		var actionParam3 types.String
 
 		request.Config.GetAttribute(ctx, actionPath, &actionType)
 		request.Config.GetAttribute(ctx, path.Root("action_parameter1"), &actionParam1)
 		request.Config.GetAttribute(ctx, path.Root("action_parameter2"), &actionParam2)
-		request.Config.GetAttribute(ctx, path.Root("action_parameter3"), &actionParam2)
+		request.Config.GetAttribute(ctx, path.Root("action_parameter3"), &actionParam3)
 
-		err := v.validateAction(actionType, actionParam1, actionParam2, actionParam3)
+		if actionParam1.IsUnknown() || actionParam2.IsUnknown() || actionParam3.IsUnknown() {
+			return
+		}
+
+		err := v.validateAction(actionType.ValueString(), actionParam1.ValueString(), actionParam2.ValueString(), actionParam3.ValueString())
 		if err != nil {
 			response.Diagnostics.AddAttributeError(actionPath, "Invalid attribute configuration", err.Error())
 			return
