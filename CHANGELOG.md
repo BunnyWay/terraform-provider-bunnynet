@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.5.1] - 2025-01-07
+### Changed
+- updated dependencies
+### Fixed
+- resource pullzone: fix panic when origin or routing blocks are missing ([#20](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/20))
+- resource dns_record: support PZ type ([#22](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/23))
+- resource pullzone_edgerule: fix action params validation ([#23](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/23))
+
 ## [0.5.0] - 2024-12-12
 ### Changed
 - Bumped minimum Go version to 1.22
