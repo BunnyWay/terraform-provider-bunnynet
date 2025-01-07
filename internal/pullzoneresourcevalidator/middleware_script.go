@@ -33,6 +33,10 @@ func (v middlewareScriptValidator) ValidateResource(ctx context.Context, req res
 	var routing attr.Value
 	req.Config.GetAttribute(ctx, path.Root("routing"), &routing)
 
+	if origin.IsNull() || routing.IsNull() {
+		return
+	}
+
 	if origin.(types.Object).Attributes()["middleware_script"].IsUnknown() || routing.(types.Object).Attributes()["filters"].IsUnknown() {
 		return
 	}
