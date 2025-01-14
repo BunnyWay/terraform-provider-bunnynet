@@ -161,16 +161,22 @@ func (r *ComputeScriptResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.UpdateComputeScript(dataApi)
 
+	previousDataApi, err := r.client.GetComputeScript(dataApi.Id)
+	if err != nil {
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
+		return
+	}
+
+	dataApiResult, err := r.client.UpdateComputeScript(dataApi, previousDataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating compute script", err.Error()))
 		return
 	}
 
-	tflog.Trace(ctx, fmt.Sprintf("updated compute script %d", dataApi.Id))
+	tflog.Trace(ctx, fmt.Sprintf("updated compute script %d", dataApiResult.Id))
 
-	dataTf, diags := r.convertApiToModel(dataApi)
+	dataTf, diags := r.convertApiToModel(dataApiResult)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return

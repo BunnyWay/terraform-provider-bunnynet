@@ -160,13 +160,13 @@ func (c *Client) CreateComputeScript(dataApi ComputeScript) (ComputeScript, erro
 	return c.GetComputeScript(dataApiResult.Id)
 }
 
-func (c *Client) UpdateComputeScript(dataApi ComputeScript) (ComputeScript, error) {
-	id := dataApi.Id
+func (c *Client) UpdateComputeScript(data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
+	id := data.Id
 
 	// update attributes
-	{
+	if data.Name != previousData.Name {
 		body, err := json.Marshal(map[string]string{
-			"Name": dataApi.Name,
+			"Name": data.Name,
 		})
 
 		if err != nil {
@@ -199,9 +199,9 @@ func (c *Client) UpdateComputeScript(dataApi ComputeScript) (ComputeScript, erro
 	}
 
 	// update code
-	{
+	if data.Content != previousData.Content {
 		body, err := json.Marshal(map[string]string{
-			"Code": dataApi.Content,
+			"Code": data.Content,
 		})
 
 		if err != nil {
