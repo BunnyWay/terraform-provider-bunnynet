@@ -40,7 +40,9 @@ resource "bunnynet_compute_script" "test" {
 
 ### Read-Only
 
+- `deployment_key` (String) The deployment key for the script.
 - `id` (Number) The ID of the script.
+- `release` (String) The current release identifier for the script.
 
 ## Import
 

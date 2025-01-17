@@ -13,10 +13,13 @@ import (
 )
 
 type ComputeScript struct {
-	Id         int64  `json:"Id,omitempty"`
-	ScriptType uint8  `json:"ScriptType"`
-	Name       string `json:"Name"`
-	Content    string `json:"Content"`
+	Id               int64  `json:"Id,omitempty"`
+	ScriptType       uint8  `json:"ScriptType"`
+	Name             string `json:"Name"`
+	Content          string `json:"Content"`
+	DeploymentKey    string `json:"DeploymentKey,omitempty"`
+	Release          string `json:"-"`
+	CurrentReleaseId int64  `json:"CurrentReleaseId,omitempty"`
 }
 
 func (c *Client) GetComputeScript(id int64) (ComputeScript, error) {
@@ -66,6 +69,18 @@ func (c *Client) GetComputeScript(id int64) (ComputeScript, error) {
 		}
 
 		data.Content = codeData["Code"]
+	}
+
+	// current release
+	if data.CurrentReleaseId > 0 {
+		release, err := c.GetComputeScriptActiveRelease(data.Id)
+		if err != nil {
+			if !errors.Is(err, ErrComputeScriptReleaseNotFound) {
+				return data, err
+			}
+		} else {
+			data.Release = release.Uuid
+		}
 	}
 
 	return data, nil

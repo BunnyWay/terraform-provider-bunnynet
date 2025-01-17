@@ -33,10 +33,12 @@ type ComputeScriptResource struct {
 }
 
 type ComputeScriptResourceModel struct {
-	Id      types.Int64  `tfsdk:"id"`
-	Type    types.String `tfsdk:"type"`
-	Name    types.String `tfsdk:"name"`
-	Content types.String `tfsdk:"content"`
+	Id            types.Int64  `tfsdk:"id"`
+	Type          types.String `tfsdk:"type"`
+	Name          types.String `tfsdk:"name"`
+	Content       types.String `tfsdk:"content"`
+	DeploymentKey types.String `tfsdk:"deployment_key"`
+	Release       types.String `tfsdk:"release"`
 }
 
 var computeScriptTypeMap = map[uint8]string{
@@ -83,6 +85,20 @@ func (r *ComputeScriptResource) Schema(ctx context.Context, req resource.SchemaR
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Description: "The code of the script.",
+			},
+			"deployment_key": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Description: "The deployment key for the script.",
+			},
+			"release": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Description: "The current release identifier for the script.",
 			},
 		},
 	}
@@ -236,6 +252,13 @@ func (r *ComputeScriptResource) convertApiToModel(dataApi api.ComputeScript) (Co
 	dataTf.Type = types.StringValue(mapKeyToValue(computeScriptTypeMap, dataApi.ScriptType))
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.Content = types.StringValue(dataApi.Content)
+	dataTf.DeploymentKey = types.StringValue(dataApi.DeploymentKey)
+
+	if dataApi.Release != "" {
+		dataTf.Release = types.StringValue(dataApi.Release)
+	} else {
+		dataTf.Release = types.StringNull()
+	}
 
 	return dataTf, nil
 }
