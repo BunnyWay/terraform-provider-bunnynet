@@ -13,7 +13,7 @@ This resource manages a secret for a Compute Script in bunny.net.
 ## Example Usage
 
 ```terraform
-resource "bunnynet_compute_script_variable" "APP_SECRET" {
+resource "bunnynet_compute_script_secret" "APP_SECRET" {
   script = bunnynet_compute_script.test.id
   name   = "APP_ENV"
   value  = ""
