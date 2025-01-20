@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## Unreleased
+### Added
+- resource compute_script_secret ([#27](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/27))
+
 ## [0.5.3] - 2025-01-17
 ### Added
 - resource compute_script: expose deployment_key and release attributes ([#26](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/26))
