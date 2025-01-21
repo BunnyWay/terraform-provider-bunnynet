@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/streamlibraryresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -27,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -88,10 +90,19 @@ type StreamLibraryResourceModel struct {
 	CdnTokenAuthenticationRequired      types.Bool   `tfsdk:"cdn_token_authentication_required"`
 	DrmMediacageBasicEnabled            types.Bool   `tfsdk:"drm_mediacage_basic_enabled"`
 	WebhookUrl                          types.String `tfsdk:"webhook_url"`
+	EncodingTier                        types.String `tfsdk:"encoding_tier"`
+	JitEncoding                         types.Bool   `tfsdk:"jit_encoding"`
+	OutputCodecs                        types.Set    `tfsdk:"output_codecs"`
 }
 
 var streamLibraryFontFamilyOptions = []string{"arial", "inter", "lato", "oswald", "raleway", "roboto", "rubik", "ubuntu"}
 var streamLibraryPlayerControlsOptions = []string{"airplay", "captions", "chromecast", "current-time", "duration", "fast-forward", "fullscreen", "mute", "pip", "play", "play-large", "progress", "rewind", "settings", "volume"}
+var streamLibraryOutputCodecsOptions = []string{"x264", "vp9"}
+
+var streamLibraryEncodingTierMap = map[uint8]string{
+	0: "Free",
+	1: "Premium",
+}
 
 func (r *StreamLibraryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_stream_library"
@@ -118,6 +129,10 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 		types.StringValue("480p"),
 		types.StringValue("720p"),
 		types.StringValue("1080p"),
+	})
+
+	streamLibraryOutputCodecsDefault := types.SetValueMust(types.StringType, []attr.Value{
+		types.StringValue("x264"),
 	})
 
 	resp.Schema = schema.Schema{
@@ -567,7 +582,49 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				},
 				Description: "The URL for webhook notifications.",
 			},
+			"encoding_tier": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("Free"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(streamLibraryEncodingTierMap)...),
+				},
+				MarkdownDescription: generateMarkdownMapOptions(streamLibraryEncodingTierMap),
+			},
+			"jit_encoding": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether Just-In-Time Encoding is enabled",
+			},
+			"output_codecs": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(streamLibraryOutputCodecsDefault),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(streamLibraryOutputCodecsOptions...),
+					),
+				},
+				MarkdownDescription: generateMarkdownSliceOptions(streamLibraryOutputCodecsOptions),
+			},
 		},
+	}
+}
+
+func (r *StreamLibraryResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		streamlibraryresourcevalidator.PremiumEncoding(),
 	}
 }
 
@@ -722,6 +779,8 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 
 	// encoding
 	{
+		dataApi.EncodingTier = mapValueToKey(streamLibraryEncodingTierMap, dataTf.EncodingTier.ValueString())
+		dataApi.JitEncodingEnabled = dataTf.JitEncoding.ValueBool()
 		dataApi.KeepOriginalFiles = dataTf.OriginalFilesKeep.ValueBool()
 		dataApi.AllowEarlyPlay = dataTf.EarlyPlayEnabled.ValueBool()
 		dataApi.EnableContentTagging = dataTf.ContentTaggingEnabled.ValueBool()
@@ -739,6 +798,7 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 		dataApi.WatermarkPositionTop = uint8(dataTf.WatermarkPositionTop.ValueInt64())
 		dataApi.WatermarkWidth = uint16(dataTf.WatermarkWidth.ValueInt64())
 		dataApi.WatermarkHeight = uint16(dataTf.WatermarkHeight.ValueInt64())
+		dataApi.OutputCodecs = strings.Join(utils.ConvertSetToStringSlice(dataTf.OutputCodecs), ",")
 	}
 
 	// transcribing
@@ -806,6 +866,8 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 
 	// encoding
 	{
+		dataTf.EncodingTier = types.StringValue(mapKeyToValue(streamLibraryEncodingTierMap, dataApi.EncodingTier))
+		dataTf.JitEncoding = types.BoolValue(dataApi.JitEncodingEnabled)
 		dataTf.OriginalFilesKeep = types.BoolValue(dataApi.KeepOriginalFiles)
 		dataTf.EarlyPlayEnabled = types.BoolValue(dataApi.AllowEarlyPlay)
 		dataTf.ContentTaggingEnabled = types.BoolValue(dataApi.EnableContentTagging)
@@ -834,6 +896,25 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 		dataTf.WatermarkPositionTop = types.Int64Value(int64(dataApi.WatermarkPositionTop))
 		dataTf.WatermarkWidth = types.Int64Value(int64(dataApi.WatermarkWidth))
 		dataTf.WatermarkHeight = types.Int64Value(int64(dataApi.WatermarkHeight))
+
+		// output codecs
+		{
+			if len(dataApi.OutputCodecs) == 0 {
+				dataTf.OutputCodecs = types.SetValueMust(types.StringType, []attr.Value{})
+			} else {
+				var values []attr.Value
+				for _, codec := range strings.Split(dataApi.OutputCodecs, ",") {
+					values = append(values, types.StringValue(codec))
+				}
+
+				codecsSet, diags := types.SetValue(types.StringType, values)
+				if diags != nil {
+					return dataTf, diags
+				}
+
+				dataTf.OutputCodecs = codecsSet
+			}
+		}
 	}
 
 	// transcribing

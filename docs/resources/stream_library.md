@@ -49,9 +49,12 @@ resource "bunnynet_stream_library" "example" {
 - `direct_url_file_access_blocked` (Boolean) Indicates whether the requests without a referrer are blocked.
 - `drm_mediacage_basic_enabled` (Boolean) Indicates whether the MediaCage basic DRM is enabled
 - `early_play_enabled` (Boolean) Indicates whether the Early-Play feature is enabled.
+- `encoding_tier` (String) Options: `Free`, `Premium`
+- `jit_encoding` (Boolean) Indicates whether Just-In-Time Encoding is enabled
 - `mp4_fallback_enabled` (Boolean) Indicates whether the MP4 fallback feature is enabled.
 - `multi_audio_track_support_enabled` (Boolean) Indicates whether multiple output audio track support is enabled.
 - `original_files_keep` (Boolean) Indicates whether to keep original files after encoding.
+- `output_codecs` (Set of String) Options: `vp9`, `x264`
 - `player_captions_background_color` (String) The background color of the captions in the video player.
 - `player_captions_font_color` (String) The font color of the captions in the video player.
 - `player_captions_font_size` (Number) The font size of the captions in the video player.

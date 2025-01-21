@@ -59,6 +59,9 @@ type StreamLibrary struct {
 	PullZoneId                              int64    `json:"PullZoneId"`
 	StorageZoneId                           int64    `json:"StorageZoneId"`
 	ApiKey                                  string   `json:"ApiKey"`
+	EncodingTier                            uint8    `json:"EncodingTier"`
+	JitEncodingEnabled                      bool     `json:"JitEncodingEnabled"`
+	OutputCodecs                            string   `json:"OutputCodecs"`
 }
 
 func (c *Client) GetStreamLibrary(id int64) (StreamLibrary, error) {
