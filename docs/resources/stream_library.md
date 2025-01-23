@@ -54,7 +54,7 @@ resource "bunnynet_stream_library" "example" {
 - `mp4_fallback_enabled` (Boolean) Indicates whether the MP4 fallback feature is enabled.
 - `multi_audio_track_support_enabled` (Boolean) Indicates whether multiple output audio track support is enabled.
 - `original_files_keep` (Boolean) Indicates whether to keep original files after encoding.
-- `output_codecs` (Set of String) Options: `vp9`, `x264`
+- `output_codecs` (Set of String) Options: `av1`, `hevc`, `vp9`, `x264`
 - `player_captions_background_color` (String) The background color of the captions in the video player.
 - `player_captions_font_color` (String) The font color of the captions in the video player.
 - `player_captions_font_size` (Number) The font size of the captions in the video player.

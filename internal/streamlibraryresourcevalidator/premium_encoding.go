@@ -8,6 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+var PremiumEncodingCodecs = map[string]struct{}{
+	"vp9":  {},
+	"hevc": {},
+	"av1":  {},
+}
+
 func PremiumEncoding() resource.ConfigValidator {
 	return premiumEncodingValidator{}
 }
@@ -57,7 +63,7 @@ func (v premiumEncodingValidator) ValidateResource(ctx context.Context, request 
 		for _, codec := range outputCodecs.Elements() {
 			value := codec.(types.String).ValueString()
 
-			if !isPremium && value == "vp9" {
+			if _, ok := PremiumEncodingCodecs[value]; !isPremium && ok {
 				response.Diagnostics.AddAttributeError(outputCodecsAttr, "Premium encoding is not enabled", fmt.Sprintf("\"%s\" is part of Premium Encoding. You must configure the \"%s\" attribute.", value, encodingTierAttr))
 			}
 		}

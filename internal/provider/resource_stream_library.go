@@ -97,7 +97,7 @@ type StreamLibraryResourceModel struct {
 
 var streamLibraryFontFamilyOptions = []string{"arial", "inter", "lato", "oswald", "raleway", "roboto", "rubik", "ubuntu"}
 var streamLibraryPlayerControlsOptions = []string{"airplay", "captions", "chromecast", "current-time", "duration", "fast-forward", "fullscreen", "mute", "pip", "play", "play-large", "progress", "rewind", "settings", "volume"}
-var streamLibraryOutputCodecsOptions = []string{"x264", "vp9"}
+var streamLibraryOutputCodecsOptions = []string{"x264", "vp9", "hevc", "av1"}
 
 var streamLibraryEncodingTierMap = map[uint8]string{
 	0: "Free",
