@@ -5,12 +5,14 @@ on:
     paths-ignore:
       - 'README.md'
       - 'CHANGELOG.md'
+      - '.goreleaser.yml'
   push:
     branches:
       - '**'
     paths-ignore:
       - 'README.md'
       - 'CHANGELOG.md'
+      - '.goreleaser.yml'
 
 permissions:
   contents: read
