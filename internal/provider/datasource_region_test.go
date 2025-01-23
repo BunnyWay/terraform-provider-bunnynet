@@ -16,7 +16,7 @@ func TestAccRegionDataSource(t *testing.T) {
 			{
 				Config: testAccRegionDataSourceConfig,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.bunnynet_region.LJ", "id", "98"),
+					resource.TestCheckResourceAttr("data.bunnynet_region.LJ", "region_code", "LJ"),
 					resource.TestCheckResourceAttr("data.bunnynet_region.LJ", "name", "EU: Ljubljana, SI"),
 				),
 			},

@@ -1,0 +1,38 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    - cron: '30 4 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  testacc:
+    name: Terraform Provider Acceptance Tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - uses: hashicorp/setup-terraform@651471c36a6092792c552e8b1bef71e592b462d8 # v3.1.1
+        with:
+          terraform_version: '1.0.*'
+          terraform_wrapper: false
+      - run: go mod download
+
+      - name: Production
+        run: go test -v -cover ./internal/provider/
+        env:
+          TF_ACC: "1"
+          BUNNYNET_API_KEY: ${{ secrets.TESTACC_API_KEY }}
+
+      - name: Staging
+        run: go test -v -cover ./internal/provider/
+        env:
+          TF_ACC: "1"
+          BUNNYNET_API_KEY: ${{ secrets.STAGING_TESTACC_API_KEY }}
+          BUNNYNET_API_URL: ${{ secrets.STAGING_TESTACC_API_URL }}
