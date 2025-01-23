@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.5.6] - 2025-01-23
+### Added
+- resource stream_library: support for HEVC and AV1 on output_codecs
+### Fixed
+- resource dns_record: create CNAME with a defined weight ([#29](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/29))
+
 ## [0.5.5] - 2025-01-21
 ### Added
 - resource stream_library: Premium Encoding support
