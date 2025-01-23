@@ -24,7 +24,7 @@ type DnsRecord struct {
 	Value                 string  `json:"Value"`
 	PullzoneId            int64   `json:"PullZoneId,omitempty"`
 	Name                  string  `json:"Name"`
-	Weight                int64   `json:"Weight"`
+	Weight                int64   `json:"Weight,omitempty"`
 	Priority              int64   `json:"Priority"`
 	Port                  int64   `json:"Port"`
 	Flags                 int64   `json:"Flags"`
@@ -64,6 +64,9 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 		return DnsRecord{}, errors.New("zone is required")
 	}
 
+	weight := data.Weight
+	data.Weight = 0
+
 	data, err := convertDnsRecordForApiSave(data)
 	if err != nil {
 		return DnsRecord{}, err
@@ -101,8 +104,9 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 	}
 
 	dataApiResult.Zone = dnsZoneId
+	dataApiResult.Weight = weight
 
-	return dataApiResult, nil
+	return c.UpdateDnsRecord(dataApiResult)
 }
 
 func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {

@@ -57,3 +57,38 @@ func TestAccDnsRecordResourcePZ(t *testing.T) {
 		},
 	})
 }
+
+const configDnsRecordIssue29Test = `
+data "bunnynet_dns_zone" "domain" {
+  domain = "terraform.internal"
+}
+
+resource "bunnynet_dns_record" "record" {
+  zone      = data.bunnynet_dns_zone.domain.id
+  name      = "test-%s"
+  type      = "CNAME"
+  value     = "www.bunny.net"
+  weight    = %d
+}
+`
+
+func TestAccDnsRecordResourceIssue29(t *testing.T) {
+	testKey := generateRandomString(4)
+	config := fmt.Sprintf(configDnsRecordIssue29Test, testKey, 29)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "type", "CNAME"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "name", fmt.Sprintf("test-%s", testKey)),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "value", "www.bunny.net"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "weight", "29"),
+				),
+			},
+		},
+	})
+}
