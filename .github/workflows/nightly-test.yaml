@@ -3,6 +3,7 @@ name: Nightly Tests
 on:
   schedule:
     - cron: '30 4 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
