@@ -1,6 +1,7 @@
 name: Nightly Tests
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '30 4 * * *'
 
@@ -36,3 +37,13 @@ jobs:
           TF_ACC: "1"
           BUNNYNET_API_KEY: ${{ secrets.STAGING_TESTACC_API_KEY }}
           BUNNYNET_API_URL: ${{ secrets.STAGING_TESTACC_API_URL }}
+
+      - name: Notify results
+        uses: bryannice/gitactions-slack-notification@2.0.0
+        if: always()
+        env:
+          SLACK_INCOMING_WEBHOOK: ${{ secrets.SLACK_INCOMING_WEBHOOK }}
+          SLACK_TITLE: 'Terraform Acceptance Tests'
+          SLACK_MESSAGE: "Status: ${{ job.status }}\nLogs: https://github.com/BunnyWay/terraform-provider-bunnynet/actions/runs/${{ github.run_id }}"
+          SLACK_CHANNEL: ${{ secrets.SLACK_INCOMING_CHANNEL }}
+          SLACK_COLOR: ${{ job.status == 'success' && '#2eb886' || '#ff0000' }}
