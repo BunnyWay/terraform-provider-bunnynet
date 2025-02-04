@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/storagezoneresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -143,6 +144,12 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				Description: "The date when the zone was last modified.",
 			},
 		},
+	}
+}
+
+func (r *StorageZoneResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		storagezoneresourcevalidator.Region(),
 	}
 }
 
