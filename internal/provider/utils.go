@@ -23,7 +23,7 @@ func mapValueToKey[T constraints.Integer](mapped map[T]string, value string) T {
 		}
 	}
 
-	panic("value not found in map")
+	panic(fmt.Sprintf("value not found in map: %v", value))
 }
 
 func mapKeyToValue[T constraints.Integer](mapped map[T]string, value T) string {

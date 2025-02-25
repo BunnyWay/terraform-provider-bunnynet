@@ -48,3 +48,11 @@ func ExtractErrorMessage(response *http.Response) error {
 
 	return errors.New(responseObj.Message)
 }
+
+func MapInvert[k comparable, v comparable](m map[k]v) map[v]k {
+	result := make(map[v]k, len(m))
+	for key, value := range m {
+		result[value] = key
+	}
+	return result
+}

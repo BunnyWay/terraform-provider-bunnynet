@@ -4,9 +4,8 @@
 package provider
 
 import (
-	"golang.org/x/exp/rand"
+	rand "math/rand/v2"
 	"testing"
-	"time"
 )
 
 func TestConvertTimestampToSeconds(t *testing.T) {
@@ -69,12 +68,9 @@ func TestConvertSecondsToTimestamp(t *testing.T) {
 const randomStringOptions = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 func generateRandomString(n int) string {
-	// @TODO should not need, but it is unfortunately being called somewhere else
-	rand.Seed(uint64(time.Now().UnixNano()))
-
 	result := make([]byte, n)
 	for i := range result {
-		result[i] = randomStringOptions[rand.Intn(len(randomStringOptions))]
+		result[i] = randomStringOptions[rand.IntN(len(randomStringOptions))]
 	}
 
 	return string(result)

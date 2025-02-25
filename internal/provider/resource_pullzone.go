@@ -174,6 +174,7 @@ var pullzoneOriginTypeMap = map[uint8]string{
 	1: "DnsAccelerate",
 	2: "StorageZone",
 	4: "ComputeScript",
+	5: "ComputeContainer",
 }
 
 var pullzoneRoutingTierMap = map[uint8]string{

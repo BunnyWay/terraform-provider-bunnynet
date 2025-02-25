@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
 )
@@ -23,25 +24,38 @@ type Region struct {
 	AllowLatencyRouting bool    `json:"AllowLatencyRouting"`
 }
 
-func (c *Client) GetRegion(regionCode string) (Region, error) {
+func (c *Client) GetRegions() ([]Region, error) {
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/region", c.apiUrl), nil)
 	if err != nil {
-		return Region{}, err
+		return []Region{}, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return Region{}, errors.New(resp.Status)
+		return []Region{}, errors.New(resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return Region{}, err
+		return []Region{}, err
 	}
 
 	_ = resp.Body.Close()
 	var regions []Region
 
 	err = json.Unmarshal(bodyResp, &regions)
+	if err != nil {
+		return []Region{}, err
+	}
+
+	slices.SortStableFunc(regions, func(a, b Region) int {
+		return int(a.Id - b.Id)
+	})
+
+	return regions, nil
+}
+
+func (c *Client) GetRegion(regionCode string) (Region, error) {
+	regions, err := c.GetRegions()
 	if err != nil {
 		return Region{}, err
 	}

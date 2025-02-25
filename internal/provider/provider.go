@@ -23,9 +23,10 @@ type BunnynetProvider struct {
 }
 
 type BunnyProviderModel struct {
-	ApiKey       types.String `tfsdk:"api_key"`
-	ApiUrl       types.String `tfsdk:"api_url"`
-	StreamApiUrl types.String `tfsdk:"stream_api_url"`
+	ApiKey          types.String `tfsdk:"api_key"`
+	ApiUrl          types.String `tfsdk:"api_url"`
+	ContainerApiUrl types.String `tfsdk:"container_api_url"`
+	StreamApiUrl    types.String `tfsdk:"stream_api_url"`
 }
 
 func (p *BunnynetProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -54,6 +55,10 @@ You can either set the API key directly on the <code>api_key</code> attribute fo
 			},
 			"api_url": schema.StringAttribute{
 				MarkdownDescription: "Optional. The API URL. Defaults to `https://api.bunny.net`.",
+				Optional:            true,
+			},
+			"container_api_url": schema.StringAttribute{
+				MarkdownDescription: "Optional. The Container API URL. Defaults to `https://api-mc.opsbunny.net`.",
 				Optional:            true,
 			},
 			"stream_api_url": schema.StringAttribute{
@@ -86,6 +91,15 @@ func (p *BunnynetProvider) Configure(ctx context.Context, req provider.Configure
 		data.ApiUrl = types.StringValue("https://api.bunny.net")
 	}
 
+	envContainerApiUrl := os.Getenv("BUNNYNET_CONTAINER_API_URL")
+	if envContainerApiUrl != "" {
+		data.ContainerApiUrl = types.StringValue(envContainerApiUrl)
+	}
+
+	if data.ContainerApiUrl.IsNull() {
+		data.ContainerApiUrl = types.StringValue("https://api-mc.opsbunny.net")
+	}
+
 	envStreamApiUrl := os.Getenv("BUNNYNET_STREAM_API_URL")
 	if envStreamApiUrl != "" {
 		data.StreamApiUrl = types.StringValue(envStreamApiUrl)
@@ -96,13 +110,21 @@ func (p *BunnynetProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	userAgent := fmt.Sprintf("Terraform/%s BunnynetProvider/%s", req.TerraformVersion, p.version)
-	apiClient := api.NewClient(data.ApiKey.ValueString(), data.ApiUrl.ValueString(), data.StreamApiUrl.ValueString(), userAgent)
+	apiClient := api.NewClient(
+		data.ApiKey.ValueString(),
+		data.ApiUrl.ValueString(),
+		data.ContainerApiUrl.ValueString(),
+		data.StreamApiUrl.ValueString(),
+		userAgent,
+	)
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
 }
 
 func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewComputeContainerAppResource,
+		NewComputeContainerImageregistryResource,
 		NewComputeScriptResource,
 		NewComputeScriptSecretResource,
 		NewComputeScriptVariableResource,
@@ -122,6 +144,9 @@ func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Reso
 
 func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewComputeContainerAppContainerDataSource,
+		NewComputeContainerAppContainerEndpointDataSource,
+		NewComputeContainerImageRegistryDataSource,
 		NewDnsRecordDataSource,
 		NewDnsZoneDataSource,
 		NewRegionDataSource,

@@ -132,7 +132,7 @@ resource "bunnynet_pullzone" "example" {
 
 Required:
 
-- `type` (String) Options: `ComputeScript`, `DnsAccelerate`, `OriginUrl`, `StorageZone`
+- `type` (String) Options: `ComputeContainer`, `ComputeScript`, `DnsAccelerate`, `OriginUrl`, `StorageZone`
 
 Optional:
 
