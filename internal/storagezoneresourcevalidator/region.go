@@ -32,13 +32,25 @@ func (v regionValidator) ValidateResource(ctx context.Context, request resource.
 	var zoneTier types.String
 	request.Config.GetAttribute(ctx, zoneTierAttr, &zoneTier)
 
+	if zoneTier.IsUnknown() {
+		return
+	}
+
 	regionAttr := path.Root("region")
 	var region types.String
 	request.Config.GetAttribute(ctx, regionAttr, &region)
 
+	if region.IsUnknown() {
+		return
+	}
+
 	replicationRegionsAttr := path.Root("replication_regions")
 	var replicationRegions types.Set
 	request.Config.GetAttribute(ctx, replicationRegionsAttr, &replicationRegions)
+
+	if replicationRegions.IsUnknown() {
+		return
+	}
 
 	replicationRegionsElements := []string{}
 	if !replicationRegions.IsNull() {

@@ -176,6 +176,16 @@ func TestRegions(t *testing.T) {
 				}),
 			},
 		},
+
+		// issue 31: variable expansion
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"zone_tier":           tftypes.NewValue(tftypes.String, "Standard"),
+				"region":              tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+				"replication_regions": tftypes.NewValue(tftypes.Set{ElementType: tftypes.String}, nil),
+			},
+		},
 	}
 
 	configSchema := schema.Schema{

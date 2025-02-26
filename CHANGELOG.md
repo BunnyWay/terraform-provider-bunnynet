@@ -7,9 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.6.1] - 2025-02-26
+### Fixed
+- resource storage_zone: support variables during validation ([#31](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/31))
+
 ## [0.6.0] - 2025-02-25
 ### Added
 - Support for Magic Containers
+- resource storage_zone: validate regions
 ### Changed
 - Bumped minimum Go version to 1.23
 - Bumped minimum Terraform version to 1.4
