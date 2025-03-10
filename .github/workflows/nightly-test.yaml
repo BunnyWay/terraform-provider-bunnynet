@@ -37,6 +37,8 @@ jobs:
           TF_ACC: "1"
           BUNNYNET_API_KEY: ${{ secrets.STAGING_TESTACC_API_KEY }}
           BUNNYNET_API_URL: ${{ secrets.STAGING_TESTACC_API_URL }}
+          BUNNYNET_CONTAINER_API_URL: ${{ secrets.STAGING_TESTACC_CONTAINER_API_URL }}
+          BUNNYNET_STREAM_API_URL: ${{ secrets.STAGING_TESTACC_STREAM_API_URL }}
 
       - name: Notify results
         uses: bryannice/gitactions-slack-notification@2.0.0

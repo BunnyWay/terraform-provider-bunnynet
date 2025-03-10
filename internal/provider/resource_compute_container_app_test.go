@@ -18,8 +18,8 @@ data "bunnynet_compute_container_imageregistry" "dockerhub" {
 
 resource "bunnynet_compute_container_app" "test" {
 	name = "test-acceptance-%s"
-	regions_allowed = ["DE"]
-	regions_required = ["DE"]
+	regions_allowed = ["GA"]
+	regions_required = ["GA"]
 
 	container {
 		name = "echo"
