@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.6.2] - 2025-03-18
+### Changed
+- updated dependencies
+
 ## [0.6.1] - 2025-02-26
 ### Fixed
 - resource storage_zone: support variables during validation ([#31](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/31))
