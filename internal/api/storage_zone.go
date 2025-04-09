@@ -90,11 +90,7 @@ func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
 	}
 
 	data.Id = dataApiResult.Id
-	dataApiResult, err = c.UpdateStorageZone(data)
-	if err != nil {
-		_ = c.DeleteStorageZone(data.Id)
-	}
-	return dataApiResult, err
+	return c.UpdateStorageZone(data)
 }
 
 func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {

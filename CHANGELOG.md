@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [Unreleased]
+### Fixed
+- resource storage_zone: handle empty set for `replication_regions`
+
 ## [0.6.2] - 2025-03-18
 ### Changed
 - updated dependencies

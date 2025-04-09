@@ -10,6 +10,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/storagezoneresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -94,6 +96,8 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 			"replication_regions": schema.SetAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				Description: "A set of regions for data replication.",
 			},
 			"zone_tier": schema.StringAttribute{
@@ -179,21 +183,21 @@ func (r *StorageZoneResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreateStorageZone(dataApi)
+	dataResultApi, err := r.client.CreateStorageZone(dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create storage zone", err.Error())
 		return
 	}
 
-	tflog.Trace(ctx, "created storage zone "+dataApi.Name)
-	dataTf, diags := r.convertApiToModel(dataApi)
+	tflog.Info(ctx, "POST /storagezone/", map[string]any{
+		"payload": dataApi,
+		"result":  dataResultApi,
+	})
+
+	dataTf, diags := r.convertApiToModel(dataResultApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
-	}
-
-	if len(dataApi.ReplicationRegions) == 0 {
-		dataTf.ReplicationRegions = types.SetNull(types.StringType)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
@@ -212,6 +216,10 @@ func (r *StorageZoneResource) Read(ctx context.Context, req resource.ReadRequest
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage zone", err.Error()))
 		return
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("GET /storagezone/%d", dataApi.Id), map[string]any{
+		"result": dataApi,
+	})
 
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
@@ -313,9 +321,7 @@ func (r *StorageZoneResource) convertModelToApi(ctx context.Context, dataTf Stor
 	dataApi.StorageHostname = dataTf.StorageHostname.ValueString()
 	dataApi.DateModified = dataTf.DateModified.ValueString()
 
-	if dataTf.ReplicationRegions.IsNull() {
-		dataApi.ReplicationRegions = nil
-	} else {
+	{
 		replicationRegions := []string{}
 		dataTf.ReplicationRegions.ElementsAs(ctx, &replicationRegions, false)
 		dataApi.ReplicationRegions = replicationRegions
@@ -337,9 +343,7 @@ func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (Storag
 	dataTf.DateModified = types.StringValue(dataApi.DateModified)
 	dataTf.Custom404FilePath = typeStringOrNull(dataApi.Custom404FilePath)
 
-	if len(dataApi.ReplicationRegions) == 0 {
-		dataTf.ReplicationRegions = types.SetNull(types.StringType)
-	} else {
+	{
 		replicationRegions, err := utils.ConvertStringSliceToSet(dataApi.ReplicationRegions)
 		if err != nil {
 			return dataTf, err
