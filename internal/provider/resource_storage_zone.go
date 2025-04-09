@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
+	"regexp"
 	"strconv"
 )
 
@@ -79,7 +80,8 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
+					stringvalidator.LengthBetween(4, 64),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[a-z0-9-]+$"), "should only contain lowercase letters, numbers and dash"),
 				},
 				Description: "The name of the storage zone.",
 			},

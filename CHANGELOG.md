@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 ### Fixed
 - resource storage_zone: handle empty set for `replication_regions`
+- resource storage_zone: validate `name`
 
 ## [0.6.2] - 2025-03-18
 ### Changed
