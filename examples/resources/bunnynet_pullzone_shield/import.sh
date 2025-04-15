@@ -1,0 +1,1 @@
+terraform import bunnynet_pullzone_shield.test $PULLZONE_ID
