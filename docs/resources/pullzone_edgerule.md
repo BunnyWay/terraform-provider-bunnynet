@@ -72,7 +72,7 @@ Required:
 - `parameter1` (String)
 - `parameter2` (String)
 - `patterns` (List of String)
-- `type` (String)
+- `type` (String) Options: `ResponseHeader`, `UrlExtension`, `CountryCode`, `UrlQueryString`, `StatusCode`, `RequestMethod`, `Url`, `RequestHeader`, `CookieValue`, `CountryStateCode`, `RemoteIP`, `RandomChance`
 
 
 <a id="nestedatt--actions"></a>
