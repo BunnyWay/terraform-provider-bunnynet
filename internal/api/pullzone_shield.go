@@ -339,10 +339,7 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 }
 
 func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) (PullzoneShield, error) {
-	premiumPlan := false
-	if data.PlanType == 1 {
-		premiumPlan = true
-	}
+	premiumPlan := data.PlanType == 1
 
 	wafEngineConfig, err := c.convertPullzoneShieldWafEngineConfigToBody(data)
 	if err != nil {

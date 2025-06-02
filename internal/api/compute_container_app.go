@@ -263,7 +263,10 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, errors.New(resp.Status + string(bodyStr))
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
 	var result struct {
 		Id string `json:"id"`
 	}
