@@ -177,19 +177,29 @@ func (r *PullzoneHostnameResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
+	hostname := dataApi.Name
+	pullzoneId := dataApi.PullzoneId
 	certificate := dataApi.Certificate
 	certificateKey := dataApi.CertificateKey
 
 	dataApi, err := r.client.CreatePullzoneHostname(dataApi)
-	dataApi.Certificate = certificate
-	dataApi.CertificateKey = certificateKey
-
 	if err != nil {
+		re := regexp.MustCompile(`loadFreeCertificate failed: The domain .* is not pointing to our servers\.`)
+		if re.MatchString(err.Error()) {
+			err2 := r.client.DeletePullzoneHostname(pullzoneId, hostname)
+			if err2 != nil {
+				tflog.Error(ctx, fmt.Sprintf("Delete hostname for pullzone %d failed: %s", pullzoneId, err2.Error()))
+				resp.Diagnostics.AddWarning("pullzone_hostname is in a dirty state", "The hostname creation failed, and unfortunately the cleanup did too. You'll have to manually remove the hostname in dash.bunny.net, or import it in terraform to continue.")
+			}
+		}
+
 		resp.Diagnostics.AddError("Unable to create hostname", err.Error())
 		return
 	}
 
-	tflog.Trace(ctx, fmt.Sprintf("created hostname for pullzone %d", dataApi.PullzoneId))
+	tflog.Trace(ctx, fmt.Sprintf("created hostname for pullzone %d", pullzoneId))
+	dataApi.Certificate = certificate
+	dataApi.CertificateKey = certificateKey
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)

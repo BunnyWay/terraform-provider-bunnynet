@@ -59,6 +59,10 @@ func TestAccPullzoneHostnameResource(t *testing.T) {
 				ExpectError: regexp.MustCompile(`.*Attribute "tls_enabled" must also be set to true.`),
 			},
 			{
+				Config:      fmt.Sprintf(configPullzoneHostnameTest, testKey, testKey, true, true),
+				ExpectError: regexp.MustCompile(`.*loadFreeCertificate failed: The\sdomain\s.*\sis\snot\spointing\sto\sour\sservers\.`),
+			},
+			{
 				// workaround for tests with ExpectError
 				// {@see https://github.com/hashicorp/terraform-plugin-sdk/issues/609#issuecomment-1101251674}
 				Config: fmt.Sprintf(configPullzoneHostnameTest, testKey, testKey, false, false),
