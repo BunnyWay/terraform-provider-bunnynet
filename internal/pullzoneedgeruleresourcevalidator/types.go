@@ -22,6 +22,10 @@ var ActionMap = map[uint8]string{
 	18: "SetNetworkRateLimit",
 	19: "SetConnectionLimit",
 	20: "SetRequestsPerSecondLimit",
+	21: "RunEdgeScript",
+	22: "OriginMagicContainers",
+	23: "DisableWAF",
+	24: "RetryOrigin",
 }
 
 var TriggerTypeMap = map[uint8]string{
@@ -37,6 +41,8 @@ var TriggerTypeMap = map[uint8]string{
 	9:  "RequestMethod",
 	10: "CookieValue",
 	11: "CountryStateCode",
+	12: "OriginRetryAttemptCount",
+	13: "OriginConnectionError",
 }
 
 var TriggerMatchTypeMap = map[uint8]string{

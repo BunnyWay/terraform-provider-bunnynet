@@ -51,7 +51,7 @@ resource "bunnynet_pullzone_edgerule" "redirect_admin" {
 
 ### Optional
 
-- `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
+- `action` (String) Options: `BlockRequest`, `BypassPermaCache`, `DisableOptimizer`, `DisableTokenAuthentication`, `DisableWAF`, `EnableTokenAuthentication`, `ForceCompression`, `ForceDownload`, `ForceSSL`, `IgnoreQueryString`, `OriginMagicContainers`, `OriginStorage`, `OriginUrl`, `OverrideBrowserCacheTime`, `OverrideCacheTime`, `OverrideCacheTimePublic`, `Redirect`, `RetryOrigin`, `RunEdgeScript`, `SetConnectionLimit`, `SetNetworkRateLimit`, `SetRequestHeader`, `SetRequestsPerSecondLimit`, `SetResponseHeader`, `SetStatusCode`
 - `action_parameter1` (String)
 - `action_parameter2` (String)
 - `action_parameter3` (String)
