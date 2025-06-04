@@ -138,7 +138,7 @@ Optional:
 
 Read-Only:
 
-- `pullzone_id` (Number) The ID of the pullzone associated with the endpoint.
+- `id` (Number) The ID of the pullzone associated with the endpoint.
 
 <a id="nestedblock--container--endpoint--cdn--sticky_sessions"></a>
 ### Nested Schema for `container.endpoint.cdn.sticky_sessions`
