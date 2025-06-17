@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -51,6 +52,7 @@ type PullzoneEdgeruleResourceModel struct {
 	ActionParameter2 types.String `tfsdk:"action_parameter2"`
 	ActionParameter3 types.String `tfsdk:"action_parameter3"`
 	MatchType        types.String `tfsdk:"match_type"`
+	Priority         types.Int64  `tfsdk:"priority"`
 	Actions          types.List   `tfsdk:"actions"`
 	Triggers         types.List   `tfsdk:"triggers"`
 }
@@ -157,6 +159,18 @@ func (r *PullzoneEdgeruleResource) Schema(ctx context.Context, req resource.Sche
 					stringvalidator.OneOf(maps.Values(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap)...),
 				},
 				MarkdownDescription: generateMarkdownMapOptions(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap),
+			},
+			"priority": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(0),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
+				Description: "The priority of the edge rule. The lower number is executed first.",
 			},
 			"actions": schema.ListAttribute{
 				Optional:    true,
@@ -338,6 +352,7 @@ func (r *PullzoneEdgeruleResource) convertModelToApi(ctx context.Context, dataTf
 	dataApi.Enabled = dataTf.Enabled.ValueBool()
 	dataApi.Description = dataTf.Description.ValueString()
 	dataApi.MatchType = mapValueToKey(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, dataTf.MatchType.ValueString())
+	dataApi.OrderIndex = dataTf.Priority.ValueInt64()
 
 	// actions
 	{
@@ -434,6 +449,7 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 	dataTf.Enabled = types.BoolValue(dataApi.Enabled)
 	dataTf.Description = types.StringValue(dataApi.Description)
 	dataTf.MatchType = types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.TriggerMatchTypeMap, dataApi.MatchType))
+	dataTf.Priority = types.Int64Value(dataApi.OrderIndex)
 
 	// actions
 	{

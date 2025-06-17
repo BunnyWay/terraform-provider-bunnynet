@@ -58,6 +58,7 @@ resource "bunnynet_pullzone_edgerule" "redirect_admin" {
 - `actions` (List of Object) List of actions for the edge rule. (see [below for nested schema](#nestedatt--actions))
 - `description` (String) The description of the edge rule.
 - `match_type` (String) Options: `MatchAll`, `MatchAny`, `MatchNone`
+- `priority` (Number) The priority of the edge rule. The lower number is executed first.
 
 ### Read-Only
 

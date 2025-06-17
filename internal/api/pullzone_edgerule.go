@@ -23,6 +23,7 @@ type PullzoneEdgerule struct {
 	ExtraActions     []PullzoneEdgeruleExtraAction `json:"ExtraActions"`
 	MatchType        uint8                         `json:"TriggerMatchingType"`
 	Triggers         []PullzoneEdgeruleTrigger     `json:"Triggers"`
+	OrderIndex       int64                         `json:"OrderIndex,omitempty"`
 	PullzoneId       int64                         `json:"-"`
 }
 
