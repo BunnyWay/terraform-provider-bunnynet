@@ -24,6 +24,16 @@ func TestShieldAdvancedRealtimeThreatIntelligence(t *testing.T) {
 	}
 
 	testCases := []testCase{
+		// @TODO can't test with realtime_threat_intelligence missing, as the framework does not support OptionalAttributes
+		// panic: can't create a tftypes.Value of type tftypes.Object["realtime_threat_intelligence":tftypes.Bool], required attribute "realtime_threat_intelligence" not set
+		// panic: Objects with OptionalAttributes cannot be used.
+		//{
+		//	ExpectedError: false,
+		//	PlanValues: map[string]tftypes.Value{
+		//		"tier": tftypes.NewValue(tftypes.String, "Basic"),
+		//		"waf":  tftypes.NewValue(wafObjType, map[string]tftypes.Value{}),
+		//	},
+		//},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{

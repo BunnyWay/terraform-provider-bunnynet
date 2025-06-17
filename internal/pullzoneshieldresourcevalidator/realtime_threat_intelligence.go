@@ -39,7 +39,11 @@ func (v realtimeThreatIntelligenceValidator) ValidateResource(ctx context.Contex
 	}
 
 	attrs := waf.Attributes()
-	rti := attrs["realtime_threat_intelligence"].(types.Bool)
+	rti, ok := attrs["realtime_threat_intelligence"].(types.Bool)
+	if !ok {
+		return
+	}
+
 	if rti.IsUnknown() {
 		return
 	}
