@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
-## [Unreleased]
+## [0.7.4] - 2025-06-18
 ### Fixed
 - resource pullzone_optimizer_class: fix `Edge Script ID not found` error ([#39](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/39));
 - resource pullzone_shield: missing realtime_threat_intelligence causes a panic
