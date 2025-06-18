@@ -31,11 +31,9 @@ func (c *Client) CreatePullzoneOptimizerClass(data PullzoneOptimizerClass) (Pull
 		return PullzoneOptimizerClass{}, err
 	}
 
-	for _, class := range pullzoneResult.OptimizerClasses {
-		if class.Name == data.Name {
-			class.PullzoneId = pullzoneResult.Id
-			return class, nil
-		}
+	class := extractPullzoneOptimizerClass(pullzoneResult, data.Name)
+	if class != nil {
+		return *class, nil
 	}
 
 	return PullzoneOptimizerClass{}, errors.New("Optimizer Image Class not found")
@@ -47,11 +45,9 @@ func (c *Client) GetPullzoneOptimizerClass(pullzoneId int64, name string) (Pullz
 		return PullzoneOptimizerClass{}, err
 	}
 
-	for _, class := range pullzone.OptimizerClasses {
-		if class.Name == name {
-			class.PullzoneId = pullzone.Id
-			return class, nil
-		}
+	class := extractPullzoneOptimizerClass(pullzone, name)
+	if class != nil {
+		return *class, nil
 	}
 
 	return PullzoneOptimizerClass{}, errors.New("Optimizer Image Class not found")
@@ -67,12 +63,17 @@ func (c *Client) UpdatePullzoneOptimizerClass(data PullzoneOptimizerClass) (Pull
 		if class.Name == data.Name {
 			pullzone.OptimizerClasses[i] = data
 
-			_, err := c.UpdatePullzone(pullzone)
+			pullzoneResult, err := c.UpdatePullzone(pullzone)
 			if err != nil {
 				return PullzoneOptimizerClass{}, err
 			}
 
-			return c.GetPullzoneOptimizerClass(data.PullzoneId, data.Name)
+			class := extractPullzoneOptimizerClass(pullzoneResult, data.Name)
+			if class != nil {
+				return *class, nil
+			}
+
+			break
 		}
 	}
 
@@ -97,4 +98,15 @@ func (c *Client) DeletePullzoneOptimizerClass(pullzoneId int64, name string) err
 	_, err = c.UpdatePullzone(pullzone)
 
 	return err
+}
+
+func extractPullzoneOptimizerClass(pullzone Pullzone, name string) *PullzoneOptimizerClass {
+	for _, class := range pullzone.OptimizerClasses {
+		if class.Name == name {
+			class.PullzoneId = pullzone.Id
+			return &class
+		}
+	}
+
+	return nil
 }

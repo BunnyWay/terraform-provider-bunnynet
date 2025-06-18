@@ -219,6 +219,10 @@ func (c *Client) UpdatePullzone(dataApi Pullzone) (Pullzone, error) {
 		return Pullzone{}, err
 	}
 
+	return c.UpdatePullzoneWithBody(id, body)
+}
+
+func (c *Client) UpdatePullzoneWithBody(id int64, body []byte) (Pullzone, error) {
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
 		return Pullzone{}, err
