@@ -4,6 +4,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"golang.org/x/exp/slices"
 )
@@ -26,7 +27,15 @@ func (c *Client) CreatePullzoneOptimizerClass(data PullzoneOptimizerClass) (Pull
 
 	pullzone.OptimizerClasses = append(pullzone.OptimizerClasses, data)
 
-	pullzoneResult, err := c.UpdatePullzone(pullzone)
+	body, err := json.Marshal(map[string]interface{}{
+		"OptimizerClasses": pullzone.OptimizerClasses,
+	})
+
+	if err != nil {
+		return PullzoneOptimizerClass{}, err
+	}
+
+	pullzoneResult, err := c.UpdatePullzoneWithBody(pullzone.Id, body)
 	if err != nil {
 		return PullzoneOptimizerClass{}, err
 	}
@@ -63,7 +72,15 @@ func (c *Client) UpdatePullzoneOptimizerClass(data PullzoneOptimizerClass) (Pull
 		if class.Name == data.Name {
 			pullzone.OptimizerClasses[i] = data
 
-			pullzoneResult, err := c.UpdatePullzone(pullzone)
+			body, err := json.Marshal(map[string]interface{}{
+				"OptimizerClasses": pullzone.OptimizerClasses,
+			})
+
+			if err != nil {
+				return PullzoneOptimizerClass{}, err
+			}
+
+			pullzoneResult, err := c.UpdatePullzoneWithBody(pullzone.Id, body)
 			if err != nil {
 				return PullzoneOptimizerClass{}, err
 			}
@@ -95,7 +112,16 @@ func (c *Client) DeletePullzoneOptimizerClass(pullzoneId int64, name string) err
 	}
 
 	pullzone.OptimizerClasses = slices.Delete(pullzone.OptimizerClasses, indexToRemove, indexToRemove+1)
-	_, err = c.UpdatePullzone(pullzone)
+
+	body, err := json.Marshal(map[string]interface{}{
+		"OptimizerClasses": pullzone.OptimizerClasses,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	_, err = c.UpdatePullzoneWithBody(pullzone.Id, body)
 
 	return err
 }

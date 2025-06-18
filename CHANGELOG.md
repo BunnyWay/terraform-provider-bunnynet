@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 ### Fixed
+- resource pullzone_optimizer_class: fix `Edge Script ID not found` error ([#39](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/39));
 - resource pullzone_shield: missing realtime_threat_intelligence causes a panic
 
 ## [0.7.3] - 2025-06-17
