@@ -166,6 +166,21 @@ func (r *StorageFileResource) Configure(ctx context.Context, req resource.Config
 	r.client = client
 }
 
+func (r *StorageFileResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var checksumState string
+	var checksumPlan string
+
+	req.State.GetAttribute(ctx, path.Root("checksum"), &checksumState)
+	req.Plan.GetAttribute(ctx, path.Root("checksum"), &checksumPlan)
+
+	if checksumState == "" || checksumPlan == "" || checksumState == checksumPlan {
+		return
+	}
+
+	resp.Plan.SetAttribute(ctx, path.Root("date_modified"), types.StringUnknown())
+	resp.Plan.SetAttribute(ctx, path.Root("size"), types.Int64Unknown())
+}
+
 func (r *StorageFileResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var dataTf StorageFileResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
