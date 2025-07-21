@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## [0.7.6] - 2025-07-21
+### Fixed
+- resource pullzone_edgerule: add missing actions ([#42](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/42));
+- resource pullzone_hostname: create: clean up after loadFreeCertificate error ([#41](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/41));
+- resource pullzone_edgerule: do not panic when an edgerule action is not mapped;
+
 ## [0.7.5] - 2025-06-19
 ### Fixed
 - resource storage_file: changed referenced `source` file does not trigger an update ([#40](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/40));
