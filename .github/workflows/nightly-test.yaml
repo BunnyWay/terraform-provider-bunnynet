@@ -30,6 +30,7 @@ jobs:
         env:
           TF_ACC: "1"
           BUNNYNET_API_KEY: ${{ secrets.TESTACC_API_KEY }}
+          TESTACC_MC_REGION: ${{ vars.TESTACC_MC_REGION_PROD }}
 
       - name: Staging
         run: go test -v -cover ./internal/provider/
@@ -39,6 +40,7 @@ jobs:
           BUNNYNET_API_URL: ${{ secrets.STAGING_TESTACC_API_URL }}
           BUNNYNET_CONTAINER_API_URL: ${{ secrets.STAGING_TESTACC_CONTAINER_API_URL }}
           BUNNYNET_STREAM_API_URL: ${{ secrets.STAGING_TESTACC_STREAM_API_URL }}
+          TESTACC_MC_REGION: ${{ vars.TESTACC_MC_REGION_STAGING }}
 
       - name: Notify results
         uses: bryannice/gitactions-slack-notification@2.0.0

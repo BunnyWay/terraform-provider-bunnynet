@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"os"
 	"testing"
 )
 
@@ -18,8 +19,8 @@ data "bunnynet_compute_container_imageregistry" "dockerhub" {
 
 resource "bunnynet_compute_container_app" "test" {
 	name = "test-acceptance-%s"
-	regions_allowed = ["GA"]
-	regions_required = ["GA"]
+	regions_allowed = ["%s"]
+	regions_required = ["%s"]
 
 	container {
 		name = "echo"
@@ -45,9 +46,14 @@ resource "bunnynet_compute_container_app" "test" {
 `
 
 func TestAccComputeContainerAppResource(t *testing.T) {
+	mcRegion := os.Getenv("TESTACC_MC_REGION")
+	if mcRegion == "" {
+		t.Error("TESTACC_MC_REGION is missing")
+	}
+
 	resourceName := "bunnynet_compute_container_app.test"
 	testKey := generateRandomString(12)
-	config := fmt.Sprintf(configComputeContainerAppTest, testKey)
+	config := fmt.Sprintf(configComputeContainerAppTest, testKey, mcRegion, mcRegion)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
