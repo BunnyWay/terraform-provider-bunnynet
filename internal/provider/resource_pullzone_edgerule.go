@@ -458,8 +458,15 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 
 		// main action
 		{
+			v, ok := pullzoneedgeruleresourcevalidator.ActionMap[dataApi.Action]
+			if !ok {
+				var diags diag.Diagnostics
+				diags.AddError("Undefined Edge Rule action", fmt.Sprintf("Action %d is not defined in terraform", dataApi.Action))
+				return PullzoneEdgeruleResourceModel{}, diags
+			}
+
 			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
-				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, dataApi.Action)),
+				"type":       types.StringValue(v),
 				"parameter1": typeStringOrNull(dataApi.ActionParameter1),
 				"parameter2": typeStringOrNull(dataApi.ActionParameter2),
 				"parameter3": typeStringOrNull(dataApi.ActionParameter3),
@@ -475,8 +482,15 @@ func (r *PullzoneEdgeruleResource) convertApiToModel(dataApi api.PullzoneEdgerul
 
 		// extra actions
 		for _, extraAction := range dataApi.ExtraActions {
+			v, ok := pullzoneedgeruleresourcevalidator.ActionMap[extraAction.ActionType]
+			if !ok {
+				var diags diag.Diagnostics
+				diags.AddError("Undefined Edge Rule action", fmt.Sprintf("Action %d is not defined in terraform", dataApi.Action))
+				return PullzoneEdgeruleResourceModel{}, diags
+			}
+
 			actionValue, diags := types.ObjectValue(pullzoneEdgeruleActionType.AttrTypes, map[string]attr.Value{
-				"type":       types.StringValue(mapKeyToValue(pullzoneedgeruleresourcevalidator.ActionMap, extraAction.ActionType)),
+				"type":       types.StringValue(v),
 				"parameter1": typeStringOrNull(extraAction.ActionParameter1),
 				"parameter2": typeStringOrNull(extraAction.ActionParameter2),
 				"parameter3": typeStringOrNull(extraAction.ActionParameter3),
