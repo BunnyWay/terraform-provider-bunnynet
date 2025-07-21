@@ -184,12 +184,21 @@ func (r *PullzoneHostnameResource) Create(ctx context.Context, req resource.Crea
 
 	dataApi, err := r.client.CreatePullzoneHostname(dataApi)
 	if err != nil {
-		re := regexp.MustCompile(`loadFreeCertificate failed: The domain .* is not pointing to our servers\.`)
-		if re.MatchString(err.Error()) {
-			err2 := r.client.DeletePullzoneHostname(pullzoneId, hostname)
-			if err2 != nil {
-				tflog.Error(ctx, fmt.Sprintf("Delete hostname for pullzone %d failed: %s", pullzoneId, err2.Error()))
-				resp.Diagnostics.AddWarning("pullzone_hostname is in a dirty state", "The hostname creation failed, and unfortunately the cleanup did too. You'll have to manually remove the hostname in dash.bunny.net, or import it in terraform to continue.")
+		possibleErrors := []*regexp.Regexp{
+			regexp.MustCompile(`loadFreeCertificate failed: The domain .* is not pointing to our servers\.`),
+			regexp.MustCompile(`loadFreeCertificate failed: The certificate could not be requested\.`),
+			regexp.MustCompile(`loadFreeCertificate failed: .* urn:ietf:params:acme:error:rateLimited: too many certificates`),
+		}
+
+		tflog.Error(ctx, "CreatePullzoneHostname failed: "+err.Error())
+
+		for _, re := range possibleErrors {
+			if re.MatchString(err.Error()) {
+				err2 := r.client.DeletePullzoneHostname(pullzoneId, hostname)
+				if err2 != nil {
+					tflog.Error(ctx, fmt.Sprintf("Delete hostname for pullzone %d failed: %s", pullzoneId, err2.Error()))
+					resp.Diagnostics.AddWarning("pullzone_hostname is in a dirty state", "The hostname creation failed, and unfortunately the cleanup did too. You'll have to manually remove the hostname in dash.bunny.net, or import it in terraform to continue.")
+				}
 			}
 		}
 
