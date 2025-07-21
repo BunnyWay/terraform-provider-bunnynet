@@ -26,6 +26,12 @@ var ActionMap = map[uint8]string{
 	22: "OriginMagicContainers",
 	23: "DisableWAF",
 	24: "RetryOrigin",
+	25: "OverrideBrowserCacheResponseHeader",
+	26: "RemoveBrowserCacheResponseHeader",
+	27: "DisableShieldChallenge",
+	28: "DisableShield",
+	29: "DisableShieldBotDetection",
+	30: "BypassAwsS3Authentication",
 }
 
 var TriggerTypeMap = map[uint8]string{
