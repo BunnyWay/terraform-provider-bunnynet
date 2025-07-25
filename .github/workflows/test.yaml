@@ -100,3 +100,4 @@ jobs:
         env:
           TF_ACC: "1"
           BUNNYNET_API_KEY: ${{ secrets.TESTACC_API_KEY }}
+          TESTACC_MC_REGION: ${{ vars.TESTACC_MC_REGION_PROD }}
