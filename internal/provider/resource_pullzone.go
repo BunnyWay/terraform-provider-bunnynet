@@ -1168,7 +1168,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					int64planmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.Int64{
-					int64validator.AtLeast(0),
+					int64validator.OneOf(3, 5, 10),
 				},
 				Description: "The amount of seconds to wait when connecting to the origin. Otherwise the request will fail or retry.",
 			},
@@ -1180,7 +1180,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					int64planmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.Int64{
-					int64validator.AtLeast(0),
+					int64validator.OneOf(5, 15, 30, 45, 60),
 				},
 				Description: "The amount of seconds to wait when waiting for the origin reply. Otherwise the request will fail or retry.",
 			},
