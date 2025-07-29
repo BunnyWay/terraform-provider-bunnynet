@@ -175,92 +175,95 @@ func (c *Client) GetPullzoneShieldIdByPullzone(pullzoneId int64) (int64, error) 
 }
 
 func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShield, error) {
-	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/shield-zone/%d", c.apiUrl, id), nil)
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
-		if err != nil {
-			return PullzoneShield{}, err
-		} else {
-			return PullzoneShield{}, errors.New("get shieldzone for pullzone failed with " + resp.Status)
-		}
-	}
-
-	bodyResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	tflog.Warn(ctx, fmt.Sprintf("GET /shield/shield-zone/%d: %+v", id, string(bodyResp)))
-
 	var result struct {
 		Data PullzoneShield `json:"data"`
 	}
 
-	err = json.Unmarshal(bodyResp, &result)
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	engineConfigDefaults, err := c.GetPullzoneShieldDefaultWafEngineConfig()
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	// copy defaults into result
-	result.Data.WafAllowedHttpMethods = utils.SetToSlice(engineConfigDefaults.AllowedHttpMethods)
-	result.Data.WafAllowedHttpVersions = utils.SetToSlice(engineConfigDefaults.AllowedHttpVersions)
-	result.Data.WafAllowedRequestContentTypes = utils.SetToSlice(engineConfigDefaults.AllowedRequestContentTypes)
-
-	// override defaults with pullzone data
-	for _, item := range result.Data.WafEngineConfig {
-		if item.Name == "allowed_http_versions" {
-			result.Data.WafAllowedHttpVersions = strings.Split(item.ValueEncoded, " ")
+	// fetch basic config
+	{
+		resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/shield-zone/%d", c.apiUrl, id), nil)
+		if err != nil {
+			return PullzoneShield{}, err
 		}
 
-		if item.Name == "allowed_methods" {
-			result.Data.WafAllowedHttpMethods = strings.Split(item.ValueEncoded, " ")
-		}
-
-		if item.Name == "allowed_request_content_type" {
-			var items []string
-			re := regexp.MustCompile(`(\|([^\|]+)\|)`)
-			matches := re.FindAllStringSubmatch(item.ValueEncoded, -1)
-			for _, item := range matches {
-				items = append(items, item[2])
-			}
-
-			result.Data.WafAllowedRequestContentTypes = items
-		}
-
-		if item.Name == "detection_paranoia_level" {
-			level, err := strconv.ParseInt(item.ValueEncoded, 10, 64)
+		if resp.StatusCode != http.StatusOK {
+			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
+			} else {
+				return PullzoneShield{}, errors.New("get shieldzone for pullzone failed with " + resp.Status)
 			}
-
-			result.Data.WafRuleSensitivityDetection = uint8(level)
 		}
 
-		if item.Name == "executing_paranoia_level" {
-			level, err := strconv.ParseInt(item.ValueEncoded, 10, 64)
-			if err != nil {
-				return PullzoneShield{}, err
-			}
-
-			result.Data.WafRuleSensitivityExecution = uint8(level)
+		bodyResp, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return PullzoneShield{}, err
 		}
 
-		if item.Name == "blocking_paranoia_level" {
-			level, err := strconv.ParseInt(item.ValueEncoded, 10, 64)
-			if err != nil {
-				return PullzoneShield{}, err
+		tflog.Warn(ctx, fmt.Sprintf("GET /shield/shield-zone/%d: %+v", id, string(bodyResp)))
+
+		err = json.Unmarshal(bodyResp, &result)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		engineConfigDefaults, err := c.GetPullzoneShieldDefaultWafEngineConfig()
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		// copy defaults into result
+		result.Data.WafAllowedHttpMethods = utils.SetToSlice(engineConfigDefaults.AllowedHttpMethods)
+		result.Data.WafAllowedHttpVersions = utils.SetToSlice(engineConfigDefaults.AllowedHttpVersions)
+		result.Data.WafAllowedRequestContentTypes = utils.SetToSlice(engineConfigDefaults.AllowedRequestContentTypes)
+
+		// override defaults with pullzone data
+		for _, item := range result.Data.WafEngineConfig {
+			if item.Name == "allowed_http_versions" {
+				result.Data.WafAllowedHttpVersions = strings.Split(item.ValueEncoded, " ")
 			}
 
-			result.Data.WafRuleSensitivityBlocking = uint8(level)
+			if item.Name == "allowed_methods" {
+				result.Data.WafAllowedHttpMethods = strings.Split(item.ValueEncoded, " ")
+			}
+
+			if item.Name == "allowed_request_content_type" {
+				var items []string
+				re := regexp.MustCompile(`(\|([^\|]+)\|)`)
+				matches := re.FindAllStringSubmatch(item.ValueEncoded, -1)
+				for _, item := range matches {
+					items = append(items, item[2])
+				}
+
+				result.Data.WafAllowedRequestContentTypes = items
+			}
+
+			if item.Name == "detection_paranoia_level" {
+				level, err := strconv.ParseInt(item.ValueEncoded, 10, 64)
+				if err != nil {
+					return PullzoneShield{}, err
+				}
+
+				result.Data.WafRuleSensitivityDetection = uint8(level)
+			}
+
+			if item.Name == "executing_paranoia_level" {
+				level, err := strconv.ParseInt(item.ValueEncoded, 10, 64)
+				if err != nil {
+					return PullzoneShield{}, err
+				}
+
+				result.Data.WafRuleSensitivityExecution = uint8(level)
+			}
+
+			if item.Name == "blocking_paranoia_level" {
+				level, err := strconv.ParseInt(item.ValueEncoded, 10, 64)
+				if err != nil {
+					return PullzoneShield{}, err
+				}
+
+				result.Data.WafRuleSensitivityBlocking = uint8(level)
+			}
 		}
 	}
 
@@ -341,48 +344,51 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 }
 
 func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) (PullzoneShield, error) {
-	wafEngineConfig, err := c.convertPullzoneShieldWafEngineConfigToBody(data)
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	body, err := json.Marshal(map[string]interface{}{
-		"shieldZoneId": data.Id,
-		"shieldZone": map[string]interface{}{
-			"planType":                             data.PlanType,
-			"dDoSShieldSensitivity":                data.DDoSLevel,
-			"dDoSExecutionMode":                    data.DDoSMode,
-			"dDoSChallengeWindow":                  data.DDosChallengeWindow,
-			"wafEnabled":                           data.WafEnabled,
-			"wafExecutionMode":                     data.WafMode,
-			"wafRealtimeThreatIntelligenceEnabled": data.WafRealtimeThreatIntelligenceEnabled,
-			"wafRequestHeaderLoggingEnabled":       data.WafLogHeaders,
-			"wafRequestIgnoredHeaders":             data.WafLogHeadersExcluded,
-			"wafEngineConfig":                      wafEngineConfig,
-			"wafDisabledRules":                     data.WafRulesDisabled,
-			"wafLogOnlyRules":                      data.WafRulesLogonly,
-			"whitelabelResponsePages":              data.WhiteLabelResponsePages,
-			"learningMode":                         false,
-		},
-	})
-
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	tflog.Warn(ctx, fmt.Sprintf("PATCH /shield/shield-zone: %+v", string(body)))
-
-	resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone", c.apiUrl), bytes.NewReader(body))
-	if err != nil {
-		return PullzoneShield{}, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+	// general settings
+	{
+		wafEngineConfig, err := c.convertPullzoneShieldWafEngineConfigToBody(data)
 		if err != nil {
 			return PullzoneShield{}, err
-		} else {
-			return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
+		}
+
+		body, err := json.Marshal(map[string]interface{}{
+			"shieldZoneId": data.Id,
+			"shieldZone": map[string]interface{}{
+				"planType":                             data.PlanType,
+				"dDoSShieldSensitivity":                data.DDoSLevel,
+				"dDoSExecutionMode":                    data.DDoSMode,
+				"dDoSChallengeWindow":                  data.DDosChallengeWindow,
+				"wafEnabled":                           data.WafEnabled,
+				"wafExecutionMode":                     data.WafMode,
+				"wafRealtimeThreatIntelligenceEnabled": data.WafRealtimeThreatIntelligenceEnabled,
+				"wafRequestHeaderLoggingEnabled":       data.WafLogHeaders,
+				"wafRequestIgnoredHeaders":             data.WafLogHeadersExcluded,
+				"wafEngineConfig":                      wafEngineConfig,
+				"wafDisabledRules":                     data.WafRulesDisabled,
+				"wafLogOnlyRules":                      data.WafRulesLogonly,
+				"whitelabelResponsePages":              data.WhiteLabelResponsePages,
+				"learningMode":                         false,
+			},
+		})
+
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		tflog.Warn(ctx, fmt.Sprintf("PATCH /shield/shield-zone: %+v", string(body)))
+
+		resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone", c.apiUrl), bytes.NewReader(body))
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			err := utils.ExtractErrorMessage(resp)
+			if err != nil {
+				return PullzoneShield{}, err
+			} else {
+				return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
+			}
 		}
 	}
 
