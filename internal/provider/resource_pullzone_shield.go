@@ -42,11 +42,6 @@ type PullzoneShieldResource struct {
 	client *api.Client
 }
 
-var pullzoneShieldPlanTypeMap = map[uint8]string{
-	0: "Basic",
-	1: "Advanced",
-}
-
 type PullzoneShieldResourceModel struct {
 	Id         types.Int64  `tfsdk:"id"`
 	PullzoneId types.Int64  `tfsdk:"pullzone"`
@@ -168,11 +163,11 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 			"tier": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  stringdefault.StaticString(pullzoneShieldPlanTypeMap[0]),
+				Default:  stringdefault.StaticString(pullzoneshieldresourcevalidator.PlanTypeMap[0]),
 				Validators: []validator.String{
-					stringvalidator.OneOf(maps.Values(pullzoneShieldPlanTypeMap)...),
+					stringvalidator.OneOf(maps.Values(pullzoneshieldresourcevalidator.PlanTypeMap)...),
 				},
-				Description: generateMarkdownMapOptions(pullzoneShieldPlanTypeMap),
+				Description: generateMarkdownMapOptions(pullzoneshieldresourcevalidator.PlanTypeMap),
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -482,7 +477,7 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 	dataApi := api.PullzoneShield{}
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
-	dataApi.PlanType = mapValueToKey(pullzoneShieldPlanTypeMap, dataTf.Tier.ValueString())
+	dataApi.PlanType = mapValueToKey(pullzoneshieldresourcevalidator.PlanTypeMap, dataTf.Tier.ValueString())
 
 	// ddos
 	{
@@ -553,7 +548,7 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 	dataTf := PullzoneShieldResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
-	dataTf.Tier = types.StringValue(mapKeyToValue(pullzoneShieldPlanTypeMap, dataApi.PlanType))
+	dataTf.Tier = types.StringValue(mapKeyToValue(pullzoneshieldresourcevalidator.PlanTypeMap, dataApi.PlanType))
 
 	// ddos
 	{

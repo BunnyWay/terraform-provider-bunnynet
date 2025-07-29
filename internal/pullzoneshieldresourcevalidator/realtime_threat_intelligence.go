@@ -2,6 +2,7 @@ package pullzoneshieldresourcevalidator
 
 import (
 	"context"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,7 +15,7 @@ func RealtimeThreatIntelligence() resource.ConfigValidator {
 type realtimeThreatIntelligenceValidator struct{}
 
 func (v realtimeThreatIntelligenceValidator) Description(ctx context.Context) string {
-	return "waf.realtime_threat_intelligence requires \"tier\" = \"Advanced\""
+	return "waf.realtime_threat_intelligence a paid \"tier\""
 }
 
 func (v realtimeThreatIntelligenceValidator) MarkdownDescription(ctx context.Context) string {
@@ -26,7 +27,15 @@ func (v realtimeThreatIntelligenceValidator) ValidateResource(ctx context.Contex
 	tierAttr := path.Root("tier")
 	req.Config.GetAttribute(ctx, tierAttr, &tier)
 
-	if tier.IsUnknown() || tier.ValueString() == "Advanced" {
+	if tier.IsUnknown() {
+		return
+	}
+
+	planTypeInverted := utils.MapInvert(PlanTypeMap)
+	planType, ok := planTypeInverted[tier.ValueString()]
+
+	// all but Basic
+	if !ok || planType > 0 {
 		return
 	}
 
@@ -52,5 +61,5 @@ func (v realtimeThreatIntelligenceValidator) ValidateResource(ctx context.Contex
 		return
 	}
 
-	resp.Diagnostics.AddAttributeError(wafAttr, "Bunny Shield Advanced is not enabled", "Real-time Threat Intelligence is only available with Bunny Shield Advanced.")
+	resp.Diagnostics.AddAttributeError(wafAttr, "Bunny Shield is free tier", "Real-time Threat Intelligence is only available for paid Bunny Shield plans.")
 }

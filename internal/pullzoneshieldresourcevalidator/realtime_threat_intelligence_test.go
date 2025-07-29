@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestShieldAdvancedRealtimeThreatIntelligence(t *testing.T) {
+func TestRealtimeThreatIntelligence(t *testing.T) {
 	type testCase struct {
 		ExpectedError bool
 		PlanValues    map[string]tftypes.Value
@@ -46,7 +46,61 @@ func TestShieldAdvancedRealtimeThreatIntelligence(t *testing.T) {
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
+				"tier": tftypes.NewValue(tftypes.String, "Advanced"),
+				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, nil),
+				}),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"tier": tftypes.NewValue(tftypes.String, "Business"),
+				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, nil),
+				}),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"tier": tftypes.NewValue(tftypes.String, "Enterprise"),
+				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, nil),
+				}),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
 				"tier": tftypes.NewValue(tftypes.String, "Basic"),
+				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, false),
+				}),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"tier": tftypes.NewValue(tftypes.String, "Advanced"),
+				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, false),
+				}),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"tier": tftypes.NewValue(tftypes.String, "Business"),
+				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, false),
+				}),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"tier": tftypes.NewValue(tftypes.String, "Enterprise"),
 				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
 					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, false),
 				}),
@@ -66,23 +120,23 @@ func TestShieldAdvancedRealtimeThreatIntelligence(t *testing.T) {
 			PlanValues: map[string]tftypes.Value{
 				"tier": tftypes.NewValue(tftypes.String, "Advanced"),
 				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
-					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, nil),
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, true),
 				}),
 			},
 		},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier": tftypes.NewValue(tftypes.String, "Advanced"),
+				"tier": tftypes.NewValue(tftypes.String, "Business"),
 				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
-					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, false),
+					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, true),
 				}),
 			},
 		},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier": tftypes.NewValue(tftypes.String, "Advanced"),
+				"tier": tftypes.NewValue(tftypes.String, "Enterprise"),
 				"waf": tftypes.NewValue(wafObjType, map[string]tftypes.Value{
 					"realtime_threat_intelligence": tftypes.NewValue(tftypes.Bool, true),
 				}),

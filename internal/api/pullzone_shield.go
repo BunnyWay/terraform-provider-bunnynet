@@ -339,8 +339,6 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 }
 
 func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) (PullzoneShield, error) {
-	premiumPlan := data.PlanType == 1
-
 	wafEngineConfig, err := c.convertPullzoneShieldWafEngineConfigToBody(data)
 	if err != nil {
 		return PullzoneShield{}, err
@@ -349,7 +347,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 	body, err := json.Marshal(map[string]interface{}{
 		"shieldZoneId": data.Id,
 		"shieldZone": map[string]interface{}{
-			"premiumPlan":                          premiumPlan,
+			"planType":                             data.PlanType,
 			"dDoSShieldSensitivity":                data.DDoSLevel,
 			"dDoSExecutionMode":                    data.DDoSMode,
 			"dDoSChallengeWindow":                  data.DDosChallengeWindow,
