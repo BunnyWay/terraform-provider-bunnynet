@@ -33,6 +33,7 @@ import (
 
 var _ resource.Resource = &PullzoneShieldResource{}
 var _ resource.ResourceWithImportState = &PullzoneShieldResource{}
+var _ resource.ResourceWithConfigValidators = &PullzoneShieldResource{}
 
 func NewPullzoneShield() resource.Resource {
 	return &PullzoneShieldResource{}
@@ -43,18 +44,28 @@ type PullzoneShieldResource struct {
 }
 
 type PullzoneShieldResourceModel struct {
-	Id         types.Int64  `tfsdk:"id"`
-	PullzoneId types.Int64  `tfsdk:"pullzone"`
-	Tier       types.String `tfsdk:"tier"`
-	Whitelabel types.Bool   `tfsdk:"whitelabel"`
-	DDoS       types.Object `tfsdk:"ddos"`
-	WAF        types.Object `tfsdk:"waf"`
+	Id           types.Int64  `tfsdk:"id"`
+	PullzoneId   types.Int64  `tfsdk:"pullzone"`
+	Tier         types.String `tfsdk:"tier"`
+	Whitelabel   types.Bool   `tfsdk:"whitelabel"`
+	BotDetection types.Object `tfsdk:"bot_detection"`
+	DDoS         types.Object `tfsdk:"ddos"`
+	WAF          types.Object `tfsdk:"waf"`
 }
 
 var pullzoneShieldDdosType = map[string]attr.Type{
 	"level":            types.StringType,
 	"mode":             types.StringType,
 	"challenge_window": types.Int64Type,
+}
+
+var pullzoneShieldBotDetectionType = map[string]attr.Type{
+	"mode":                    types.StringType,
+	"fingerprint_sensitivity": types.Int64Type,
+	"fingerprint_aggression":  types.Int64Type,
+	"ip_sensitivity":          types.Int64Type,
+	"request_integrity":       types.Int64Type,
+	"complex_fingerprinting":  types.BoolType,
 }
 
 var pullzoneShieldDdosLevelMap = map[uint8]string{
@@ -68,6 +79,11 @@ var pullzoneShieldDdosLevelMap = map[uint8]string{
 var pullzoneShieldDdosModeMap = map[uint8]string{
 	0: "Log",
 	1: "Block",
+}
+
+var pullzoneShieldBotDetectionModeMap = map[uint8]string{
+	0: "Log",
+	1: "Challenge",
 }
 
 var pullzoneShieldWafType = map[string]attr.Type{
@@ -178,6 +194,62 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 			},
 		},
 		Blocks: map[string]schema.Block{
+			"bot_detection": schema.SingleNestedBlock{
+				Attributes: map[string]schema.Attribute{
+					"mode": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString(pullzoneShieldBotDetectionModeMap[0]),
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneShieldBotDetectionModeMap)...),
+						},
+						Description: "Indicates the mode the Bot Detection engine is running. " + generateMarkdownMapOptions(pullzoneShieldBotDetectionModeMap),
+					},
+					"fingerprint_sensitivity": schema.Int64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(1),
+						Description: "Adjusts how precisely browsers are checked for signs of automation.",
+						Validators: []validator.Int64{
+							int64validator.Between(0, 3),
+						},
+					},
+					"fingerprint_aggression": schema.Int64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(1),
+						Description: "Controls how assertively unusual fingerprints are treated as bots.",
+						Validators: []validator.Int64{
+							int64validator.Between(1, 3),
+						},
+					},
+					"ip_sensitivity": schema.Int64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(1),
+						Description: "Monitors IP behaviour, reputation, and rate patterns.",
+						Validators: []validator.Int64{
+							int64validator.Between(0, 3),
+						},
+					},
+					"request_integrity": schema.Int64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(1),
+						Description: "Analyzes request headers, query structure, and protocol anomalies.",
+						Validators: []validator.Int64{
+							int64validator.Between(0, 3),
+						},
+					},
+					"complex_fingerprinting": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
+						Description: "Combines advanced entropy analysis and cross-session consistency.",
+					},
+				},
+				Description: "Configures Bot Detection settings.",
+			},
 			"ddos": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"level": schema.StringAttribute{
@@ -348,6 +420,7 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 
 func (r *PullzoneShieldResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
+		pullzoneshieldresourcevalidator.BotDetection(),
 		pullzoneshieldresourcevalidator.RealtimeThreatIntelligence(),
 		pullzoneshieldresourcevalidator.Whitelabel(),
 	}
@@ -488,6 +561,42 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 	dataApi.PlanType = mapValueToKey(pullzoneshieldresourcevalidator.PlanTypeMap, dataTf.Tier.ValueString())
 	dataApi.WhiteLabelResponsePages = dataTf.Whitelabel.ValueBool()
 
+	// bot_detection
+	{
+		attrs := dataTf.BotDetection.Attributes()
+
+		if len(attrs) == 0 {
+			dataApi.BotDetectionMode = 0
+			dataApi.BotDetectionFingerprintSensitivity = 0
+			dataApi.BotDetectionFingerprintAggression = 0
+			dataApi.BotDetectionIPSensitivity = 0
+			dataApi.BotDetectionRequestIntegrity = 0
+			dataApi.BotDetectionComplexFingerprinting = false
+		} else {
+			dataApi.BotDetectionMode = mapValueToKey(pullzoneShieldBotDetectionModeMap, attrs["mode"].(types.String).ValueString())
+
+			if v, ok := attrs["fingerprint_sensitivity"]; ok {
+				dataApi.BotDetectionFingerprintSensitivity = uint8(v.(types.Int64).ValueInt64())
+			}
+
+			if v, ok := attrs["fingerprint_aggression"]; ok {
+				dataApi.BotDetectionFingerprintAggression = uint8(v.(types.Int64).ValueInt64())
+			}
+
+			if v, ok := attrs["ip_sensitivity"]; ok {
+				dataApi.BotDetectionIPSensitivity = uint8(v.(types.Int64).ValueInt64())
+			}
+
+			if v, ok := attrs["request_integrity"]; ok {
+				dataApi.BotDetectionRequestIntegrity = uint8(v.(types.Int64).ValueInt64())
+			}
+
+			if v, ok := attrs["complex_fingerprinting"]; ok {
+				dataApi.BotDetectionComplexFingerprinting = v.(types.Bool).ValueBool()
+			}
+		}
+	}
+
 	// ddos
 	{
 		attrs := dataTf.DDoS.Attributes()
@@ -559,6 +668,29 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Tier = types.StringValue(mapKeyToValue(pullzoneshieldresourcevalidator.PlanTypeMap, dataApi.PlanType))
 	dataTf.Whitelabel = types.BoolValue(dataApi.WhiteLabelResponsePages)
+
+	// bot_detection
+	{
+		if dataApi.BotDetectionMode == 0 && dataApi.BotDetectionRequestIntegrity == 0 && dataApi.BotDetectionIPSensitivity == 0 && dataApi.BotDetectionFingerprintSensitivity == 0 {
+			dataTf.BotDetection = types.ObjectNull(pullzoneShieldBotDetectionType)
+		} else {
+			values := map[string]attr.Value{
+				"mode":                    types.StringValue(mapKeyToValue(pullzoneShieldBotDetectionModeMap, dataApi.BotDetectionMode)),
+				"request_integrity":       types.Int64Value(int64(dataApi.BotDetectionRequestIntegrity)),
+				"ip_sensitivity":          types.Int64Value(int64(dataApi.BotDetectionIPSensitivity)),
+				"fingerprint_sensitivity": types.Int64Value(int64(dataApi.BotDetectionFingerprintSensitivity)),
+				"fingerprint_aggression":  types.Int64Value(int64(dataApi.BotDetectionFingerprintAggression)),
+				"complex_fingerprinting":  types.BoolValue(dataApi.BotDetectionComplexFingerprinting),
+			}
+
+			obj, diags := types.ObjectValue(pullzoneShieldBotDetectionType, values)
+			if diags != nil {
+				return PullzoneShieldResourceModel{}, diags
+			}
+
+			dataTf.BotDetection = obj
+		}
+	}
 
 	// ddos
 	{

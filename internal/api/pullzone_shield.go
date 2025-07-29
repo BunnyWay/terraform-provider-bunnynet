@@ -27,6 +27,12 @@ type PullzoneShield struct {
 	Id                                   int64    `json:"shieldZoneId,omitempty"`
 	PullzoneId                           int64    `json:"pullZoneId"`
 	PlanType                             uint8    `json:"planType"`
+	BotDetectionMode                     uint8    `json:"-"`
+	BotDetectionFingerprintSensitivity   uint8    `json:"-"`
+	BotDetectionFingerprintAggression    uint8    `json:"-"`
+	BotDetectionIPSensitivity            uint8    `json:"-"`
+	BotDetectionRequestIntegrity         uint8    `json:"-"`
+	BotDetectionComplexFingerprinting    bool     `json:"-"`
 	WhiteLabelResponsePages              bool     `json:"whitelabelResponsePages"`
 	DDoSMode                             uint8    `json:"dDoSExecutionMode"`
 	DDoSLevel                            uint8    `json:"dDoSShieldSensitivity"`
@@ -267,7 +273,102 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		}
 	}
 
+	// fetch bot-detection config
+	{
+		botDetectionResult, err := c.fetchBotDetection(ctx, id)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		result.Data.BotDetectionMode = botDetectionResult.Mode
+		result.Data.BotDetectionFingerprintSensitivity = botDetectionResult.FingerprintSensitivity
+		result.Data.BotDetectionFingerprintAggression = botDetectionResult.FingerprintAggression
+		result.Data.BotDetectionIPSensitivity = botDetectionResult.IPSensitivity
+		result.Data.BotDetectionRequestIntegrity = botDetectionResult.RequestIntegrity
+		result.Data.BotDetectionComplexFingerprinting = botDetectionResult.ComplexFingerprinting
+	}
+
 	return result.Data, nil
+}
+
+type fetchBotDetectionResult struct {
+	Mode                   uint8
+	FingerprintSensitivity uint8
+	FingerprintAggression  uint8
+	IPSensitivity          uint8
+	RequestIntegrity       uint8
+	ComplexFingerprinting  bool
+}
+
+func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fetchBotDetectionResult, error) {
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/shield-zone/%d/bot-detection", c.apiUrl, shieldZoneId), nil)
+	if err != nil {
+		return fetchBotDetectionResult{}, err
+	}
+
+	if resp.StatusCode == http.StatusAccepted {
+		err := utils.ExtractShieldErrorMessage(resp)
+		if err != nil {
+			if err.Error() == "invalid_plan_type.bot_detection" {
+				return fetchBotDetectionResult{
+					Mode:                   0,
+					FingerprintSensitivity: 0,
+					FingerprintAggression:  1,
+					IPSensitivity:          0,
+					RequestIntegrity:       0,
+					ComplexFingerprinting:  false,
+				}, nil
+			}
+		}
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := utils.ExtractErrorMessage(resp)
+		if err != nil {
+			return fetchBotDetectionResult{}, err
+		} else {
+			return fetchBotDetectionResult{}, errors.New("get shieldzone/bot-detection for pullzone failed with " + resp.Status)
+		}
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fetchBotDetectionResult{}, err
+	}
+
+	tflog.Warn(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/bot-detection: %+v", shieldZoneId, string(bodyResp)))
+
+	var result struct {
+		Data struct {
+			ShieldZoneId     int64 `json:"shieldZoneId"`
+			ExecutionMode    uint8 `json:"executionMode"`
+			RequestIntegrity struct {
+				Sensitivity uint8 `json:"sensitivity"`
+			} `json:"requestIntegrity"`
+			IpAddress struct {
+				Sensitivity uint8 `json:"sensitivity"`
+			} `json:"ipAddress"`
+			BrowserFingerprint struct {
+				Sensitivity    uint8 `json:"sensitivity"`
+				Aggression     uint8 `json:"aggression"`
+				ComplexEnabled bool  `json:"complexEnabled"`
+			} `json:"browserFingerprint"`
+		} `json:"data"`
+	}
+
+	err = json.Unmarshal(bodyResp, &result)
+	if err != nil {
+		return fetchBotDetectionResult{}, err
+	}
+
+	return fetchBotDetectionResult{
+		Mode:                   result.Data.ExecutionMode,
+		FingerprintSensitivity: result.Data.BrowserFingerprint.Sensitivity,
+		FingerprintAggression:  result.Data.BrowserFingerprint.Aggression,
+		IPSensitivity:          result.Data.IpAddress.Sensitivity,
+		RequestIntegrity:       result.Data.RequestIntegrity.Sensitivity,
+		ComplexFingerprinting:  result.Data.BrowserFingerprint.ComplexEnabled,
+	}, nil
 }
 
 func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) (PullzoneShield, error) {
@@ -340,7 +441,9 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		return PullzoneShield{}, err
 	}
 
-	return c.GetPullzoneShield(ctx, result.Data.ShieldZone.Id)
+	data.Id = result.Data.ShieldZone.Id
+
+	return c.UpdatePullzoneShield(ctx, data)
 }
 
 func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) (PullzoneShield, error) {
@@ -388,6 +491,45 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				return PullzoneShield{}, err
 			} else {
 				return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
+			}
+		}
+	}
+
+	// bot-detection fields
+	{
+		body, err := json.Marshal(map[string]interface{}{
+			"shieldZoneId":  data.Id,
+			"executionMode": data.BotDetectionMode,
+			"requestIntegrity": map[string]interface{}{
+				"sensitivity": data.BotDetectionRequestIntegrity,
+			},
+			"ipAddress": map[string]interface{}{
+				"sensitivity": data.BotDetectionIPSensitivity,
+			},
+			"browserFingerprint": map[string]interface{}{
+				"sensitivity":    data.BotDetectionFingerprintSensitivity,
+				"aggression":     data.BotDetectionFingerprintAggression,
+				"complexEnabled": data.BotDetectionComplexFingerprinting,
+			},
+		})
+
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		tflog.Warn(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/bot-detection: %+v", data.Id, string(body)))
+
+		resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone/%d/bot-detection", c.apiUrl, data.Id), bytes.NewReader(body))
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			err := utils.ExtractErrorMessage(resp)
+			if err != nil {
+				return PullzoneShield{}, err
+			} else {
+				return PullzoneShield{}, errors.New("update pullzone shield/bot-detection failed with " + resp.Status)
 			}
 		}
 	}

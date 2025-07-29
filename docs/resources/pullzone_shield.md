@@ -38,6 +38,7 @@ resource "bunnynet_pullzone_shield" "test" {
 
 ### Optional
 
+- `bot_detection` (Block, Optional) Configures Bot Detection settings. (see [below for nested schema](#nestedblock--bot_detection))
 - `ddos` (Block, Optional) Configures DDoS settings. (see [below for nested schema](#nestedblock--ddos))
 - `tier` (String) Options: `Advanced`, `Basic`, `Business`, `Enterprise`
 - `waf` (Block, Optional) Configures WAF settings. (see [below for nested schema](#nestedblock--waf))
@@ -46,6 +47,19 @@ resource "bunnynet_pullzone_shield" "test" {
 ### Read-Only
 
 - `id` (Number) The ID of the Bunny Shield.
+
+<a id="nestedblock--bot_detection"></a>
+### Nested Schema for `bot_detection`
+
+Optional:
+
+- `complex_fingerprinting` (Boolean) Combines advanced entropy analysis and cross-session consistency.
+- `fingerprint_aggression` (Number) Controls how assertively unusual fingerprints are treated as bots.
+- `fingerprint_sensitivity` (Number) Adjusts how precisely browsers are checked for signs of automation.
+- `ip_sensitivity` (Number) Monitors IP behaviour, reputation, and rate patterns.
+- `mode` (String) Indicates the mode the Bot Detection engine is running. Options: `Challenge`, `Log`
+- `request_integrity` (Number) Analyzes request headers, query structure, and protocol anomalies.
+
 
 <a id="nestedblock--ddos"></a>
 ### Nested Schema for `ddos`

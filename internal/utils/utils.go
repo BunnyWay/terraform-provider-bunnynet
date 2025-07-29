@@ -49,6 +49,28 @@ func ExtractErrorMessage(response *http.Response) error {
 	return errors.New(responseObj.Message)
 }
 
+func ExtractShieldErrorMessage(response *http.Response) error {
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil
+	}
+
+	_ = response.Body.Close()
+	var responseObj struct {
+		Error struct {
+			Message  string `json:"message"`
+			ErrorKey string `json:"errorKey"`
+		} `json:"error"`
+	}
+
+	err = json.Unmarshal(bodyBytes, &responseObj)
+	if err != nil {
+		return nil
+	}
+
+	return errors.New(responseObj.Error.ErrorKey)
+}
+
 func MapInvert[k comparable, v comparable](m map[k]v) map[v]k {
 	result := make(map[v]k, len(m))
 	for key, value := range m {
