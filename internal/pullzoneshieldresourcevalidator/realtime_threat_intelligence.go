@@ -15,7 +15,7 @@ func RealtimeThreatIntelligence() resource.ConfigValidator {
 type realtimeThreatIntelligenceValidator struct{}
 
 func (v realtimeThreatIntelligenceValidator) Description(ctx context.Context) string {
-	return "waf.realtime_threat_intelligence a paid \"tier\""
+	return "waf.realtime_threat_intelligence requires a paid \"tier\""
 }
 
 func (v realtimeThreatIntelligenceValidator) MarkdownDescription(ctx context.Context) string {

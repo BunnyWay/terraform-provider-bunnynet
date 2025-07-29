@@ -46,6 +46,7 @@ type PullzoneShieldResourceModel struct {
 	Id         types.Int64  `tfsdk:"id"`
 	PullzoneId types.Int64  `tfsdk:"pullzone"`
 	Tier       types.String `tfsdk:"tier"`
+	Whitelabel types.Bool   `tfsdk:"whitelabel"`
 	DDoS       types.Object `tfsdk:"ddos"`
 	WAF        types.Object `tfsdk:"waf"`
 }
@@ -168,6 +169,12 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 					stringvalidator.OneOf(maps.Values(pullzoneshieldresourcevalidator.PlanTypeMap)...),
 				},
 				Description: generateMarkdownMapOptions(pullzoneshieldresourcevalidator.PlanTypeMap),
+			},
+			"whitelabel": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+				Description: "Replace our bunny.net branded block and challenge pages with a white-labelled experience.",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -342,6 +349,7 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 func (r *PullzoneShieldResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		pullzoneshieldresourcevalidator.RealtimeThreatIntelligence(),
+		pullzoneshieldresourcevalidator.Whitelabel(),
 	}
 }
 
@@ -478,6 +486,7 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.PlanType = mapValueToKey(pullzoneshieldresourcevalidator.PlanTypeMap, dataTf.Tier.ValueString())
+	dataApi.WhiteLabelResponsePages = dataTf.Whitelabel.ValueBool()
 
 	// ddos
 	{
@@ -549,6 +558,7 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Tier = types.StringValue(mapKeyToValue(pullzoneshieldresourcevalidator.PlanTypeMap, dataApi.PlanType))
+	dataTf.Whitelabel = types.BoolValue(dataApi.WhiteLabelResponsePages)
 
 	// ddos
 	{

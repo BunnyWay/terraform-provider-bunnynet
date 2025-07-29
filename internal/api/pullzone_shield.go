@@ -27,6 +27,7 @@ type PullzoneShield struct {
 	Id                                   int64    `json:"shieldZoneId,omitempty"`
 	PullzoneId                           int64    `json:"pullZoneId"`
 	PlanType                             uint8    `json:"planType"`
+	WhiteLabelResponsePages              bool     `json:"whitelabelResponsePages"`
 	DDoSMode                             uint8    `json:"dDoSExecutionMode"`
 	DDoSLevel                            uint8    `json:"dDoSShieldSensitivity"`
 	DDosChallengeWindow                  int64    `json:"dDoSChallengeWindow"`
@@ -293,6 +294,7 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			"wafEngineConfig":                      wafEngineConfig,
 			"wafDisabledRules":                     data.WafRulesDisabled,
 			"wafLogOnlyRules":                      data.WafRulesLogonly,
+			"whitelabelResponsePages":              data.WhiteLabelResponsePages,
 			"learningMode":                         false,
 		},
 	})
@@ -359,6 +361,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			"wafEngineConfig":                      wafEngineConfig,
 			"wafDisabledRules":                     data.WafRulesDisabled,
 			"wafLogOnlyRules":                      data.WafRulesLogonly,
+			"whitelabelResponsePages":              data.WhiteLabelResponsePages,
 			"learningMode":                         false,
 		},
 	})
@@ -415,8 +418,9 @@ func (c *Client) DeletePullzoneShield(ctx context.Context, id int64) error {
 			"application/xss-auditor-report",
 			"text/plain",
 		},
-		WafRulesDisabled: []string{},
-		WafRulesLogonly:  []string{},
+		WafRulesDisabled:        []string{},
+		WafRulesLogonly:         []string{},
+		WhiteLabelResponsePages: false,
 	}
 
 	_, err := c.UpdatePullzoneShield(ctx, data)

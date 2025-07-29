@@ -41,6 +41,7 @@ resource "bunnynet_pullzone_shield" "test" {
 - `ddos` (Block, Optional) Configures DDoS settings. (see [below for nested schema](#nestedblock--ddos))
 - `tier` (String) Options: `Advanced`, `Basic`, `Business`, `Enterprise`
 - `waf` (Block, Optional) Configures WAF settings. (see [below for nested schema](#nestedblock--waf))
+- `whitelabel` (Boolean) Replace our bunny.net branded block and challenge pages with a white-labelled experience.
 
 ### Read-Only
 
