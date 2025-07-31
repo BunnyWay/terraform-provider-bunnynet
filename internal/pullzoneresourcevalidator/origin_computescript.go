@@ -5,6 +5,7 @@ package pullzoneresourcevalidator
 
 import (
 	"context"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/customtype"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -38,7 +39,7 @@ func (v originComputeScriptValidator) ValidateResource(ctx context.Context, req 
 	}
 
 	originType := origin.(types.Object).Attributes()["type"].(types.String)
-	originUrl := origin.(types.Object).Attributes()["url"].(types.String)
+	originUrl := origin.(types.Object).Attributes()["url"].(customtype.PullzoneOriginUrlValue)
 	routingFilters := routing.(types.Object).Attributes()["filters"]
 
 	if originType.IsUnknown() || originUrl.IsUnknown() || routingFilters.IsUnknown() {

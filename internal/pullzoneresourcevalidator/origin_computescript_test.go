@@ -2,6 +2,7 @@ package pullzoneresourcevalidator
 
 import (
 	"context"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/customtype"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -137,7 +138,9 @@ func TestOriginComputeScript(t *testing.T) {
 			"origin": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"type": schema.StringAttribute{},
-					"url":  schema.StringAttribute{},
+					"url": schema.StringAttribute{
+						CustomType: customtype.PullzoneOriginUrlType{},
+					},
 				},
 			},
 			"routing": schema.SingleNestedBlock{

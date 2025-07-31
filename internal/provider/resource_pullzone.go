@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/customtype"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
@@ -143,7 +144,7 @@ type PullzoneResourceModel struct {
 
 var pullzoneOriginTypes = map[string]attr.Type{
 	"type":                types.StringType,
-	"url":                 types.StringType,
+	"url":                 customtype.PullzoneOriginUrlType{},
 	"storagezone":         types.Int64Type,
 	"follow_redirects":    types.BoolType,
 	"host_header":         types.StringType,
@@ -1199,6 +1200,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						MarkdownDescription: generateMarkdownMapOptions(pullzoneOriginTypeMap),
 					},
 					"url": schema.StringAttribute{
+						CustomType:  customtype.PullzoneOriginUrlType{},
 						Optional:    true,
 						Description: "The origin URL from where the files are fetched.",
 					},
@@ -1657,7 +1659,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 	// origin
 	dataApi.OriginType = mapValueToKey(pullzoneOriginTypeMap, origin["type"].(types.String).ValueString())
-	dataApi.OriginUrl = origin["url"].(types.String).ValueString()
+	dataApi.OriginUrl = origin["url"].(customtype.PullzoneOriginUrlValue).ValueString()
 	dataApi.StorageZoneId = origin["storagezone"].(types.Int64).ValueInt64()
 	dataApi.OriginHostHeader = origin["host_header"].(types.String).ValueString()
 	dataApi.AddHostHeader = origin["forward_host_header"].(types.Bool).ValueBool()
@@ -1915,7 +1917,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	{
 		originValues := map[string]attr.Value{
 			"type": types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
-			"url":  typeStringOrNull(dataApi.OriginUrl),
+			"url":  customtype.PullzoneOriginUrlValue{StringValue: typeStringOrNull(dataApi.OriginUrl)},
 		}
 
 		if dataApi.StorageZoneId == 0 || dataApi.StorageZoneId == -1 {
