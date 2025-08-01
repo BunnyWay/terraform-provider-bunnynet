@@ -19,10 +19,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -48,9 +50,15 @@ type PullzoneShieldResourceModel struct {
 	PullzoneId   types.Int64  `tfsdk:"pullzone"`
 	Tier         types.String `tfsdk:"tier"`
 	Whitelabel   types.Bool   `tfsdk:"whitelabel"`
+	AccessList   types.Set    `tfsdk:"access_list"`
 	BotDetection types.Object `tfsdk:"bot_detection"`
 	DDoS         types.Object `tfsdk:"ddos"`
 	WAF          types.Object `tfsdk:"waf"`
+}
+
+var pullzoneShieldAccessListType = map[string]attr.Type{
+	"id":     types.Int64Type,
+	"action": types.StringType,
 }
 
 var pullzoneShieldDdosType = map[string]attr.Type{
@@ -194,6 +202,35 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 			},
 		},
 		Blocks: map[string]schema.Block{
+			"access_list": schema.SetNestedBlock{
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedBlockObject{
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
+					},
+					Attributes: map[string]schema.Attribute{
+						"id": schema.Int64Attribute{
+							Required:    true,
+							Description: "The ID of the Access List.",
+						},
+						"action": schema.StringAttribute{
+							Required: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(maps.Values(pullzoneAccessListActionMap)...),
+							},
+							Description: generateMarkdownMapOptions(pullzoneAccessListActionMap),
+						},
+					},
+				},
+				Validators: []validator.Set{
+					pullzoneshieldresourcevalidator.AccessListSetUniqueValues(),
+				},
+			},
 			"bot_detection": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"mode": schema.StringAttribute{
@@ -561,6 +598,35 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 	dataApi.PlanType = mapValueToKey(pullzoneshieldresourcevalidator.PlanTypeMap, dataTf.Tier.ValueString())
 	dataApi.WhiteLabelResponsePages = dataTf.Whitelabel.ValueBool()
 
+	// access_list
+	{
+		elements := dataTf.AccessList.Elements()
+		accessLists := make([]api.PullzoneShieldAccessList, 0, len(elements))
+
+		for _, element := range elements {
+			listAttrs := element.(types.Object).Attributes()
+			item := api.PullzoneShieldAccessList{
+				IsEnabled: true,
+			}
+
+			if v, ok := listAttrs["id"]; ok {
+				item.Id = v.(types.Int64).ValueInt64()
+			}
+
+			if v, ok := listAttrs["name"]; ok {
+				item.Name = v.(types.String).ValueString()
+			}
+
+			if v, ok := listAttrs["action"]; ok {
+				item.Action = mapValueToKey(pullzoneAccessListActionMap, v.(types.String).ValueString())
+			}
+
+			accessLists = append(accessLists, item)
+		}
+
+		dataApi.AccessLists = accessLists
+	}
+
 	// bot_detection
 	{
 		attrs := dataTf.BotDetection.Attributes()
@@ -668,6 +734,30 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Tier = types.StringValue(mapKeyToValue(pullzoneshieldresourcevalidator.PlanTypeMap, dataApi.PlanType))
 	dataTf.Whitelabel = types.BoolValue(dataApi.WhiteLabelResponsePages)
+
+	// access_list
+	{
+		setValues := make([]attr.Value, 0, len(dataApi.AccessLists))
+		for _, list := range dataApi.AccessLists {
+			obj, diags := types.ObjectValue(pullzoneShieldAccessListType, map[string]attr.Value{
+				"id":     types.Int64Value(list.Id),
+				"action": types.StringValue(mapKeyToValue(pullzoneAccessListActionMap, list.Action)),
+			})
+
+			if diags != nil {
+				return PullzoneShieldResourceModel{}, diags
+			}
+
+			setValues = append(setValues, obj)
+		}
+
+		accessListsSet, diags := types.SetValue(types.ObjectType{AttrTypes: pullzoneShieldAccessListType}, setValues)
+		if diags != nil {
+			return PullzoneShieldResourceModel{}, diags
+		}
+
+		dataTf.AccessList = accessListsSet
+	}
 
 	// bot_detection
 	{

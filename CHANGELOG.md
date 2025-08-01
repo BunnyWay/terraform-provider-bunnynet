@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 ### Added
+- resource pullzone_shield: support managed Access Lists;
+- resource pullzone_access_list: customized Access Lists;
 - resource pullzone_shield: Bot Detection;
 - resource pullzone_shield: support `Business` and `Enterprise` tiers;
 - resource pullzone_shield: support Whitelabel block pages;

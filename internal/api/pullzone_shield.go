@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneshieldresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
@@ -21,6 +22,13 @@ import (
 type PullzoneShieldWafEngineConfigItem struct {
 	Name         string `json:"name"`
 	ValueEncoded string `json:"valueEncoded"`
+}
+
+type PullzoneShieldAccessList struct {
+	Id        int64  `json:"-"`
+	Name      string `json:"-"`
+	Action    uint8  `json:"-"`
+	IsEnabled bool   `json:"-"`
 }
 
 type PullzoneShield struct {
@@ -51,6 +59,7 @@ type PullzoneShield struct {
 	WafRulesDisabled                     []string `json:"wafDisabledRules"`
 	WafRulesLogonly                      []string `json:"wafLogOnlyRules"`
 
+	AccessLists     []PullzoneShieldAccessList          `json:"-"`
 	WafEngineConfig []PullzoneShieldWafEngineConfigItem `json:"wafEngineConfig,omitempty"`
 }
 
@@ -273,6 +282,30 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		}
 	}
 
+	// fetch managed access lists
+	{
+		lists, err := c.getPullzoneAccessLists(ctx, id, PullzoneAccessListQueryCurated)
+		if err != nil {
+			return result.Data, err
+		}
+
+		var resultLists []PullzoneShieldAccessList
+		for _, list := range lists {
+			if !list.IsEnabled {
+				continue
+			}
+
+			resultLists = append(resultLists, PullzoneShieldAccessList{
+				Id:        list.ListId,
+				Action:    list.Action,
+				Name:      list.Name,
+				IsEnabled: list.IsEnabled,
+			})
+		}
+
+		result.Data.AccessLists = resultLists
+	}
+
 	// fetch bot-detection config
 	{
 		botDetectionResult, err := c.fetchBotDetection(ctx, id)
@@ -491,6 +524,90 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				return PullzoneShield{}, err
 			} else {
 				return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
+			}
+		}
+	}
+
+	// managed access lists
+	{
+		managedLists, err := c.getPullzoneAccessLists(ctx, data.Id, PullzoneAccessListQueryCurated)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		type accessListConfig struct {
+			Action    uint8
+			IsEnabled bool
+		}
+
+		listConfigMap := make(map[int64]accessListConfig, len(data.AccessLists))
+		managedListsMap := make(map[int64]pullzoneAccessListInfo, len(managedLists))
+		managedListsNameMap := make(map[string]int64, len(managedLists))
+
+		for _, managedList := range managedLists {
+			managedListsMap[managedList.ListId] = managedList
+			managedListsNameMap[managedList.Name] = managedList.ListId
+		}
+
+		for _, list := range data.AccessLists {
+			listId := list.Id
+			if listId == 0 {
+				var ok bool
+				listId, ok = managedListsNameMap[list.Name]
+				if !ok {
+					return PullzoneShield{}, fmt.Errorf("access list named \"%s\" does not exist", list.Name)
+				}
+			}
+
+			if mappedList, ok := managedListsMap[listId]; !ok {
+				return PullzoneShield{}, fmt.Errorf("access list id %d does not exist", listId)
+			} else {
+				// this comparison assumes the pullzoneshieldresourcevalidator.PlanTypeMap IDs are sorted from lower to higher
+				if mappedList.RequiredPlan > 0 && data.PlanType < mappedList.RequiredPlan {
+					tier, ok := pullzoneshieldresourcevalidator.PlanTypeMap[mappedList.RequiredPlan]
+					if !ok {
+						return PullzoneShield{}, fmt.Errorf("Unexpected Bunny Shield plan: %d", mappedList.RequiredPlan)
+					}
+
+					return PullzoneShield{}, fmt.Errorf("The access list \"%s\" requires the \"%s\" Bunny Shield plan.", mappedList.Name, tier)
+				}
+			}
+
+			listConfigMap[listId] = accessListConfig{
+				Action:    list.Action,
+				IsEnabled: list.IsEnabled,
+			}
+		}
+
+		for _, list := range managedLists {
+			listConfig, ok := listConfigMap[list.ListId]
+			if !ok {
+				if list.IsEnabled {
+					err := c.updatePullzoneAccessListConfiguration(ctx, data.Id, list.ListId, false, list.Action)
+					if err != nil {
+						if err.Error() == "not_available.access_list" {
+							continue
+						}
+
+						return PullzoneShield{}, err
+					}
+				}
+
+				continue
+			}
+
+			if listConfig.Action == list.Action && listConfig.IsEnabled == list.IsEnabled {
+				// no changes
+				continue
+			}
+
+			err := c.updatePullzoneAccessListConfiguration(ctx, data.Id, list.ListId, listConfig.IsEnabled, listConfig.Action)
+			if err != nil {
+				if err.Error() == "not_available.access_list" {
+					continue
+				}
+
+				return PullzoneShield{}, err
 			}
 		}
 	}

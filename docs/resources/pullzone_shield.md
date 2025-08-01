@@ -38,6 +38,7 @@ resource "bunnynet_pullzone_shield" "test" {
 
 ### Optional
 
+- `access_list` (Block Set) (see [below for nested schema](#nestedblock--access_list))
 - `bot_detection` (Block, Optional) Configures Bot Detection settings. (see [below for nested schema](#nestedblock--bot_detection))
 - `ddos` (Block, Optional) Configures DDoS settings. (see [below for nested schema](#nestedblock--ddos))
 - `tier` (String) Options: `Advanced`, `Basic`, `Business`, `Enterprise`
@@ -47,6 +48,15 @@ resource "bunnynet_pullzone_shield" "test" {
 ### Read-Only
 
 - `id` (Number) The ID of the Bunny Shield.
+
+<a id="nestedblock--access_list"></a>
+### Nested Schema for `access_list`
+
+Required:
+
+- `action` (String) Options: `Allow`, `Block`, `Challenge`, `Log`
+- `id` (Number) The ID of the Access List.
+
 
 <a id="nestedblock--bot_detection"></a>
 ### Nested Schema for `bot_detection`
