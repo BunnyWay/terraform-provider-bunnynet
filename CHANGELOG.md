@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - resource pullzone: validation for `safehop_connection_timeout` and `safehop_response_timeout`;
 - resource pullzone: normalize origin.url ([#44](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/44));
+- resource pullzone_edgerule: expose underlying error message;
 
 ## [0.7.6] - 2025-07-21
 ### Fixed

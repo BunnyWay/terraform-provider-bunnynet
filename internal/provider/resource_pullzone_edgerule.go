@@ -233,7 +233,7 @@ func (r *PullzoneEdgeruleResource) Create(ctx context.Context, req resource.Crea
 	pullzoneId := dataTf.PullzoneId.ValueInt64()
 	pzMutex.Lock(pullzoneId)
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreatePullzoneEdgerule(dataApi)
+	dataApi, err := r.client.CreatePullzoneEdgerule(ctx, dataApi)
 	pzMutex.Unlock(pullzoneId)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create edgerule", err.Error())
@@ -285,7 +285,7 @@ func (r *PullzoneEdgeruleResource) Update(ctx context.Context, req resource.Upda
 	pullzoneId := data.PullzoneId.ValueInt64()
 	pzMutex.Lock(pullzoneId)
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.CreatePullzoneEdgerule(dataApi)
+	dataApi, err := r.client.CreatePullzoneEdgerule(ctx, dataApi)
 	pzMutex.Unlock(pullzoneId)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating edgerule", err.Error()))

@@ -5,9 +5,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -42,7 +45,7 @@ type PullzoneEdgeruleTrigger struct {
 	Parameter2 string   `json:"Parameter2,omitempty"`
 }
 
-func (c *Client) CreatePullzoneEdgerule(data PullzoneEdgerule) (PullzoneEdgerule, error) {
+func (c *Client) CreatePullzoneEdgerule(ctx context.Context, data PullzoneEdgerule) (PullzoneEdgerule, error) {
 	if data.PullzoneId == 0 {
 		return PullzoneEdgerule{}, errors.New("pullzone is required")
 	}
@@ -52,13 +55,20 @@ func (c *Client) CreatePullzoneEdgerule(data PullzoneEdgerule) (PullzoneEdgerule
 		return PullzoneEdgerule{}, err
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("POST /pullzone/%d/edgerules/addOrUpdate: %+v", data.PullzoneId, string(body)))
+
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/edgerules/addOrUpdate", c.apiUrl, data.PullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return PullzoneEdgerule{}, err
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return PullzoneEdgerule{}, errors.New(resp.Status)
+		err := utils.ExtractErrorMessage(resp)
+		if err != nil {
+			return PullzoneEdgerule{}, err
+		} else {
+			return PullzoneEdgerule{}, errors.New(resp.Status)
+		}
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
