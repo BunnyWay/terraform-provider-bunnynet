@@ -648,9 +648,13 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractErrorMessage(resp)
+			err := utils.ExtractShieldErrorMessage(resp)
 			if err != nil {
-				return PullzoneShield{}, err
+				if data.PlanType == 0 && err.Error() == "invalid_plan_type.bot_detection" {
+					// noop
+				} else {
+					return PullzoneShield{}, err
+				}
 			} else {
 				return PullzoneShield{}, errors.New("update pullzone shield/bot-detection failed with " + resp.Status)
 			}
