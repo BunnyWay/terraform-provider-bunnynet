@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resource pullzone_shield: Bot Detection;
 - resource pullzone_shield: support `Business` and `Enterprise` tiers;
 - resource pullzone_shield: support Whitelabel block pages;
+- resource pullzone_shield: support request/response body limits;
 - resource pullzone: validate fields for ComputeScript origin.type ([#43](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/43));
 ### Fixed
 - resource pullzone: validation for `safehop_connection_timeout` and `safehop_response_timeout`;

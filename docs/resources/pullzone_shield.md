@@ -97,6 +97,8 @@ Optional:
 - `allowed_http_versions` (Set of String) Indicates allowed HTTP versions.
 - `allowed_request_content_types` (Set of String) Indicates allowed values for request Content-Type.
 - `blocking_sensitivity` (Number) Determines which severity level of rules will block requests.
+- `body_limit_request` (String) Determines the action to take when the request body length exceeds your plan limit. Options: `Block`, `Ignore`, `Log`
+- `body_limit_response` (String) Determines the action to take when the response body length exceeds your plan limit. Options: `Block`, `Ignore`, `Log`
 - `detection_sensitivity` (Number) Determines which severity level of rules will trigger a detection log.
 - `execution_sensitivity` (Number) Determines which severity level of rules will trigger the rules and their action.
 - `log_headers` (Boolean) When enabled, detected WAF audit logs will contain the full list of request headers sent during the request.

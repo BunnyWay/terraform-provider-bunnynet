@@ -56,6 +56,8 @@ type PullzoneShield struct {
 	WafRuleSensitivityBlocking           uint8    `json:"-"`
 	WafRuleSensitivityDetection          uint8    `json:"-"`
 	WafRuleSensitivityExecution          uint8    `json:"-"`
+	WafRequestBodyLimitAction            uint8    `json:"wafRequestBodyLimitAction"`
+	WafResponseBodyLimitAction           uint8    `json:"wafResponseBodyLimitAction"`
 	WafRulesDisabled                     []string `json:"wafDisabledRules"`
 	WafRulesLogonly                      []string `json:"wafLogOnlyRules"`
 
@@ -433,6 +435,8 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			"wafLogOnlyRules":                      data.WafRulesLogonly,
 			"whitelabelResponsePages":              data.WhiteLabelResponsePages,
 			"learningMode":                         false,
+			"wafRequestBodyLimitAction":            data.WafRequestBodyLimitAction,
+			"wafResponseBodyLimitAction":           data.WafResponseBodyLimitAction,
 		},
 	})
 
@@ -504,6 +508,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				"wafLogOnlyRules":                      data.WafRulesLogonly,
 				"whitelabelResponsePages":              data.WhiteLabelResponsePages,
 				"learningMode":                         false,
+				"wafRequestBodyLimitAction":            data.WafRequestBodyLimitAction,
+				"wafResponseBodyLimitAction":           data.WafResponseBodyLimitAction,
 			},
 		})
 
@@ -683,9 +689,11 @@ func (c *Client) DeletePullzoneShield(ctx context.Context, id int64) error {
 			"application/xss-auditor-report",
 			"text/plain",
 		},
-		WafRulesDisabled:        []string{},
-		WafRulesLogonly:         []string{},
-		WhiteLabelResponsePages: false,
+		WafRulesDisabled:           []string{},
+		WafRulesLogonly:            []string{},
+		WhiteLabelResponsePages:    false,
+		WafRequestBodyLimitAction:  1, // Log
+		WafResponseBodyLimitAction: 2, // Ignore
 	}
 
 	_, err := c.UpdatePullzoneShield(ctx, data)

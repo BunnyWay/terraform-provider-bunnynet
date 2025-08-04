@@ -106,6 +106,8 @@ var pullzoneShieldWafType = map[string]attr.Type{
 	"detection_sensitivity":         types.Int64Type,
 	"execution_sensitivity":         types.Int64Type,
 	"blocking_sensitivity":          types.Int64Type,
+	"body_limit_request":            types.StringType,
+	"body_limit_response":           types.StringType,
 	"rules_disabled":                types.SetType{ElemType: types.StringType},
 	"rules_logonly":                 types.SetType{ElemType: types.StringType},
 }
@@ -158,6 +160,13 @@ var pullzoneShieldWafAllowedRequestContentTypesDefault = utils.ConvertStringSlic
 	"application/xss-auditor-report",
 	"text/plain",
 })
+
+// curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WAFPayloadLimitAction")'
+var pullzoneShieldWafBodyLimitMap = map[uint8]string{
+	0: "Block",
+	1: "Log",
+	2: "Ignore",
+}
 
 func (r *PullzoneShieldResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone_shield"
@@ -448,6 +457,24 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 						},
 						Description: "Determines which severity level of rules will block requests.",
 					},
+					"body_limit_request": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString("Log"),
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneShieldWafBodyLimitMap)...),
+						},
+						Description: "Determines the action to take when the request body length exceeds your plan limit. " + generateMarkdownMapOptions(pullzoneShieldWafBodyLimitMap),
+					},
+					"body_limit_response": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString("Ignore"),
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneShieldWafBodyLimitMap)...),
+						},
+						Description: "Determines the action to take when the response body length exceeds your plan limit. " + generateMarkdownMapOptions(pullzoneShieldWafBodyLimitMap),
+					},
 				},
 				Description: "Configures WAF settings.",
 			},
@@ -679,6 +706,8 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 		dataApi.WafMode = mapValueToKey(pullzoneShieldWafModeMap, attrs["mode"].(types.String).ValueString())
 		dataApi.WafRealtimeThreatIntelligenceEnabled = attrs["realtime_threat_intelligence"].(types.Bool).ValueBool()
 		dataApi.WafLogHeaders = attrs["log_headers"].(types.Bool).ValueBool()
+		dataApi.WafRequestBodyLimitAction = mapValueToKey(pullzoneShieldWafBodyLimitMap, attrs["body_limit_request"].(types.String).ValueString())
+		dataApi.WafResponseBodyLimitAction = mapValueToKey(pullzoneShieldWafBodyLimitMap, attrs["body_limit_response"].(types.String).ValueString())
 
 		{
 			var headers []string
@@ -870,6 +899,8 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 			"detection_sensitivity":         types.Int64Value(int64(dataApi.WafRuleSensitivityDetection)),
 			"execution_sensitivity":         types.Int64Value(int64(dataApi.WafRuleSensitivityExecution)),
 			"blocking_sensitivity":          types.Int64Value(int64(dataApi.WafRuleSensitivityBlocking)),
+			"body_limit_request":            types.StringValue(mapKeyToValue(pullzoneShieldWafBodyLimitMap, dataApi.WafRequestBodyLimitAction)),
+			"body_limit_response":           types.StringValue(mapKeyToValue(pullzoneShieldWafBodyLimitMap, dataApi.WafResponseBodyLimitAction)),
 		}
 
 		obj, diags := types.ObjectValue(pullzoneShieldWafType, values)
