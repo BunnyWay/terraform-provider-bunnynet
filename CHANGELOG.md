@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
-## Unreleased
+## [0.8.0] - 2025-08-04
 ### Added
 - resource pullzone_shield: support managed Access Lists;
 - resource pullzone_access_list: customized Access Lists;
