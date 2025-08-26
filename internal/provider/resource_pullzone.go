@@ -1404,18 +1404,13 @@ func (r *PullzoneResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 
 	// permacache_storagezone
 	{
-		var statePermacacheStoragezone int64
-		req.State.GetAttribute(ctx, path.Root("permacache_storagezone"), &statePermacacheStoragezone)
-
-		var planPermacacheStoragezone int64
+		var planPermacacheStoragezone types.Int64
 		req.Plan.GetAttribute(ctx, path.Root("permacache_storagezone"), &planPermacacheStoragezone)
 
-		if planPermacacheStoragezone > 0 {
+		if planPermacacheStoragezone.IsUnknown() {
+			resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), types.Int64Unknown())
+		} else if planPermacacheStoragezone.ValueInt64() > 0 {
 			resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), pullzoneresourcevalidator.DefaultCacheExpirationTimeForPermacache)
-		}
-
-		if planPermacacheStoragezone == 0 && statePermacacheStoragezone > 0 {
-			resp.Plan.SetAttribute(ctx, path.Root("cache_expiration_time"), -1)
 		}
 	}
 
