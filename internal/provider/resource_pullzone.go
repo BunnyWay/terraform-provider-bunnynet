@@ -183,7 +183,7 @@ var pullzoneRoutingTierMap = map[uint8]string{
 	1: "Volume",
 }
 
-var pullzoneCacheVaryOptions = []string{"querystring", "webp", "country", "hostname", "mobile", "avif", "cookie"}
+var pullzoneCacheVaryOptions = []string{"querystring", "webp", "country", "state", "hostname", "mobile", "avif", "cookie"}
 var pullzoneCacheStaleOptions = []string{"offline", "updating"}
 var pullzoneTlsSupportOptions = []string{"TLSv1.0", "TLSv1.1"}
 var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxResponse", "responseTimeout"}
@@ -1531,6 +1531,9 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 			if v.(types.String).ValueString() == "country" {
 				dataApi.EnableCountryCodeVary = true
 			}
+			if v.(types.String).ValueString() == "state" {
+				dataApi.EnableCountryStateCodeVary = true
+			}
 			if v.(types.String).ValueString() == "hostname" {
 				dataApi.EnableHostnameVary = true
 			}
@@ -1736,6 +1739,10 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		if dataApi.EnableCountryCodeVary {
 			varyValues = append(varyValues, types.StringValue("country"))
+		}
+
+		if dataApi.EnableCountryStateCodeVary {
+			varyValues = append(varyValues, types.StringValue("state"))
 		}
 
 		if dataApi.EnableHostnameVary {

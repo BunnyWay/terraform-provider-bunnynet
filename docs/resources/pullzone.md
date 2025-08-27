@@ -49,7 +49,7 @@ resource "bunnynet_pullzone" "example" {
 - `cache_expiration_time` (Number) The override cache time, in seconds.
 - `cache_expiration_time_browser` (Number) The override cache time for the end client, in seconds.
 - `cache_stale` (Set of String) Options: `offline`, `updating`
-- `cache_vary` (Set of String) Options: `avif`, `cookie`, `country`, `hostname`, `mobile`, `querystring`, `webp`
+- `cache_vary` (Set of String) Options: `avif`, `cookie`, `country`, `hostname`, `mobile`, `querystring`, `state`, `webp`
 - `cache_vary_cookie` (Set of String) Contains the list of vary parameters that will be used for vary cache by cookie string. If empty, cookie vary will not be used.
 - `cache_vary_querystring` (Set of String) Contains the list of vary parameters that will be used for vary cache by query string. If empty, all parameters will be used to construct the key
 - `cors_enabled` (Boolean) Indicates whether CORS (Cross-Origin Resource Sharing) is enabled.

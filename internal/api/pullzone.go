@@ -34,6 +34,7 @@ type Pullzone struct {
 	IgnoreQueryStrings                 bool     `json:"IgnoreQueryStrings"`
 	EnableWebPVary                     bool     `json:"EnableWebPVary"`
 	EnableCountryCodeVary              bool     `json:"EnableCountryCodeVary"`
+	EnableCountryStateCodeVary         bool     `json:"EnableCountryStateCodeVary"`
 	EnableHostnameVary                 bool     `json:"EnableHostnameVary"`
 	EnableMobileVary                   bool     `json:"EnableMobileVary"`
 	EnableAvifVary                     bool     `json:"EnableAvifVary"`
