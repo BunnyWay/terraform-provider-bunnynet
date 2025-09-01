@@ -35,6 +35,8 @@ resource "bunnynet_dns_record" "record" {
 }
 ```
 
+## Fixed
+- resource dns_record: fix `The script ID is not valid` error for `type = Script`;
 ## Changed
 - resource dns_record: `link_name` is now a computed field;
 - resource dns_record: use `pullzone_id` to link a pullzone with `type = "PullZone"`;

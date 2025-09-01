@@ -38,6 +38,7 @@ type DnsRecord struct {
 	SmartRoutingType      uint8   `json:"SmartRoutingType"`
 	Disabled              bool    `json:"Disabled"`
 	Comment               string  `json:"Comment"`
+	ScriptId              int64   `json:"ScriptId,omitempty"`
 }
 
 func (c *Client) GetDnsRecord(zoneId int64, id int64) (DnsRecord, error) {

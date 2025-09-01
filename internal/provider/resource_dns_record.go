@@ -6,12 +6,16 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/dnsrecordresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -27,8 +31,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
-	"strconv"
-	"strings"
 )
 
 var _ resource.Resource = &DnsRecordResource{}
@@ -361,7 +363,12 @@ func (r *DnsRecordResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	dataApi := r.convertModelToApi(ctx, dataTf)
+	dataApi, diags := r.convertModelToApi(ctx, dataTf)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	dataApi, err := r.client.CreateDnsRecord(dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create DNS record", err.Error())
@@ -369,7 +376,7 @@ func (r *DnsRecordResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("created dns record %s %s", mapKeyToValue(dnsRecordTypeMap, dataApi.Type), dataApi.Name))
-	dataTf, diags := dnsRecordApiToTf(dataApi)
+	dataTf, diags = dnsRecordApiToTf(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -408,9 +415,13 @@ func (r *DnsRecordResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.UpdateDnsRecord(dataApi)
+	dataApi, diags := r.convertModelToApi(ctx, data)
+	if diags != nil {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
+	dataApi, err := r.client.UpdateDnsRecord(dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating dns record", err.Error()))
 		return
@@ -472,7 +483,7 @@ func (r *DnsRecordResource) ImportState(ctx context.Context, req resource.Import
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *DnsRecordResource) convertModelToApi(ctx context.Context, dataTf DnsRecordResourceModel) api.DnsRecord {
+func (r *DnsRecordResource) convertModelToApi(ctx context.Context, dataTf DnsRecordResourceModel) (api.DnsRecord, diag.Diagnostics) {
 	dataApi := api.DnsRecord{}
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.Zone = dataTf.Zone.ValueInt64()
@@ -497,7 +508,19 @@ func (r *DnsRecordResource) convertModelToApi(ctx context.Context, dataTf DnsRec
 	dataApi.Comment = dataTf.Comment.ValueString()
 	dataApi.Disabled = !dataTf.Enabled.ValueBool()
 
-	return dataApi
+	if dataTf.Type.ValueString() == "Script" {
+		value, err := strconv.ParseInt(dataApi.Value, 10, 64)
+		if err != nil {
+			diags := diag.Diagnostics{}
+			diags.AddAttributeError(path.Root("value"), "Invalid attribute value", "For \"Script\" records, the value must be a script ID.")
+
+			return dataApi, diags
+		}
+
+		dataApi.ScriptId = value
+	}
+
+	return dataApi, nil
 }
 
 func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagnostics) {
