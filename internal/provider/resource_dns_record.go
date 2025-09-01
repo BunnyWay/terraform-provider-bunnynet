@@ -241,9 +241,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				Description: dnsRecordDescription.AcceleratedPullzone,
 			},
 			"link_name": schema.StringAttribute{
-				Optional: true,
 				Computed: true,
-				Default:  stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

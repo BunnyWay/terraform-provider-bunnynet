@@ -33,7 +33,6 @@ resource "bunnynet_dns_record" "record" {
   name      = "test22"
   type      = "PullZone"
   value     = bunnynet_pullzone.pullzone.name
-  link_name = bunnynet_pullzone.pullzone.id
 }
 `
 

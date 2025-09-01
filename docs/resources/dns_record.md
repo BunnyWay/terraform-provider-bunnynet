@@ -41,7 +41,6 @@ resource "bunnynet_dns_record" "MX" {
 - `geolocation_lat` (Number) The latitude for geolocation-based routing.
 - `geolocation_long` (Number) The longitude for geolocation-based routing.
 - `latency_zone` (String) The latency zone for latency-based routing.
-- `link_name` (String) The name of the linked resource.
 - `monitor_type` (String) Options: `Http`, `Monitor`, `None`, `Ping`
 - `port` (Number) The port number for services that require a specific port.
 - `priority` (Number) The priority of the DNS record.
@@ -54,6 +53,7 @@ resource "bunnynet_dns_record" "MX" {
 
 - `accelerated_pullzone` (Number) The ID of the accelerated pull zone.
 - `id` (Number) The unique identifier for the DNS record.
+- `link_name` (String) The name of the linked resource.
 
 ## Import
 
