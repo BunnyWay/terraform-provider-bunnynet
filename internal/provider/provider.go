@@ -129,6 +129,8 @@ func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Reso
 		NewComputeScriptSecretResource,
 		NewComputeScriptVariableResource,
 		NewDnsRecordResourceResource,
+		NewDnsScriptResource,
+		NewDnsScriptVariableResource,
 		NewDnsZoneResourceResource,
 		NewPullzoneResource,
 		NewPullzoneEdgeruleResource,

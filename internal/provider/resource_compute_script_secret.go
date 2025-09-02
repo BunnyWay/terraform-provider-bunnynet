@@ -105,8 +105,20 @@ func (r *ComputeScriptSecretResource) Create(ctx context.Context, req resource.C
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
+
+	script, err := r.client.GetComputeScript(dataApi.ScriptId)
+	if err != nil {
+		resp.Diagnostics.AddError("Error finding compute script secret", err.Error())
+		return
+	}
+
+	if script.ScriptType == api.ScriptTypeDns {
+		resp.Diagnostics.AddError("Error finding compute script secret", "404 Not Found")
+		return
+	}
+
 	value := dataApi.Value
-	dataApi, err := r.client.CreateComputeScriptSecret(dataApi)
+	dataApi, err = r.client.CreateComputeScriptSecret(dataApi)
 	dataApi.Value = value
 
 	if err != nil {
@@ -199,6 +211,17 @@ func (r *ComputeScriptSecretResource) ImportState(ctx context.Context, req resou
 	scriptId, err := strconv.ParseInt(scriptIdStr, 10, 64)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding compute script secret", "Invalid compute script ID: "+err.Error()))
+		return
+	}
+
+	script, err := r.client.GetComputeScript(scriptId)
+	if err != nil {
+		resp.Diagnostics.AddError("Error finding compute script secret", err.Error())
+		return
+	}
+
+	if script.ScriptType == api.ScriptTypeDns {
+		resp.Diagnostics.AddError("Error finding compute script secret", "404 Not Found")
 		return
 	}
 

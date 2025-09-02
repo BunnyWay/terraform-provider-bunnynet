@@ -7,52 +7,42 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"golang.org/x/exp/maps"
 	"strconv"
 )
 
-var _ resource.Resource = &ComputeScriptResource{}
-var _ resource.ResourceWithImportState = &ComputeScriptResource{}
+var _ resource.Resource = &DnsScriptResource{}
+var _ resource.ResourceWithImportState = &DnsScriptResource{}
 
-func NewComputeScriptResource() resource.Resource {
-	return &ComputeScriptResource{}
+func NewDnsScriptResource() resource.Resource {
+	return &DnsScriptResource{}
 }
 
-type ComputeScriptResource struct {
+type DnsScriptResource struct {
 	client *api.Client
 }
 
-type ComputeScriptResourceModel struct {
-	Id            types.Int64  `tfsdk:"id"`
-	Type          types.String `tfsdk:"type"`
-	Name          types.String `tfsdk:"name"`
-	Content       types.String `tfsdk:"content"`
-	DeploymentKey types.String `tfsdk:"deployment_key"`
-	Release       types.String `tfsdk:"release"`
+type DnsScriptResourceModel struct {
+	Id      types.Int64  `tfsdk:"id"`
+	Name    types.String `tfsdk:"name"`
+	Content types.String `tfsdk:"content"`
+	Release types.String `tfsdk:"release"`
 }
 
-var computeScriptTypeMap = map[uint8]string{
-	api.ScriptTypeStandalone: "standalone",
-	api.ScriptTypeMiddleware: "middleware",
+func (r *DnsScriptResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_dns_script"
 }
 
-func (r *ComputeScriptResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_compute_script"
-}
-
-func (r *ComputeScriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *DnsScriptResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "This resource manages a compute script in bunny.net.",
+		Description: "This resource manages a DNS script in bunny.net.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
@@ -61,16 +51,6 @@ func (r *ComputeScriptResource) Schema(ctx context.Context, req resource.SchemaR
 					int64planmodifier.UseStateForUnknown(),
 				},
 				Description: "The ID of the script.",
-			},
-			"type": schema.StringAttribute{
-				Required: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.OneOf(maps.Values(computeScriptTypeMap)...),
-				},
-				MarkdownDescription: generateMarkdownMapOptions(computeScriptTypeMap),
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -86,13 +66,6 @@ func (r *ComputeScriptResource) Schema(ctx context.Context, req resource.SchemaR
 				},
 				Description: "The code of the script.",
 			},
-			"deployment_key": schema.StringAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Description: "The deployment key for the script.",
-			},
 			"release": schema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
@@ -104,7 +77,7 @@ func (r *ComputeScriptResource) Schema(ctx context.Context, req resource.SchemaR
 	}
 }
 
-func (r *ComputeScriptResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *DnsScriptResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -122,8 +95,8 @@ func (r *ComputeScriptResource) Configure(ctx context.Context, req resource.Conf
 	r.client = client
 }
 
-func (r *ComputeScriptResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var dataTf ComputeScriptResourceModel
+func (r *DnsScriptResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var dataTf DnsScriptResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -132,11 +105,11 @@ func (r *ComputeScriptResource) Create(ctx context.Context, req resource.CreateR
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	dataApi, err := r.client.CreateComputeScript(dataApi)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create compute script", err.Error())
+		resp.Diagnostics.AddError("Unable to create DNS script", err.Error())
 		return
 	}
 
-	tflog.Trace(ctx, fmt.Sprintf("created compute script %d", dataApi.Id))
+	tflog.Trace(ctx, fmt.Sprintf("created DNS script %d", dataApi.Id))
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
@@ -146,8 +119,8 @@ func (r *ComputeScriptResource) Create(ctx context.Context, req resource.CreateR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *ComputeScriptResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data ComputeScriptResourceModel
+func (r *DnsScriptResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data DnsScriptResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -156,7 +129,7 @@ func (r *ComputeScriptResource) Read(ctx context.Context, req resource.ReadReque
 
 	dataApi, err := r.client.GetComputeScript(data.Id.ValueInt64())
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", err.Error()))
 		return
 	}
 
@@ -169,8 +142,8 @@ func (r *ComputeScriptResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *ComputeScriptResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data ComputeScriptResourceModel
+func (r *DnsScriptResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data DnsScriptResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -180,17 +153,17 @@ func (r *ComputeScriptResource) Update(ctx context.Context, req resource.UpdateR
 
 	previousDataApi, err := r.client.GetComputeScript(dataApi.Id)
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", err.Error()))
 		return
 	}
 
 	dataApiResult, err := r.client.UpdateComputeScript(dataApi, previousDataApi)
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating compute script", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating DNS script", err.Error()))
 		return
 	}
 
-	tflog.Trace(ctx, fmt.Sprintf("updated compute script %d", dataApiResult.Id))
+	tflog.Trace(ctx, fmt.Sprintf("updated DNS script %d", dataApiResult.Id))
 
 	dataTf, diags := r.convertApiToModel(dataApiResult)
 	if diags != nil {
@@ -201,8 +174,8 @@ func (r *ComputeScriptResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *ComputeScriptResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data ComputeScriptResourceModel
+func (r *DnsScriptResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data DnsScriptResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -210,25 +183,25 @@ func (r *ComputeScriptResource) Delete(ctx context.Context, req resource.DeleteR
 
 	err := r.client.DeleteComputeScript(data.Id.ValueInt64())
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting compute script", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting DNS script", err.Error()))
 	}
 }
 
-func (r *ComputeScriptResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *DnsScriptResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	id, err := strconv.ParseInt(req.ID, 10, 64)
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding compute script", "Invalid ID: "+err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding DNS script", "Invalid ID: "+err.Error()))
 		return
 	}
 
 	dataApi, err := r.client.GetComputeScript(id)
 	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", err.Error()))
 		return
 	}
 
-	if dataApi.ScriptType == api.ScriptTypeDns {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", "404 Not Found"))
+	if dataApi.ScriptType != api.ScriptTypeDns {
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", "404 Not Found"))
 		return
 	}
 
@@ -241,23 +214,21 @@ func (r *ComputeScriptResource) ImportState(ctx context.Context, req resource.Im
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
-func (r *ComputeScriptResource) convertModelToApi(ctx context.Context, dataTf ComputeScriptResourceModel) api.ComputeScript {
+func (r *DnsScriptResource) convertModelToApi(ctx context.Context, dataTf DnsScriptResourceModel) api.ComputeScript {
 	dataApi := api.ComputeScript{}
 	dataApi.Id = dataTf.Id.ValueInt64()
-	dataApi.ScriptType = mapValueToKey(computeScriptTypeMap, dataTf.Type.ValueString())
 	dataApi.Name = dataTf.Name.ValueString()
 	dataApi.Content = dataTf.Content.ValueString()
+	dataApi.ScriptType = api.ScriptTypeDns
 
 	return dataApi
 }
 
-func (r *ComputeScriptResource) convertApiToModel(dataApi api.ComputeScript) (ComputeScriptResourceModel, diag.Diagnostics) {
-	dataTf := ComputeScriptResourceModel{}
+func (r *DnsScriptResource) convertApiToModel(dataApi api.ComputeScript) (DnsScriptResourceModel, diag.Diagnostics) {
+	dataTf := DnsScriptResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
-	dataTf.Type = types.StringValue(mapKeyToValue(computeScriptTypeMap, dataApi.ScriptType))
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.Content = types.StringValue(dataApi.Content)
-	dataTf.DeploymentKey = types.StringValue(dataApi.DeploymentKey)
 
 	if dataApi.Release != "" {
 		dataTf.Release = types.StringValue(dataApi.Release)

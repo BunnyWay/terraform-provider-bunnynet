@@ -113,7 +113,19 @@ func (r *ComputeScriptVariableResource) Create(ctx context.Context, req resource
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreateComputeScriptVariable(dataApi)
+
+	script, err := r.client.GetComputeScript(dataApi.ScriptId)
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to create compute script variable", err.Error())
+		return
+	}
+
+	if script.ScriptType == api.ScriptTypeDns {
+		resp.Diagnostics.AddError("Unable to create compute script variable", "404 Not Found")
+		return
+	}
+
+	dataApi, err = r.client.CreateComputeScriptVariable(dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create compute script variable", err.Error())
 		return
@@ -201,6 +213,17 @@ func (r *ComputeScriptVariableResource) ImportState(ctx context.Context, req res
 	scriptId, err := strconv.ParseInt(scriptIdStr, 10, 64)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding compute script variable", "Invalid compute script ID: "+err.Error()))
+		return
+	}
+
+	script, err := r.client.GetComputeScript(scriptId)
+	if err != nil {
+		resp.Diagnostics.AddError("Error finding compute script variable", err.Error())
+		return
+	}
+
+	if script.ScriptType == api.ScriptTypeDns {
+		resp.Diagnostics.AddError("Error finding compute script variable", "404 Not Found")
 		return
 	}
 

@@ -35,6 +35,8 @@ resource "bunnynet_dns_record" "record" {
 }
 ```
 
+## Added
+- Support for DNS Script
 ## Fixed
 - resource dns_record: fix `The script ID is not valid` error for `type = Script`;
 ## Changed

@@ -12,6 +12,10 @@ import (
 	"net/http"
 )
 
+const ScriptTypeDns = 0
+const ScriptTypeStandalone = 1
+const ScriptTypeMiddleware = 2
+
 type ComputeScript struct {
 	Id               int64  `json:"Id,omitempty"`
 	ScriptType       uint8  `json:"ScriptType"`
