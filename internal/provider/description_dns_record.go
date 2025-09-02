@@ -16,6 +16,7 @@ type dnsRecordDescriptionType struct {
 	Port                string
 	Flags               string
 	Tag                 string
+	PullzoneId          string
 	Accelerated         string
 	AcceleratedPullzone string
 	Link                string
@@ -40,6 +41,7 @@ var dnsRecordDescription = dnsRecordDescriptionType{
 	Port:                "The port number for services that require a specific port.",
 	Flags:               "Flags for advanced DNS settings.",
 	Tag:                 "A tag for the DNS record.",
+	PullzoneId:          "The ID of the linked pullzone.",
 	Accelerated:         "Indicates whether the DNS record should utilize bunny.net’s acceleration services.",
 	AcceleratedPullzone: "The ID of the accelerated pull zone.",
 	Link:                "The name of the linked resource.",

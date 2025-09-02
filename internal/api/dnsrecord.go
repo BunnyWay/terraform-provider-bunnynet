@@ -11,7 +11,6 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
-	"strconv"
 )
 
 const DnsRecordTypePZ = 7
@@ -67,11 +66,6 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 	weight := data.Weight
 	data.Weight = 0
 
-	data, err := convertDnsRecordForApiSave(data)
-	if err != nil {
-		return DnsRecord{}, err
-	}
-
 	body, err := json.Marshal(data)
 	if err != nil {
 		return DnsRecord{}, err
@@ -113,11 +107,6 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 	id := dataApi.Id
 	zoneId := dataApi.Zone
 
-	dataApi, err := convertDnsRecordForApiSave(dataApi)
-	if err != nil {
-		return DnsRecord{}, err
-	}
-
 	body, err := json.Marshal(dataApi)
 	if err != nil {
 		return DnsRecord{}, err
@@ -143,25 +132,6 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 	}
 
 	return dataApiResult, nil
-}
-
-func convertDnsRecordForApiSave(record DnsRecord) (DnsRecord, error) {
-	if record.Type == DnsRecordTypePZ {
-		if len(record.LinkName) == 0 {
-			return DnsRecord{}, errors.New("linkname should contain the Pullzone ID")
-		}
-
-		id, err := strconv.ParseInt(record.LinkName, 10, 64)
-		if err != nil {
-			return DnsRecord{}, err
-		}
-
-		record.PullzoneId = id
-		record.LinkName = ""
-		record.Value = ""
-	}
-
-	return record, nil
 }
 
 func (c *Client) DeleteDnsRecord(zoneId int64, id int64) error {

@@ -44,6 +44,7 @@ resource "bunnynet_dns_record" "MX" {
 - `monitor_type` (String) Options: `Http`, `Monitor`, `None`, `Ping`
 - `port` (Number) The port number for services that require a specific port.
 - `priority` (Number) The priority of the DNS record.
+- `pullzone_id` (Number) The ID of the linked pullzone.
 - `smart_routing_type` (String) Options: `Geolocation`, `Latency`, `None`
 - `tag` (String) A tag for the DNS record.
 - `ttl` (Number) The time-to-live value for the DNS record.

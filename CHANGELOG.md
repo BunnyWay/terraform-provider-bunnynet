@@ -8,8 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
 ## Unreleased
+
+## Backwards compatibility break
+
+To declare a DNS record with `type = "PullZone"`, instead of `link_name`, you now need to use `pullzone_id`. The `link_name` field was made read-only.
+
+Before:
+```terraform
+resource "bunnynet_dns_record" "record" {
+  zone      = data.bunnynet_dns_zone.domain.id
+  name      = "www"
+  type      = "PullZone"
+  value     = bunnynet_pullzone.pullzone.name
+  link_name = bunnynet_pullzone.pullzone.id
+}
+```
+
+After:
+```terraform
+resource "bunnynet_dns_record" "record" {
+  zone        = data.bunnynet_dns_zone.domain.id
+  name        = "www"
+  type        = "PullZone"
+  value       = bunnynet_pullzone.pullzone.name
+  pullzone_id = bunnynet_pullzone.pullzone.id
+}
+```
+
 ## Changed
 - resource dns_record: `link_name` is now a computed field;
+- resource dns_record: use `pullzone_id` to link a pullzone with `type = "PullZone"`;
 
 ## [0.8.2] - 2025-08-27
 ### Added

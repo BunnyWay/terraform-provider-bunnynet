@@ -29,10 +29,11 @@ data "bunnynet_dns_zone" "domain" {
 }
 
 resource "bunnynet_dns_record" "record" {
-  zone      = data.bunnynet_dns_zone.domain.id
-  name      = "test22"
-  type      = "PullZone"
-  value     = bunnynet_pullzone.pullzone.name
+  zone        = data.bunnynet_dns_zone.domain.id
+  name        = "test22"
+  type        = "PullZone"
+  value       = bunnynet_pullzone.pullzone.name
+  pullzone_id = bunnynet_pullzone.pullzone.id
 }
 `
 

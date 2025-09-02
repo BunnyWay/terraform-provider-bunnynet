@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/dnsrecordresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -54,6 +55,7 @@ type DnsRecordResourceModel struct {
 	Port                  types.Int64   `tfsdk:"port"`
 	Flags                 types.Int64   `tfsdk:"flags"`
 	Tag                   types.String  `tfsdk:"tag"`
+	PullzoneId            types.Int64   `tfsdk:"pullzone_id"`
 	Accelerated           types.Bool    `tfsdk:"accelerated"`
 	AcceleratedPullZoneId types.Int64   `tfsdk:"accelerated_pullzone"`
 	LinkName              types.String  `tfsdk:"link_name"`
@@ -225,6 +227,14 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 				},
 				Description: dnsRecordDescription.Tag,
 			},
+			"pullzone_id": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Description: dnsRecordDescription.PullzoneId,
+			},
 			"accelerated": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
@@ -336,6 +346,12 @@ func (r *DnsRecordResource) Configure(ctx context.Context, req resource.Configur
 	}
 
 	r.client = client
+}
+
+func (r *DnsRecordResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		dnsrecordresourcevalidator.PullzoneId(),
+	}
 }
 
 func (r *DnsRecordResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -469,6 +485,7 @@ func (r *DnsRecordResource) convertModelToApi(ctx context.Context, dataTf DnsRec
 	dataApi.Port = dataTf.Port.ValueInt64()
 	dataApi.Flags = dataTf.Flags.ValueInt64()
 	dataApi.Tag = dataTf.Tag.ValueString()
+	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.Accelerated = dataTf.Accelerated.ValueBool()
 	dataApi.AcceleratedPullZoneId = dataTf.AcceleratedPullZoneId.ValueInt64()
 	dataApi.LinkName = dataTf.LinkName.ValueString()
@@ -506,6 +523,18 @@ func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagn
 	dataTf.SmartRoutingType = types.StringValue(mapKeyToValue(dnsRecordSmartRoutingTypeMap, dataApi.SmartRoutingType))
 	dataTf.Comment = types.StringValue(dataApi.Comment)
 	dataTf.Enabled = types.BoolValue(!dataApi.Disabled)
+
+	if dataApi.Type == api.DnsRecordTypePZ {
+		pullzoneId, err := strconv.ParseInt(dataApi.LinkName, 10, 64)
+		if err != nil {
+			diags := diag.Diagnostics{}
+			diags.AddAttributeError(path.Root("pullzone_id"), "Invalid attribute value", err.Error())
+
+			return DnsRecordResourceModel{}, diags
+		}
+
+		dataTf.PullzoneId = types.Int64Value(pullzoneId)
+	}
 
 	return dataTf, nil
 }
