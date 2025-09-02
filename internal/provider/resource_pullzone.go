@@ -1614,7 +1614,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 				dataApi.EnableTLS1 = true
 			}
 			if v.(types.String).ValueString() == "TLSv1.1" {
-				dataApi.EnableTLS1_1 = true
+				dataApi.EnableTLS11 = true
 			}
 		}
 	}
@@ -1832,17 +1832,22 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 			return dataTf, diags
 		}
 
-		var tlsSupportValues []attr.Value
-		if dataApi.EnableTLS1 {
-			tlsSupportValues = append(tlsSupportValues, types.StringValue("TLSv1.0"))
-		}
-		if dataApi.EnableTLS1_1 {
-			tlsSupportValues = append(tlsSupportValues, types.StringValue("TLSv1.1"))
-		}
+		// tls support
+		{
+			var tlsSupportValues []attr.Value
+			if dataApi.EnableTLS1 {
+				tlsSupportValues = append(tlsSupportValues, types.StringValue("TLSv1.0"))
+			}
+			if dataApi.EnableTLS11 {
+				tlsSupportValues = append(tlsSupportValues, types.StringValue("TLSv1.1"))
+			}
 
-		tlsSupport, diags := types.SetValue(types.StringType, tlsSupportValues)
-		if diags != nil {
-			return dataTf, diags
+			tlsSupport, diags := types.SetValue(types.StringType, tlsSupportValues)
+			if diags != nil {
+				return dataTf, diags
+			}
+
+			dataTf.TlsSupport = tlsSupport
 		}
 
 		dataTf.BlockRootPath = types.BoolValue(dataApi.BlockRootPathAccess)
@@ -1862,7 +1867,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		dataTf.LogForwardFormat = types.StringValue(mapKeyToValue(pullzoneLogForwardFormatMap, dataApi.LogForwardingFormat))
 		dataTf.LogStorageEnabled = types.BoolValue(dataApi.LoggingSaveToStorage)
 		dataTf.LogStorageZone = types.Int64Value(int64(dataApi.LoggingStorageZoneId))
-		dataTf.TlsSupport = tlsSupport
+
 		dataTf.ErrorPageWhitelabel = types.BoolValue(dataApi.ErrorPageWhitelabel)
 		dataTf.ErrorPageStatuspageEnabled = types.BoolValue(dataApi.ErrorPageEnableStatuspageWidget)
 		dataTf.ErrorPageStatuspageCode = types.StringValue(dataApi.ErrorPageStatuspageCode)

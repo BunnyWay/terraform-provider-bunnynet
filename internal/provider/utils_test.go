@@ -4,7 +4,7 @@
 package provider
 
 import (
-	rand "math/rand/v2"
+	"math/rand/v2"
 	"testing"
 )
 

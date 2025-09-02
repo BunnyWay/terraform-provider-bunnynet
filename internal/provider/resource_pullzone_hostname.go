@@ -226,13 +226,13 @@ func (r *PullzoneHostnameResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	dataApi, err := r.client.GetPullzoneHostname(data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
-	dataApi.Certificate = data.Certificate.ValueString()
-	dataApi.CertificateKey = data.CertificateKey.ValueString()
-
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching hostname", err.Error()))
 		return
 	}
+
+	dataApi.Certificate = data.Certificate.ValueString()
+	dataApi.CertificateKey = data.CertificateKey.ValueString()
 
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
@@ -259,17 +259,17 @@ func (r *PullzoneHostnameResource) Update(ctx context.Context, req resource.Upda
 	previousDataApi := r.convertModelToApi(ctx, previousData)
 
 	dataApiResult, err := r.client.UpdatePullzoneHostname(dataApi, previousDataApi)
+	if err != nil {
+		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating hostname", err.Error()))
+		return
+	}
+
 	if len(dataApi.Certificate) > 0 {
 		dataApiResult.Certificate = dataApi.Certificate
 	}
 
 	if len(dataApi.CertificateKey) > 0 {
 		dataApiResult.CertificateKey = dataApi.CertificateKey
-	}
-
-	if err != nil {
-		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating hostname", err.Error()))
-		return
 	}
 
 	dataTf, diags := r.convertApiToModel(dataApiResult)

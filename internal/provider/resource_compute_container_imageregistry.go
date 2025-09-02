@@ -116,12 +116,14 @@ func (r *ComputeContainerImageregistryResource) Create(ctx context.Context, req 
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	token := dataApi.Token
+
 	dataApi, err := r.client.CreateComputeContainerImageregistry(dataApi)
-	dataApi.Token = token
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create container image registry", err.Error())
 		return
 	}
+
+	dataApi.Token = token
 
 	tflog.Trace(ctx, "created container image registry "+dataApi.DisplayName+"/"+dataApi.UserName)
 	dataTf, diags = r.convertApiToModel(dataApi)
@@ -142,12 +144,12 @@ func (r *ComputeContainerImageregistryResource) Read(ctx context.Context, req re
 	}
 
 	dataApi, err := r.client.GetComputeContainerImageregistry(data.Id.ValueInt64())
-	dataApi.Token = data.Token.ValueString()
-
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container image registry", err.Error()))
 		return
 	}
+
+	dataApi.Token = data.Token.ValueString()
 
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {

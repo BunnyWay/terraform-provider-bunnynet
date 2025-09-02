@@ -190,11 +190,11 @@ func (c *Client) UpdateComputeContainerImageregistry(data ComputeContainerImager
 	}
 
 	dataApiResult, err := c.GetComputeContainerImageregistry(id)
-	dataApiResult.Token = token
-
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	dataApiResult.Token = token
 
 	return dataApiResult, nil
 }

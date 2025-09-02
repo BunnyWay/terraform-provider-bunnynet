@@ -72,7 +72,7 @@ var computeContainerAppContainerEndpointProtocolMap = map[string]string{
 	"UDP": "Udp",
 }
 
-func (r ComputeContainerAppResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ComputeContainerAppResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_compute_container_app"
 }
 
@@ -793,7 +793,7 @@ func (r *ComputeContainerAppResource) ConfigValidators(ctx context.Context) []re
 	}
 }
 
-func (r ComputeContainerAppResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+func (r *ComputeContainerAppResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	if req.Plan.Raw.IsNull() {
 		return
 	}

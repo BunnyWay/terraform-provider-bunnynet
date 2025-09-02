@@ -356,7 +356,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 	if len(dataApi.Chapters) == 0 {
 		dataTf.Chapters = types.SetNull(streamVideoChapterType)
 	} else {
-		chaptersValues := []attr.Value{}
+		chaptersValues := make([]attr.Value, 0, len(dataApi.Chapters))
 		for _, chapter := range dataApi.Chapters {
 			chapterObj, diags := types.ObjectValue(streamVideoChapterType.AttrTypes, map[string]attr.Value{
 				"title": types.StringValue(chapter.Title),
@@ -383,7 +383,7 @@ func (r *StreamVideoResource) convertApiToModel(dataApi api.StreamVideo) (Stream
 	if len(dataApi.Moments) == 0 {
 		dataTf.Moments = types.SetNull(streamVideoMomentType)
 	} else {
-		momentsValues := []attr.Value{}
+		momentsValues := make([]attr.Value, 0, len(dataApi.Moments))
 		for _, moment := range dataApi.Moments {
 			momentObj, diags := types.ObjectValue(streamVideoMomentType.AttrTypes, map[string]attr.Value{
 				"label":     types.StringValue(moment.Label),

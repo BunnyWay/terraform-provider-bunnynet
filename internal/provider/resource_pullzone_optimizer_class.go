@@ -362,13 +362,13 @@ func (r *PullzoneOptimizerClassResource) ImportState(ctx context.Context, req re
 		return
 	}
 
-	optimizer_class, err := r.client.GetPullzoneOptimizerClass(pullzoneId, name)
+	optimizerClass, err := r.client.GetPullzoneOptimizerClass(pullzoneId, name)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error finding Optimizer Image Class", err.Error()))
 		return
 	}
 
-	dataTf, diags := r.convertApiToModel(optimizer_class)
+	dataTf, diags := r.convertApiToModel(optimizerClass)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return

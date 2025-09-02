@@ -119,14 +119,14 @@ func (r *ComputeScriptSecretResource) Create(ctx context.Context, req resource.C
 
 	value := dataApi.Value
 	dataApi, err = r.client.CreateComputeScriptSecret(dataApi)
-	dataApi.Value = value
-
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create compute script secret", err.Error())
 		return
 	}
 
+	dataApi.Value = value
 	tflog.Trace(ctx, fmt.Sprintf("created compute script secret %d", dataApi.Id))
+
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
@@ -145,12 +145,12 @@ func (r *ComputeScriptSecretResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	dataApi, err := r.client.GetComputeScriptSecretByName(data.Script.ValueInt64(), data.Name.ValueString())
-	dataApi.Value = data.Value.ValueString()
-
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script secret", err.Error()))
 		return
 	}
+
+	dataApi.Value = data.Value.ValueString()
 
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
@@ -170,13 +170,12 @@ func (r *ComputeScriptSecretResource) Update(ctx context.Context, req resource.U
 
 	dataApi := r.convertModelToApi(ctx, data)
 	dataApi, err := r.client.UpdateComputeScriptSecret(dataApi)
-	dataApi.Value = data.Value.ValueString()
-
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating compute script secret", err.Error()))
 		return
 	}
 
+	dataApi.Value = data.Value.ValueString()
 	tflog.Trace(ctx, fmt.Sprintf("updated compute script secret %d", dataApi.Id))
 
 	dataTf, diags := r.convertApiToModel(dataApi)
