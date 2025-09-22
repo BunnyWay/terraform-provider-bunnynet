@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## Unreleased
+
+## Backwards compatibility break
+
+The `weight` attribute on a `dns_record` was previously available for all record types, however, outside `SRV`/`A`/`AAAA` they aren't used and can be discarded by the bunny.net API. For that reason, we're limiting the `weight` attribute usage to only the record types that actually support it on our backend systems.
+
+## Changed
+- resource dns_record: `weight` is now only available for `SRV`/`A`/`AAAA` record types;
+
 ## 0.9.0 - 2025-09-02
 
 ## Backwards compatibility break

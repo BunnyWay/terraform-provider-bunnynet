@@ -66,9 +66,6 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 		return DnsRecord{}, errors.New("zone is required")
 	}
 
-	weight := data.Weight
-	data.Weight = 0
-
 	body, err := json.Marshal(data)
 	if err != nil {
 		return DnsRecord{}, err
@@ -103,7 +100,6 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 	}
 
 	dataApiResult.Zone = dnsZoneId
-	dataApiResult.Weight = weight
 
 	return c.UpdateDnsRecord(ctx, dataApiResult)
 }
