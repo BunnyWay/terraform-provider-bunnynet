@@ -369,7 +369,7 @@ func (r *DnsRecordResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	dataApi, err := r.client.CreateDnsRecord(dataApi)
+	dataApi, err := r.client.CreateDnsRecord(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create DNS record", err.Error())
 		return
@@ -393,7 +393,7 @@ func (r *DnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	dataApi, err := r.client.GetDnsRecord(data.Zone.ValueInt64(), data.Id.ValueInt64())
+	dataApi, err := r.client.GetDnsRecord(ctx, data.Zone.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching dns record", err.Error()))
 		return
@@ -421,7 +421,7 @@ func (r *DnsRecordResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dataApi, err := r.client.UpdateDnsRecord(dataApi)
+	dataApi, err := r.client.UpdateDnsRecord(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating dns record", err.Error()))
 		return
@@ -443,7 +443,7 @@ func (r *DnsRecordResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	err := r.client.DeleteDnsRecord(data.Zone.ValueInt64(), data.Id.ValueInt64())
+	err := r.client.DeleteDnsRecord(ctx, data.Zone.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting dns record", err.Error()))
 	}
@@ -468,7 +468,7 @@ func (r *DnsRecordResource) ImportState(ctx context.Context, req resource.Import
 		return
 	}
 
-	dataApi, err := r.client.GetDnsRecord(zoneId, id)
+	dataApi, err := r.client.GetDnsRecord(ctx, zoneId, id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching dns record", err.Error()))
 		return

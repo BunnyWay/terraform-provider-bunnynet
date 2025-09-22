@@ -217,7 +217,7 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 			return PullzoneShield{}, err
 		}
 
-		tflog.Warn(ctx, fmt.Sprintf("GET /shield/shield-zone/%d: %+v", id, string(bodyResp)))
+		tflog.Debug(ctx, fmt.Sprintf("GET /shield/shield-zone/%d: %+v", id, string(bodyResp)))
 
 		err = json.Unmarshal(bodyResp, &result)
 		if err != nil {
@@ -371,7 +371,7 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 		return fetchBotDetectionResult{}, err
 	}
 
-	tflog.Warn(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/bot-detection: %+v", shieldZoneId, string(bodyResp)))
+	tflog.Debug(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/bot-detection: %+v", shieldZoneId, string(bodyResp)))
 
 	var result struct {
 		Data struct {
@@ -444,7 +444,7 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		return PullzoneShield{}, err
 	}
 
-	tflog.Warn(ctx, fmt.Sprintf("POST /shield/shield-zone: %+v", string(body)))
+	tflog.Debug(ctx, fmt.Sprintf("POST /shield/shield-zone: %+v", string(body)))
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/shield/shield-zone", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
@@ -517,7 +517,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			return PullzoneShield{}, err
 		}
 
-		tflog.Warn(ctx, fmt.Sprintf("PATCH /shield/shield-zone: %+v", string(body)))
+		tflog.Debug(ctx, fmt.Sprintf("PATCH /shield/shield-zone: %+v", string(body)))
 
 		resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone", c.apiUrl), bytes.NewReader(body))
 		if err != nil {
@@ -640,7 +640,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			return PullzoneShield{}, err
 		}
 
-		tflog.Warn(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/bot-detection: %+v", data.Id, string(body)))
+		tflog.Debug(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/bot-detection: %+v", data.Id, string(body)))
 
 		resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone/%d/bot-detection", c.apiUrl, data.Id), bytes.NewReader(body))
 		if err != nil {

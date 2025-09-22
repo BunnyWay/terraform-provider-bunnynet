@@ -103,7 +103,7 @@ func (r *DnsScriptResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreateComputeScript(dataApi)
+	dataApi, err := r.client.CreateComputeScript(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create DNS script", err.Error())
 		return
@@ -127,7 +127,7 @@ func (r *DnsScriptResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	dataApi, err := r.client.GetComputeScript(data.Id.ValueInt64())
+	dataApi, err := r.client.GetComputeScript(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", err.Error()))
 		return
@@ -151,13 +151,13 @@ func (r *DnsScriptResource) Update(ctx context.Context, req resource.UpdateReque
 
 	dataApi := r.convertModelToApi(ctx, data)
 
-	previousDataApi, err := r.client.GetComputeScript(dataApi.Id)
+	previousDataApi, err := r.client.GetComputeScript(ctx, dataApi.Id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", err.Error()))
 		return
 	}
 
-	dataApiResult, err := r.client.UpdateComputeScript(dataApi, previousDataApi)
+	dataApiResult, err := r.client.UpdateComputeScript(ctx, dataApi, previousDataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating DNS script", err.Error()))
 		return
@@ -194,7 +194,7 @@ func (r *DnsScriptResource) ImportState(ctx context.Context, req resource.Import
 		return
 	}
 
-	dataApi, err := r.client.GetComputeScript(id)
+	dataApi, err := r.client.GetComputeScript(ctx, id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching DNS script", err.Error()))
 		return

@@ -5,10 +5,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 	"strings"
@@ -27,13 +29,13 @@ type StorageFile struct {
 	FileContents io.Reader
 }
 
-func (c *Client) GetStorageFile(zoneId int64, path string) (StorageFile, error) {
-	zone, err := c.GetStorageZone(zoneId)
+func (c *Client) GetStorageFile(ctx context.Context, zoneId int64, path string) (StorageFile, error) {
+	zone, err := c.GetStorageZone(ctx, zoneId)
 	if err != nil {
 		return StorageFile{}, err
 	}
 
-	info, err := getStorageFileInfo(zone, path)
+	info, err := getStorageFileInfo(ctx, zone, path)
 	if err != nil {
 		return StorageFile{}, err
 	}
@@ -41,12 +43,13 @@ func (c *Client) GetStorageFile(zoneId int64, path string) (StorageFile, error) 
 	return info, nil
 }
 
-func (c *Client) CreateStorageFile(data StorageFile) (StorageFile, error) {
-	zone, err := c.GetStorageZone(data.Zone)
+func (c *Client) CreateStorageFile(ctx context.Context, data StorageFile) (StorageFile, error) {
+	zone, err := c.GetStorageZone(ctx, data.Zone)
 	if err != nil {
 		return StorageFile{}, err
 	}
 
+	// @TODO do not read entire file into memory
 	body, err := io.ReadAll(data.FileContents)
 	if err != nil {
 		return StorageFile{}, err
@@ -73,19 +76,23 @@ func (c *Client) CreateStorageFile(data StorageFile) (StorageFile, error) {
 		return StorageFile{}, err
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("PUT https://%s/%s/%s", zone.StorageHostname, zone.Name, data.Path), map[string]interface{}{
+		"status": resp.Status,
+	})
+
 	if resp.StatusCode != http.StatusCreated {
 		return StorageFile{}, errors.New(resp.Status)
 	}
 
-	return c.GetStorageFile(data.Zone, data.Path)
+	return c.GetStorageFile(ctx, data.Zone, data.Path)
 }
 
-func (c *Client) UpdateStorageFile(data StorageFile) (StorageFile, error) {
-	return c.CreateStorageFile(data)
+func (c *Client) UpdateStorageFile(ctx context.Context, data StorageFile) (StorageFile, error) {
+	return c.CreateStorageFile(ctx, data)
 }
 
-func (c *Client) DeleteStorageFile(zoneId int64, path string) error {
-	zone, err := c.GetStorageZone(zoneId)
+func (c *Client) DeleteStorageFile(ctx context.Context, zoneId int64, path string) error {
+	zone, err := c.GetStorageZone(ctx, zoneId)
 	if err != nil {
 		return err
 	}
@@ -107,6 +114,10 @@ func (c *Client) DeleteStorageFile(zoneId int64, path string) error {
 		return err
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("DELETE https://%s/%s/%s", zone.StorageHostname, zone.Name, path), map[string]interface{}{
+		"status": resp.Status,
+	})
+
 	if resp.StatusCode != http.StatusOK {
 		return errors.New(resp.Status)
 	}
@@ -114,7 +125,7 @@ func (c *Client) DeleteStorageFile(zoneId int64, path string) error {
 	return nil
 }
 
-func getStorageFileInfo(zone StorageZone, path string) (StorageFile, error) {
+func getStorageFileInfo(ctx context.Context, zone StorageZone, path string) (StorageFile, error) {
 	req, err := http.NewRequest("DESCRIBE", fmt.Sprintf("https://%s/%s/%s", zone.StorageHostname, zone.Name, path), nil)
 	if err != nil {
 		return StorageFile{}, err
@@ -140,6 +151,11 @@ func getStorageFileInfo(zone StorageZone, path string) (StorageFile, error) {
 	if err != nil {
 		return StorageFile{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("DESCRIBE https://%s/%s/%s", zone.StorageHostname, zone.Name, path), map[string]interface{}{
+		"status":   resp.Status,
+		"response": string(bodyResp),
+	})
 
 	_ = resp.Body.Close()
 	var obj struct {

@@ -130,7 +130,7 @@ func (r *ComputeScriptResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreateComputeScript(dataApi)
+	dataApi, err := r.client.CreateComputeScript(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create compute script", err.Error())
 		return
@@ -154,7 +154,7 @@ func (r *ComputeScriptResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	dataApi, err := r.client.GetComputeScript(data.Id.ValueInt64())
+	dataApi, err := r.client.GetComputeScript(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
 		return
@@ -178,13 +178,13 @@ func (r *ComputeScriptResource) Update(ctx context.Context, req resource.UpdateR
 
 	dataApi := r.convertModelToApi(ctx, data)
 
-	previousDataApi, err := r.client.GetComputeScript(dataApi.Id)
+	previousDataApi, err := r.client.GetComputeScript(ctx, dataApi.Id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
 		return
 	}
 
-	dataApiResult, err := r.client.UpdateComputeScript(dataApi, previousDataApi)
+	dataApiResult, err := r.client.UpdateComputeScript(ctx, dataApi, previousDataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating compute script", err.Error()))
 		return
@@ -221,7 +221,7 @@ func (r *ComputeScriptResource) ImportState(ctx context.Context, req resource.Im
 		return
 	}
 
-	dataApi, err := r.client.GetComputeScript(id)
+	dataApi, err := r.client.GetComputeScript(ctx, id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
 		return

@@ -5,10 +5,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -41,8 +43,8 @@ type DnsRecord struct {
 	ScriptId              int64   `json:"ScriptId,omitempty"`
 }
 
-func (c *Client) GetDnsRecord(zoneId int64, id int64) (DnsRecord, error) {
-	zone, err := c.GetDnsZone(zoneId)
+func (c *Client) GetDnsRecord(ctx context.Context, zoneId int64, id int64) (DnsRecord, error) {
+	zone, err := c.GetDnsZone(ctx, zoneId)
 	if err != nil {
 		return DnsRecord{}, err
 	}
@@ -58,7 +60,7 @@ func (c *Client) GetDnsRecord(zoneId int64, id int64) (DnsRecord, error) {
 
 }
 
-func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
+func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord, error) {
 	dnsZoneId := data.Zone
 	if dnsZoneId == 0 {
 		return DnsRecord{}, errors.New("zone is required")
@@ -71,6 +73,8 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 	if err != nil {
 		return DnsRecord{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("PUT /dnszone/%d/records: %+v", dnsZoneId, string(body)))
 
 	resp, err := c.doRequest(http.MethodPut, fmt.Sprintf("%s/dnszone/%d/records", c.apiUrl, dnsZoneId), bytes.NewReader(body))
 	if err != nil {
@@ -101,10 +105,10 @@ func (c *Client) CreateDnsRecord(data DnsRecord) (DnsRecord, error) {
 	dataApiResult.Zone = dnsZoneId
 	dataApiResult.Weight = weight
 
-	return c.UpdateDnsRecord(dataApiResult)
+	return c.UpdateDnsRecord(ctx, dataApiResult)
 }
 
-func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
+func (c *Client) UpdateDnsRecord(ctx context.Context, dataApi DnsRecord) (DnsRecord, error) {
 	id := dataApi.Id
 	zoneId := dataApi.Zone
 
@@ -112,6 +116,8 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 	if err != nil {
 		return DnsRecord{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("PUT /dnszone/%d/records/%d: %+v", zoneId, id, string(body)))
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d/records/%d", c.apiUrl, zoneId, id), bytes.NewReader(body))
 	if err != nil {
@@ -127,7 +133,7 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 		}
 	}
 
-	dataApiResult, err := c.GetDnsRecord(dataApi.Zone, id)
+	dataApiResult, err := c.GetDnsRecord(ctx, dataApi.Zone, id)
 	if err != nil {
 		return dataApiResult, err
 	}
@@ -135,11 +141,13 @@ func (c *Client) UpdateDnsRecord(dataApi DnsRecord) (DnsRecord, error) {
 	return dataApiResult, nil
 }
 
-func (c *Client) DeleteDnsRecord(zoneId int64, id int64) error {
+func (c *Client) DeleteDnsRecord(ctx context.Context, zoneId int64, id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d/records/%d", c.apiUrl, zoneId, id), nil)
 	if err != nil {
 		return err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d/records/%d: %s", zoneId, id, resp.Status))
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)

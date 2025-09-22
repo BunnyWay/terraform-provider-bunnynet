@@ -5,10 +5,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -26,7 +28,7 @@ type DnsZone struct {
 	Records                       []DnsRecord `json:"Records"`
 }
 
-func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
+func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 	var data DnsZone
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
 	if err != nil {
@@ -42,6 +44,8 @@ func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
 		return data, err
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("GET /dnszone/%d: %+v", id, string(bodyResp)))
+
 	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
@@ -51,7 +55,7 @@ func (c *Client) GetDnsZone(id int64) (DnsZone, error) {
 	return data, nil
 }
 
-func (c *Client) GetDnsZoneByDomain(domain string) (DnsZone, error) {
+func (c *Client) GetDnsZoneByDomain(ctx context.Context, domain string) (DnsZone, error) {
 	var data DnsZone
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/dnszone", c.apiUrl), nil)
 	if err != nil {
@@ -86,13 +90,15 @@ func (c *Client) GetDnsZoneByDomain(domain string) (DnsZone, error) {
 	return data, fmt.Errorf("DNS zone \"%s\" not found", domain)
 }
 
-func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
+func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, error) {
 	body, err := json.Marshal(map[string]string{
 		"Domain": data.Domain,
 	})
 	if err != nil {
 		return DnsZone{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /dnszone: %+v", string(body)))
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
@@ -121,20 +127,23 @@ func (c *Client) CreateDnsZone(data DnsZone) (DnsZone, error) {
 	}
 
 	data.Id = dataApiResult.Id
-	dataApiResult, err = c.UpdateDnsZone(data)
+	dataApiResult, err = c.UpdateDnsZone(ctx, data)
 	if err != nil {
-		_ = c.DeleteDnsZone(data.Id)
+		_ = c.DeleteDnsZone(ctx, data.Id)
 	}
+
 	return dataApiResult, err
 }
 
-func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
+func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, error) {
 	id := dataApi.Id
 
 	body, err := json.Marshal(dataApi)
 	if err != nil {
 		return DnsZone{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /dnszone/%d: %+v", id, string(body)))
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
@@ -150,7 +159,7 @@ func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
 		}
 	}
 
-	dataApiResult, err := c.GetDnsZone(id)
+	dataApiResult, err := c.GetDnsZone(ctx, id)
 	if err != nil {
 		return dataApiResult, err
 	}
@@ -158,11 +167,13 @@ func (c *Client) UpdateDnsZone(dataApi DnsZone) (DnsZone, error) {
 	return dataApiResult, nil
 }
 
-func (c *Client) DeleteDnsZone(id int64) error {
+func (c *Client) DeleteDnsZone(ctx context.Context, id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d: %s", id, resp.Status))
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)

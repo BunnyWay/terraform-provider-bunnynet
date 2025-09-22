@@ -70,7 +70,7 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 		return result, err
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/access-lists/%d: %s", shieldZoneId, listId, string(bodyResp)))
+	tflog.Debug(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/access-lists/%d: %s", shieldZoneId, listId, string(bodyResp)))
 
 	var httpResult pullzoneAccessListHttpType
 	err = json.Unmarshal(bodyResp, &httpResult)
@@ -115,14 +115,12 @@ func (c *Client) CreatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 		return result, err
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/access-lists: %s", shieldZoneId, string(body)))
+	tflog.Debug(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/access-lists: %s", shieldZoneId, string(body)))
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/shield/shield-zone/%d/access-lists", c.apiUrl, shieldZoneId), bytes.NewReader(body))
 	if err != nil {
 		return result, err
 	}
-
-	tflog.Warn(ctx, "resp.Status = "+resp.Status)
 
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractShieldErrorMessage(resp)
@@ -138,7 +136,7 @@ func (c *Client) CreatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 		return result, err
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/access-lists: %s", shieldZoneId, string(bodyResp)))
+	tflog.Debug(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/access-lists: %s", shieldZoneId, string(bodyResp)))
 
 	var httpResult pullzoneAccessListHttpType
 	err = json.Unmarshal(bodyResp, &httpResult)
@@ -293,7 +291,7 @@ func (c *Client) getPullzoneAccessLists(ctx context.Context, shieldZoneId int64,
 		return result, err
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/access-lists: %s", shieldZoneId, string(bodyResp)))
+	tflog.Debug(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/access-lists: %s", shieldZoneId, string(bodyResp)))
 
 	var httpResult struct {
 		ManagedLists []pullzoneAccessListInfo `json:"managedLists"`
@@ -357,7 +355,7 @@ func (c *Client) updatePullzoneAccessListConfiguration(ctx context.Context, shie
 		return err
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("PATCH /shield/shield-zone/%d/access-lists/configurations/%d", shieldZoneId, accessListInfo.ConfigurationId))
+	tflog.Debug(ctx, fmt.Sprintf("PATCH /shield/shield-zone/%d/access-lists/configurations/%d", shieldZoneId, accessListInfo.ConfigurationId))
 
 	resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone/%d/access-lists/configurations/%d", c.apiUrl, shieldZoneId, accessListInfo.ConfigurationId), bytes.NewReader(body))
 	if err != nil {

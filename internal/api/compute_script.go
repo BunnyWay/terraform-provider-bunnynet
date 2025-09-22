@@ -5,9 +5,11 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -26,7 +28,7 @@ type ComputeScript struct {
 	CurrentReleaseId int64  `json:"CurrentReleaseId,omitempty"`
 }
 
-func (c *Client) GetComputeScript(id int64) (ComputeScript, error) {
+func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript, error) {
 	var data ComputeScript
 
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/compute/script/%d", c.apiUrl, id), nil)
@@ -42,6 +44,8 @@ func (c *Client) GetComputeScript(id int64) (ComputeScript, error) {
 	if err != nil {
 		return data, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d: %+v", id, string(bodyResp)))
 
 	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
@@ -65,6 +69,8 @@ func (c *Client) GetComputeScript(id int64) (ComputeScript, error) {
 			return data, err
 		}
 		_ = codeResp.Body.Close()
+
+		tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d/code: %+v", id, string(codeBodyResp)))
 
 		var codeData map[string]string
 		err = json.Unmarshal(codeBodyResp, &codeData)
@@ -90,7 +96,7 @@ func (c *Client) GetComputeScript(id int64) (ComputeScript, error) {
 	return data, nil
 }
 
-func (c *Client) CreateComputeScript(dataApi ComputeScript) (ComputeScript, error) {
+func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript) (ComputeScript, error) {
 	body := map[string]interface{}{
 		"Name":                 dataApi.Name,
 		"ScriptType":           dataApi.ScriptType,
@@ -176,10 +182,10 @@ func (c *Client) CreateComputeScript(dataApi ComputeScript) (ComputeScript, erro
 		_ = resp.Body.Close()
 	}
 
-	return c.GetComputeScript(dataApiResult.Id)
+	return c.GetComputeScript(ctx, dataApiResult.Id)
 }
 
-func (c *Client) UpdateComputeScript(data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
+func (c *Client) UpdateComputeScript(ctx context.Context, data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
 	id := data.Id
 
 	// update attributes
@@ -252,7 +258,7 @@ func (c *Client) UpdateComputeScript(data ComputeScript, previousData ComputeScr
 		}
 	}
 
-	return c.GetComputeScript(id)
+	return c.GetComputeScript(ctx, id)
 }
 
 func (c *Client) DeleteComputeScript(id int64) error {

@@ -114,7 +114,7 @@ func (r *ComputeScriptVariableResource) Create(ctx context.Context, req resource
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
 
-	script, err := r.client.GetComputeScript(dataApi.ScriptId)
+	script, err := r.client.GetComputeScript(ctx, dataApi.ScriptId)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create compute script variable", err.Error())
 		return
@@ -216,7 +216,7 @@ func (r *ComputeScriptVariableResource) ImportState(ctx context.Context, req res
 		return
 	}
 
-	script, err := r.client.GetComputeScript(scriptId)
+	script, err := r.client.GetComputeScript(ctx, scriptId)
 	if err != nil {
 		resp.Diagnostics.AddError("Error finding compute script variable", err.Error())
 		return

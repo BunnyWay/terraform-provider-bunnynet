@@ -251,7 +251,7 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, err
 	}
 
-	tflog.Error(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
+	tflog.Debug(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
 
 	resp, err := c.doJWTRequest(http.MethodPut, fmt.Sprintf("%s/v1/namespaces/default/applications", c.containerApiUrl), bytes.NewReader(body))
 	if err != nil {

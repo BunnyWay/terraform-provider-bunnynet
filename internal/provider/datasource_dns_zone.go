@@ -97,7 +97,7 @@ func (d *DnsZoneDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	zone, err := d.client.GetDnsZoneByDomain(data.Domain.ValueString())
+	zone, err := d.client.GetDnsZoneByDomain(ctx, data.Domain.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Could not fetch DNS zone", err.Error())
 		return

@@ -194,7 +194,7 @@ func (r *StorageFileResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	dataApi, err = r.client.CreateStorageFile(dataApi)
+	dataApi, err = r.client.CreateStorageFile(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create storage file", err.Error())
 		return
@@ -226,7 +226,7 @@ func (r *StorageFileResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	dataApi, err := r.client.GetStorageFile(data.Zone.ValueInt64(), data.Path.ValueString())
+	dataApi, err := r.client.GetStorageFile(ctx, data.Zone.ValueInt64(), data.Path.ValueString())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage file", err.Error()))
 		return
@@ -266,7 +266,7 @@ func (r *StorageFileResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	dataApi, err = r.client.UpdateStorageFile(dataApi)
+	dataApi, err = r.client.UpdateStorageFile(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating storage file", err.Error()))
 		return
@@ -300,7 +300,7 @@ func (r *StorageFileResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	err := r.client.DeleteStorageFile(data.Zone.ValueInt64(), data.Path.ValueString())
+	err := r.client.DeleteStorageFile(ctx, data.Zone.ValueInt64(), data.Path.ValueString())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting storage file", err.Error()))
 	}
@@ -319,7 +319,7 @@ func (r *StorageFileResource) ImportState(ctx context.Context, req resource.Impo
 		return
 	}
 
-	dataApi, err := r.client.GetStorageFile(zoneId, filePath)
+	dataApi, err := r.client.GetStorageFile(ctx, zoneId, filePath)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage file", err.Error()))
 		return

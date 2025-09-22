@@ -5,10 +5,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -27,7 +29,7 @@ type StorageZone struct {
 	DateModified       string   `json:"DateModified,omitempty"`
 }
 
-func (c *Client) GetStorageZone(id int64) (StorageZone, error) {
+func (c *Client) GetStorageZone(ctx context.Context, id int64) (StorageZone, error) {
 	var data StorageZone
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
 	if err != nil {
@@ -43,6 +45,11 @@ func (c *Client) GetStorageZone(id int64) (StorageZone, error) {
 		return data, err
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("GET /storagezone/%d", id), map[string]any{
+		"status":   resp.Status,
+		"response": string(bodyResp),
+	})
+
 	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
@@ -52,7 +59,7 @@ func (c *Client) GetStorageZone(id int64) (StorageZone, error) {
 	return data, nil
 }
 
-func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
+func (c *Client) CreateStorageZone(ctx context.Context, data StorageZone) (StorageZone, error) {
 	body, err := json.Marshal(map[string]interface{}{
 		"Name":               data.Name,
 		"ZoneTier":           data.ZoneTier,
@@ -67,6 +74,11 @@ func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
 	if err != nil {
 		return StorageZone{}, err
 	}
+
+	tflog.Debug(ctx, "POST /storagezone", map[string]interface{}{
+		"payload": string(body),
+		"status":  resp.Status,
+	})
 
 	if resp.StatusCode != http.StatusCreated {
 		err := utils.ExtractErrorMessage(resp)
@@ -90,10 +102,10 @@ func (c *Client) CreateStorageZone(data StorageZone) (StorageZone, error) {
 	}
 
 	data.Id = dataApiResult.Id
-	return c.UpdateStorageZone(data)
+	return c.UpdateStorageZone(ctx, data)
 }
 
-func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
+func (c *Client) UpdateStorageZone(ctx context.Context, dataApi StorageZone) (StorageZone, error) {
 	id := dataApi.Id
 
 	dataUpdate := map[string]interface{}{
@@ -112,6 +124,11 @@ func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 		return StorageZone{}, err
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("POST /storagezone/%d", id), map[string]interface{}{
+		"payload": string(body),
+		"status":  resp.Status,
+	})
+
 	if resp.StatusCode != http.StatusNoContent {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
@@ -121,7 +138,7 @@ func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 		}
 	}
 
-	dataApiResult, err := c.GetStorageZone(id)
+	dataApiResult, err := c.GetStorageZone(ctx, id)
 	if err != nil {
 		return dataApiResult, err
 	}
@@ -129,11 +146,15 @@ func (c *Client) UpdateStorageZone(dataApi StorageZone) (StorageZone, error) {
 	return dataApiResult, nil
 }
 
-func (c *Client) DeleteStorageZone(id int64) error {
+func (c *Client) DeleteStorageZone(ctx context.Context, id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/storagezone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("DELETE /storagezone/%d", id), map[string]interface{}{
+		"status": resp.Status,
+	})
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)

@@ -106,7 +106,7 @@ func (r *ComputeScriptSecretResource) Create(ctx context.Context, req resource.C
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
 
-	script, err := r.client.GetComputeScript(dataApi.ScriptId)
+	script, err := r.client.GetComputeScript(ctx, dataApi.ScriptId)
 	if err != nil {
 		resp.Diagnostics.AddError("Error finding compute script secret", err.Error())
 		return
@@ -213,7 +213,7 @@ func (r *ComputeScriptSecretResource) ImportState(ctx context.Context, req resou
 		return
 	}
 
-	script, err := r.client.GetComputeScript(scriptId)
+	script, err := r.client.GetComputeScript(ctx, scriptId)
 	if err != nil {
 		resp.Diagnostics.AddError("Error finding compute script secret", err.Error())
 		return

@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
 	"regexp"
 	"strconv"
@@ -185,16 +184,11 @@ func (r *StorageZoneResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataResultApi, err := r.client.CreateStorageZone(dataApi)
+	dataResultApi, err := r.client.CreateStorageZone(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create storage zone", err.Error())
 		return
 	}
-
-	tflog.Info(ctx, "POST /storagezone/", map[string]any{
-		"payload": dataApi,
-		"result":  dataResultApi,
-	})
 
 	dataTf, diags := r.convertApiToModel(dataResultApi)
 	if diags != nil {
@@ -213,15 +207,11 @@ func (r *StorageZoneResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	dataApi, err := r.client.GetStorageZone(data.Id.ValueInt64())
+	dataApi, err := r.client.GetStorageZone(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage zone", err.Error()))
 		return
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("GET /storagezone/%d", dataApi.Id), map[string]any{
-		"result": dataApi,
-	})
 
 	dataTf, diags := r.convertApiToModel(dataApi)
 	if diags != nil {
@@ -256,7 +246,7 @@ func (r *StorageZoneResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.UpdateStorageZone(dataApi)
+	dataApi, err := r.client.UpdateStorageZone(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating storage zone", err.Error()))
 		return
@@ -278,7 +268,7 @@ func (r *StorageZoneResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	err := r.client.DeleteStorageZone(data.Id.ValueInt64())
+	err := r.client.DeleteStorageZone(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting storage zone", err.Error()))
 	}
@@ -291,7 +281,7 @@ func (r *StorageZoneResource) ImportState(ctx context.Context, req resource.Impo
 		return
 	}
 
-	dataApi, err := r.client.GetStorageZone(id)
+	dataApi, err := r.client.GetStorageZone(ctx, id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage zone", err.Error()))
 		return
