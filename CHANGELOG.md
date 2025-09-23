@@ -15,6 +15,7 @@ The `weight` attribute on a `dns_record` was previously available for all record
 
 ## Changed
 - resource dns_record: `weight` is now only available for `SRV`/`A`/`AAAA` record types;
+- resource dns_script: publish script after code changes;
 
 ## 0.9.0 - 2025-09-02
 

@@ -188,6 +188,17 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 func (c *Client) UpdateComputeScript(ctx context.Context, data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
 	id := data.Id
 
+	data, err := c.UpdateComputeScriptWithoutGet(data, previousData)
+	if err != nil {
+		return data, err
+	}
+
+	return c.GetComputeScript(ctx, id)
+}
+
+func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
+	id := data.Id
+
 	// update attributes
 	if data.Name != previousData.Name {
 		body, err := json.Marshal(map[string]string{
@@ -258,7 +269,7 @@ func (c *Client) UpdateComputeScript(ctx context.Context, data ComputeScript, pr
 		}
 	}
 
-	return c.GetComputeScript(ctx, id)
+	return data, nil
 }
 
 func (c *Client) DeleteComputeScript(id int64) error {

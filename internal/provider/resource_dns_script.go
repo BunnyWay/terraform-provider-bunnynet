@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -20,6 +21,7 @@ import (
 
 var _ resource.Resource = &DnsScriptResource{}
 var _ resource.ResourceWithImportState = &DnsScriptResource{}
+var _ resource.ResourceWithModifyPlan = &DnsScriptResource{}
 
 func NewDnsScriptResource() resource.Resource {
 	return &DnsScriptResource{}
@@ -95,6 +97,20 @@ func (r *DnsScriptResource) Configure(ctx context.Context, req resource.Configur
 	r.client = client
 }
 
+func (r *DnsScriptResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var contentState string
+	var contentPlan string
+
+	req.State.GetAttribute(ctx, path.Root("content"), &contentState)
+	req.Plan.GetAttribute(ctx, path.Root("content"), &contentPlan)
+
+	if contentState == "" || contentPlan == "" || contentState == contentPlan {
+		return
+	}
+
+	resp.Plan.SetAttribute(ctx, path.Root("release"), types.StringUnknown())
+}
+
 func (r *DnsScriptResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var dataTf DnsScriptResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
@@ -157,7 +173,7 @@ func (r *DnsScriptResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dataApiResult, err := r.client.UpdateComputeScript(ctx, dataApi, previousDataApi)
+	dataApiResult, err := r.client.UpdateDnsScript(ctx, dataApi, previousDataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating DNS script", err.Error()))
 		return
