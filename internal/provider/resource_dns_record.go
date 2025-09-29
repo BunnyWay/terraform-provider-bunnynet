@@ -577,7 +577,6 @@ func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagn
 	dataTf.Ttl = types.Int64Value(dataApi.Ttl)
 	dataTf.Value = types.StringValue(dataApi.Value)
 	dataTf.Name = types.StringValue(dataApi.Name)
-	dataTf.Weight = types.Int64Value(dataApi.Weight)
 	dataTf.Priority = types.Int64Value(dataApi.Priority)
 	dataTf.Port = types.Int64Value(dataApi.Port)
 	dataTf.Flags = types.Int64Value(dataApi.Flags)
@@ -592,6 +591,12 @@ func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagn
 	dataTf.SmartRoutingType = types.StringValue(mapKeyToValue(dnsRecordSmartRoutingTypeMap, dataApi.SmartRoutingType))
 	dataTf.Comment = types.StringValue(dataApi.Comment)
 	dataTf.Enabled = types.BoolValue(!dataApi.Disabled)
+
+	if dataApi.Type == api.DnsRecordTypeA || dataApi.Type == api.DnsRecordTypeAAAA || dataApi.Type == api.DnsRecordTypeSRV {
+		dataTf.Weight = types.Int64Value(dataApi.Weight)
+	} else {
+		dataTf.Weight = types.Int64Null()
+	}
 
 	if dataApi.Type == api.DnsRecordTypePZ {
 		pullzoneId, err := strconv.ParseInt(dataApi.LinkName, 10, 64)

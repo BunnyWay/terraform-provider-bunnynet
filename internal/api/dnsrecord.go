@@ -15,7 +15,10 @@ import (
 	"net/http"
 )
 
+const DnsRecordTypeA = 0
+const DnsRecordTypeAAAA = 1
 const DnsRecordTypePZ = 7
+const DnsRecordTypeSRV = 8
 
 type DnsRecord struct {
 	Zone                  int64   `json:"-"`
