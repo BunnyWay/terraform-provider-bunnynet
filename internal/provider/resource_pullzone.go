@@ -91,6 +91,7 @@ type PullzoneResourceModel struct {
 	OptimizerEnabled                   types.Bool    `tfsdk:"optimizer_enabled"`
 	OptimizerMinifyCss                 types.Bool    `tfsdk:"optimizer_minify_css"`
 	OptimizerMinifyJs                  types.Bool    `tfsdk:"optimizer_minify_js"`
+	OptimizerHtmlPrerender             types.Bool    `tfsdk:"optimizer_html_prerender"`
 	OptimizerWebp                      types.Bool    `tfsdk:"optimizer_webp"`
 	OptimizerClassesForce              types.Bool    `tfsdk:"optimizer_classes_force"`
 	OptimizerDynamicImageApi           types.Bool    `tfsdk:"optimizer_dynamic_image_api"`
@@ -982,7 +983,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether the CSS minifcation should be enabled.",
+				Description: "Indicates whether the CSS minification should be enabled.",
 			},
 			"optimizer_minify_js": schema.BoolAttribute{
 				Optional: true,
@@ -991,7 +992,16 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether the JavaScript minifcation should be enabled.",
+				Description: "Indicates whether the JavaScript minification should be enabled.",
+			},
+			"optimizer_html_prerender": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether HTML Prerender should be enabled.",
 			},
 			"optimizer_smartimage": schema.BoolAttribute{
 				Optional: true,
@@ -1641,6 +1651,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.OptimizerEnabled = dataTf.OptimizerEnabled.ValueBool()
 	dataApi.OptimizerMinifyCss = dataTf.OptimizerMinifyCss.ValueBool()
 	dataApi.OptimizerMinifyJs = dataTf.OptimizerMinifyJs.ValueBool()
+	dataApi.OptimizerPrerenderHtml = dataTf.OptimizerHtmlPrerender.ValueBool()
 	dataApi.OptimizerEnableWebP = dataTf.OptimizerWebp.ValueBool()
 	dataApi.OptimizerForceClasses = dataTf.OptimizerClassesForce.ValueBool()
 	dataApi.OptimizerEnableManipulationEngine = dataTf.OptimizerDynamicImageApi.ValueBool()
@@ -1906,6 +1917,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	dataTf.OptimizerEnabled = types.BoolValue(dataApi.OptimizerEnabled)
 	dataTf.OptimizerMinifyCss = types.BoolValue(dataApi.OptimizerMinifyCss)
 	dataTf.OptimizerMinifyJs = types.BoolValue(dataApi.OptimizerMinifyJs)
+	dataTf.OptimizerHtmlPrerender = types.BoolValue(dataApi.OptimizerPrerenderHtml)
 	dataTf.OptimizerWebp = types.BoolValue(dataApi.OptimizerEnableWebP)
 	dataTf.OptimizerClassesForce = types.BoolValue(dataApi.OptimizerForceClasses)
 	dataTf.OptimizerDynamicImageApi = types.BoolValue(dataApi.OptimizerEnableManipulationEngine)

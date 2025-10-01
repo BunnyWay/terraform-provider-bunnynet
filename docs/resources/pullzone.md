@@ -80,8 +80,9 @@ resource "bunnynet_pullzone" "example" {
 - `optimizer_classes_force` (Boolean) Indicates whether the optimizer class list should be enforced.
 - `optimizer_dynamic_image_api` (Boolean) Indicates whether the image manipulation should be enabled.
 - `optimizer_enabled` (Boolean) Indicates whether Bunny Optimizer should be enabled.
-- `optimizer_minify_css` (Boolean) Indicates whether the CSS minifcation should be enabled.
-- `optimizer_minify_js` (Boolean) Indicates whether the JavaScript minifcation should be enabled.
+- `optimizer_html_prerender` (Boolean) Indicates whether HTML Prerender should be enabled.
+- `optimizer_minify_css` (Boolean) Indicates whether the CSS minification should be enabled.
+- `optimizer_minify_js` (Boolean) Indicates whether the JavaScript minification should be enabled.
 - `optimizer_smartimage` (Boolean) Indicates whether the automatic image optimization should be enabled.
 - `optimizer_smartimage_desktop_maxwidth` (Number) The maximum automatic image size for desktop clients.
 - `optimizer_smartimage_desktop_quality` (Number) The image quality for desktop clients.
