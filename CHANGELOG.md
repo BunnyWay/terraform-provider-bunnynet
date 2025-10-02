@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Added
 
+- resource pullzone: support websockets;
 - resource pullzone: support HTML prerender;
 
 ## 0.10.1 - 2025-09-29

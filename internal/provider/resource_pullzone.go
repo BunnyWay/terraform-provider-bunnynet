@@ -141,6 +141,8 @@ type PullzoneResourceModel struct {
 	TokenAuthEnabled                   types.Bool    `tfsdk:"token_auth_enabled"`
 	TokenAuthIpValidation              types.Bool    `tfsdk:"token_auth_ip_validation"`
 	TokenAuthKey                       types.String  `tfsdk:"token_auth_key"`
+	WebsocketsEnabled                  types.Bool    `tfsdk:"websockets_enabled"`
+	WebsocketsMaxConnections           types.Int64   `tfsdk:"websockets_max_connections"`
 }
 
 var pullzoneOriginTypes = map[string]attr.Type{
@@ -1195,6 +1197,27 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Description: "The amount of seconds to wait when waiting for the origin reply. Otherwise the request will fail or retry.",
 			},
+			"websockets_enabled": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether the WebSocket support is enabled.",
+			},
+			"websockets_max_connections": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(500),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.OneOf(500, 1000, 2500, 5000, 10000, 25000),
+				},
+				Description: "The maximum allowed concurrent WebSocket connections.",
+			},
 		},
 		Blocks: map[string]schema.Block{
 			"origin": schema.SingleNestedBlock{
@@ -1677,6 +1700,10 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.EdgeScriptId = origin["script"].(types.Int64).ValueInt64()
 	dataApi.MiddlewareScriptId = origin["middleware_script"].(types.Int64).ValueInt64()
 
+	// websockets
+	dataApi.EnableWebSockets = dataTf.WebsocketsEnabled.ValueBool()
+	dataApi.MaxWebSocketConnections = uint64(dataTf.WebsocketsMaxConnections.ValueInt64())
+
 	// routing
 	dataApi.Type = mapValueToKey(pullzoneRoutingTierMap, routing["tier"].(types.String).ValueString())
 	dataApi.RoutingFilters = utils.ConvertSetToStringSlice(routing["filters"].(types.Set))
@@ -1964,6 +1991,10 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 
 		dataTf.Origin = origin
 	}
+
+	// websockets
+	dataTf.WebsocketsEnabled = types.BoolValue(dataApi.EnableWebSockets)
+	dataTf.WebsocketsMaxConnections = types.Int64Value(int64(dataApi.MaxWebSocketConnections))
 
 	// routing
 	{

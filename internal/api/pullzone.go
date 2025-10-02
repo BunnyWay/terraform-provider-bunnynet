@@ -114,6 +114,10 @@ type Pullzone struct {
 	EdgeScriptId       int64  `json:"EdgeScriptId,omitempty"`
 	MiddlewareScriptId int64  `json:"MiddlewareScriptId"`
 
+	// websockets
+	EnableWebSockets        bool   `json:"EnableWebSockets"`
+	MaxWebSocketConnections uint64 `json:"MaxWebSocketConnections"`
+
 	// routing
 	Type                      uint8    `json:"Type"`
 	EnableGeoZoneAF           bool     `json:"EnableGeoZoneAF"`
