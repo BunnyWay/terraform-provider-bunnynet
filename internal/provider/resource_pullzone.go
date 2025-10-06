@@ -92,6 +92,7 @@ type PullzoneResourceModel struct {
 	OptimizerMinifyCss                 types.Bool    `tfsdk:"optimizer_minify_css"`
 	OptimizerMinifyJs                  types.Bool    `tfsdk:"optimizer_minify_js"`
 	OptimizerHtmlPrerender             types.Bool    `tfsdk:"optimizer_html_prerender"`
+	OptimizerBurrow                    types.Bool    `tfsdk:"optimizer_burrow"`
 	OptimizerWebp                      types.Bool    `tfsdk:"optimizer_webp"`
 	OptimizerClassesForce              types.Bool    `tfsdk:"optimizer_classes_force"`
 	OptimizerDynamicImageApi           types.Bool    `tfsdk:"optimizer_dynamic_image_api"`
@@ -1005,6 +1006,15 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Description: "Indicates whether HTML Prerender should be enabled.",
 			},
+			"optimizer_burrow": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether Burrow Smart Routing should be enabled.",
+			},
 			"optimizer_smartimage": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
@@ -1675,6 +1685,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.OptimizerMinifyCss = dataTf.OptimizerMinifyCss.ValueBool()
 	dataApi.OptimizerMinifyJs = dataTf.OptimizerMinifyJs.ValueBool()
 	dataApi.OptimizerPrerenderHtml = dataTf.OptimizerHtmlPrerender.ValueBool()
+	dataApi.OptimizerTunnelEnabled = dataTf.OptimizerBurrow.ValueBool()
 	dataApi.OptimizerEnableWebP = dataTf.OptimizerWebp.ValueBool()
 	dataApi.OptimizerForceClasses = dataTf.OptimizerClassesForce.ValueBool()
 	dataApi.OptimizerEnableManipulationEngine = dataTf.OptimizerDynamicImageApi.ValueBool()
@@ -1945,6 +1956,7 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 	dataTf.OptimizerMinifyCss = types.BoolValue(dataApi.OptimizerMinifyCss)
 	dataTf.OptimizerMinifyJs = types.BoolValue(dataApi.OptimizerMinifyJs)
 	dataTf.OptimizerHtmlPrerender = types.BoolValue(dataApi.OptimizerPrerenderHtml)
+	dataTf.OptimizerBurrow = types.BoolValue(dataApi.OptimizerTunnelEnabled)
 	dataTf.OptimizerWebp = types.BoolValue(dataApi.OptimizerEnableWebP)
 	dataTf.OptimizerClassesForce = types.BoolValue(dataApi.OptimizerForceClasses)
 	dataTf.OptimizerDynamicImageApi = types.BoolValue(dataApi.OptimizerEnableManipulationEngine)

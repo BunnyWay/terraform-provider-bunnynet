@@ -147,6 +147,7 @@ type Pullzone struct {
 	OptimizerWatermarkPosition            uint8   `json:"OptimizerWatermarkPosition"`
 	OptimizerWatermarkOffset              float64 `json:"OptimizerWatermarkOffset"`
 	OptimizerWatermarkMinImageSize        uint64  `json:"OptimizerWatermarkMinImageSize"`
+	OptimizerTunnelEnabled                bool    `json:"OptimizerTunnelEnabled"`
 
 	// limits
 	LimitRatePerSecond        float64 `json:"LimitRatePerSecond"`

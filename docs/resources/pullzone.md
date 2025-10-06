@@ -77,6 +77,7 @@ resource "bunnynet_pullzone" "example" {
 - `log_forward_token` (String) The token used for log forwarding authentication.
 - `log_storage_enabled` (Boolean) Indicates whether log storage is enabled.
 - `log_storage_zone` (Number) The storage zone ID for log storage.
+- `optimizer_burrow` (Boolean) Indicates whether Burrow Smart Routing should be enabled.
 - `optimizer_classes_force` (Boolean) Indicates whether the optimizer class list should be enforced.
 - `optimizer_dynamic_image_api` (Boolean) Indicates whether the image manipulation should be enabled.
 - `optimizer_enabled` (Boolean) Indicates whether Bunny Optimizer should be enabled.
