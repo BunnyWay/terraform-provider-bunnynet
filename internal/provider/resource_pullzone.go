@@ -147,15 +147,17 @@ type PullzoneResourceModel struct {
 }
 
 var pullzoneOriginTypes = map[string]attr.Type{
-	"type":                types.StringType,
-	"url":                 customtype.PullzoneOriginUrlType{},
-	"storagezone":         types.Int64Type,
-	"follow_redirects":    types.BoolType,
-	"host_header":         types.StringType,
-	"forward_host_header": types.BoolType,
-	"verify_ssl":          types.BoolType,
-	"script":              types.Int64Type,
-	"middleware_script":   types.Int64Type,
+	"type":                  types.StringType,
+	"url":                   customtype.PullzoneOriginUrlType{},
+	"storagezone":           types.Int64Type,
+	"follow_redirects":      types.BoolType,
+	"host_header":           types.StringType,
+	"forward_host_header":   types.BoolType,
+	"verify_ssl":            types.BoolType,
+	"script":                types.Int64Type,
+	"middleware_script":     types.Int64Type,
+	"container_app_id":      types.StringType,
+	"container_endpoint_id": types.StringType,
 }
 
 var pullzoneRoutingTypes = map[string]attr.Type{
@@ -1288,6 +1290,18 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Default:     int64default.StaticInt64(0),
 						Description: "The ID of the compute script used as a middleware.",
 					},
+					"container_app_id": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "The ID if the compute container app.",
+						Default:     stringdefault.StaticString(""),
+					},
+					"container_endpoint_id": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(""),
+						Description: "The ID if the compute container app endpoint.",
+					},
 				},
 			},
 			"routing": schema.SingleNestedBlock{
@@ -1710,6 +1724,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.FollowRedirects = origin["follow_redirects"].(types.Bool).ValueBool()
 	dataApi.EdgeScriptId = origin["script"].(types.Int64).ValueInt64()
 	dataApi.MiddlewareScriptId = origin["middleware_script"].(types.Int64).ValueInt64()
+	dataApi.MagicContainersAppId = origin["container_app_id"].(types.String).ValueString()
+	dataApi.MagicContainersEndpointId = origin["container_endpoint_id"].(types.String).ValueString()
 
 	// websockets
 	dataApi.EnableWebSockets = dataTf.WebsocketsEnabled.ValueBool()
@@ -1995,6 +2011,8 @@ func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneReso
 		originValues["host_header"] = types.StringValue(dataApi.OriginHostHeader)
 		originValues["forward_host_header"] = types.BoolValue(dataApi.AddHostHeader)
 		originValues["verify_ssl"] = types.BoolValue(dataApi.VerifyOriginSSL)
+		originValues["container_app_id"] = types.StringValue(dataApi.MagicContainersAppId)
+		originValues["container_endpoint_id"] = types.StringValue(dataApi.MagicContainersEndpointId)
 
 		origin, diags := types.ObjectValue(pullzoneOriginTypes, originValues)
 		if diags != nil {

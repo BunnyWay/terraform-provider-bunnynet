@@ -140,6 +140,8 @@ Required:
 
 Optional:
 
+- `container_app_id` (String) The ID if the compute container app.
+- `container_endpoint_id` (String) The ID if the compute container app endpoint.
 - `follow_redirects` (Boolean) Indicates whether the zone will follow origin redirects.
 - `forward_host_header` (Boolean) Indicates whether the current hostname is forwarded to the origin.
 - `host_header` (String) The host header that will be sent to the origin.
