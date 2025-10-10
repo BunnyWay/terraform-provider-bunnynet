@@ -51,6 +51,7 @@ type StreamLibraryResourceModel struct {
 	Pullzone                            types.Int64  `tfsdk:"pullzone"`
 	StorageZone                         types.Int64  `tfsdk:"storage_zone"`
 	ApiKey                              types.String `tfsdk:"api_key"`
+	PlayerVersion                       types.Int64  `tfsdk:"player_version"`
 	PlayerLanguage                      types.String `tfsdk:"player_language"`
 	PlayerFontFamily                    types.String `tfsdk:"player_font_family"`
 	PlayerPrimaryColor                  types.String `tfsdk:"player_primary_color"`
@@ -172,6 +173,18 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Description: "The API key for accessing the stream library.",
+			},
+			"player_version": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(1),
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					int64validator.OneOf(1, 2),
+				},
+				MarkdownDescription: "Specifies the video player version.",
 			},
 			"player_language": schema.StringAttribute{
 				Optional: true,
@@ -761,6 +774,7 @@ func (r *StreamLibraryResource) convertModelToApi(ctx context.Context, dataTf St
 
 	// player
 	{
+		dataApi.PlayerVersion = dataTf.PlayerVersion.ValueInt64()
 		dataApi.UILanguage = dataTf.PlayerLanguage.ValueString()
 		dataApi.FontFamily = dataTf.PlayerFontFamily.ValueString()
 		dataApi.PlayerKeyColor = dataTf.PlayerPrimaryColor.ValueString()
@@ -835,6 +849,7 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 
 	// player
 	{
+		dataTf.PlayerVersion = types.Int64Value(dataApi.PlayerVersion)
 		dataTf.PlayerLanguage = types.StringValue(dataApi.UILanguage)
 		dataTf.PlayerFontFamily = types.StringValue(dataApi.FontFamily)
 		dataTf.PlayerPrimaryColor = types.StringValue(dataApi.PlayerKeyColor)

@@ -63,6 +63,7 @@ resource "bunnynet_stream_library" "example" {
 - `player_font_family` (String) Options: `arial`, `inter`, `lato`, `oswald`, `raleway`, `roboto`, `rubik`, `ubuntu`
 - `player_language` (String) Specifies the language for the video player interface.
 - `player_primary_color` (String) Customizes the appearance of the video player.
+- `player_version` (Number) Specifies the video player version.
 - `player_watchtime_heatmap_enabled` (Boolean) Indicates whether the video watch heatmap should be displayed in the player.
 - `referers_allowed` (Set of String) The list of allowed referrer domains allowed to access videos in this library.
 - `referers_blocked` (Set of String) The list of blocked referrer domains blocked from accessing videos in this library.

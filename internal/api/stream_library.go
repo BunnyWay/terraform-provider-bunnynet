@@ -17,6 +17,7 @@ import (
 type StreamLibrary struct {
 	Id                                      int64    `json:"Id,omitempty"`
 	Name                                    string   `json:"Name"`
+	PlayerVersion                           int64    `json:"PlayerVersion"`
 	UILanguage                              string   `json:"UILanguage"`
 	FontFamily                              string   `json:"FontFamily"`
 	PlayerKeyColor                          string   `json:"PlayerKeyColor"`
