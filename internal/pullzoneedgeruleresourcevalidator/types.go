@@ -32,6 +32,8 @@ var ActionMap = map[uint8]string{
 	28: "DisableShield",
 	29: "DisableShieldBotDetection",
 	30: "BypassAwsS3Authentication",
+	31: "DisableShieldAccessLists",
+	32: "DisableShieldRateLimiting",
 }
 
 var TriggerTypeMap = map[uint8]string{
