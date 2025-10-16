@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Added
 
+- data source pullzone;
 - resource pullzone_edgerule: add new action types;
 
 ## 0.10.4 - 2025-10-10

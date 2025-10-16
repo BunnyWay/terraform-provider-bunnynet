@@ -153,6 +153,7 @@ func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.
 		NewComputeContainerAppContainerDataSource,
 		NewComputeContainerAppContainerEndpointDataSource,
 		NewComputeContainerImageRegistryDataSource,
+		NewPullzoneDataSource,
 		NewPullzoneAccessListsDataSource,
 		NewDnsRecordDataSource,
 		NewDnsZoneDataSource,

@@ -6,6 +6,8 @@ package provider
 import (
 	"errors"
 	"fmt"
+	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/maps"
@@ -111,4 +113,52 @@ func typeStringOrNull(value string) types.String {
 	}
 
 	return types.StringNull()
+}
+
+func resourceAttrToDatasourceAttr(ra rschema.Attribute) dschema.Attribute {
+	switch ra := ra.(type) {
+	case rschema.BoolAttribute:
+		return dschema.BoolAttribute{
+			Computed:            true,
+			Description:         ra.Description,
+			MarkdownDescription: ra.MarkdownDescription,
+			CustomType:          ra.CustomType,
+		}
+
+	case rschema.Float64Attribute:
+		return dschema.Float64Attribute{
+			Computed:            true,
+			Description:         ra.Description,
+			MarkdownDescription: ra.MarkdownDescription,
+			CustomType:          ra.CustomType,
+		}
+
+	case rschema.Int64Attribute:
+		return dschema.Int64Attribute{
+			Computed:            true,
+			Description:         ra.Description,
+			MarkdownDescription: ra.MarkdownDescription,
+			CustomType:          ra.CustomType,
+		}
+
+	case rschema.SetAttribute:
+		return dschema.SetAttribute{
+			Computed:            true,
+			ElementType:         ra.ElementType,
+			Description:         ra.Description,
+			MarkdownDescription: ra.MarkdownDescription,
+			CustomType:          ra.CustomType,
+		}
+
+	case rschema.StringAttribute:
+		return dschema.StringAttribute{
+			Computed:            true,
+			Description:         ra.Description,
+			MarkdownDescription: ra.MarkdownDescription,
+			CustomType:          ra.CustomType,
+		}
+
+	default:
+		panic(fmt.Sprintf("unexpected attribute type: %T", ra))
+	}
 }

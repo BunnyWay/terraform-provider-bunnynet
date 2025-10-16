@@ -1783,6 +1783,10 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 }
 
 func (r *PullzoneResource) convertApiToModel(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnostics) {
+	return pullzoneApiToTf(dataApi)
+}
+
+func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnostics) {
 	dataTf := PullzoneResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
