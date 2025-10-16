@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.10.5 - 2025-10-16
+
 ## Added
 
 - data source pullzone;
