@@ -5,4 +5,4 @@
 ## Requirements
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.4
-- [Go](https://golang.org/doc/install) >= 1.23
+- [Go](https://golang.org/doc/install) >= 1.24

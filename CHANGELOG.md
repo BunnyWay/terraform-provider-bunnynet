@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Changed
+
+- Bumped minimum Go version to 1.24;
+
 ## 0.10.5 - 2025-10-16
 
 ## Added
