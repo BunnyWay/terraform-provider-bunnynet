@@ -173,9 +173,9 @@ func TestEndpointNameShouldBeUnique(t *testing.T) {
 
 	configSchema := schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"container": schema.SetAttribute{ElementType: types.ObjectType{
+			"container": schema.ListAttribute{ElementType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					"endpoint": types.SetType{
+					"endpoint": types.ListType{
 						ElemType: types.ObjectType{
 							AttrTypes: map[string]attr.Type{
 								"name": types.StringType,
@@ -195,23 +195,23 @@ func TestEndpointNameShouldBeUnique(t *testing.T) {
 		},
 	}
 
-	endpointSetType := tftypes.Set{
+	endpointListType := tftypes.List{
 		ElementType: endpointType,
 	}
 
 	containerType := tftypes.Object{
 		AttributeTypes: map[string]tftypes.Type{
-			"endpoint": endpointSetType,
+			"endpoint": endpointListType,
 		},
 	}
 
-	containerSetType := tftypes.Set{
+	containerListType := tftypes.List{
 		ElementType: containerType,
 	}
 
 	configTypes := tftypes.Object{
 		AttributeTypes: map[string]tftypes.Type{
-			"container": containerSetType,
+			"container": containerListType,
 		},
 	}
 
@@ -224,8 +224,8 @@ func TestEndpointNameShouldBeUnique(t *testing.T) {
 				endpoints[i] = tftypes.NewValue(endpointType, endpointAttrs)
 			}
 
-			containers[j] = tftypes.NewValue(configTypes.AttributeTypes["container"].(tftypes.Set).ElementType, map[string]tftypes.Value{
-				"endpoint": tftypes.NewValue(configTypes.AttributeTypes["container"].(tftypes.Set).ElementType.(tftypes.Object).AttributeTypes["endpoint"], endpoints),
+			containers[j] = tftypes.NewValue(configTypes.AttributeTypes["container"].(tftypes.List).ElementType, map[string]tftypes.Value{
+				"endpoint": tftypes.NewValue(configTypes.AttributeTypes["container"].(tftypes.List).ElementType.(tftypes.Object).AttributeTypes["endpoint"], endpoints),
 			})
 		}
 
