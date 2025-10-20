@@ -68,8 +68,8 @@ func (c containerProbe) ValidateObject(ctx context.Context, request validator.Ob
 		response.Diagnostics.AddError("Invalid probe configuration", errProbePort)
 	}
 
-	httpElements := attrs["http"].(types.Set).Elements()
-	grpcElements := attrs["grpc"].(types.Set).Elements()
+	httpElements := attrs["http"].(types.List).Elements()
+	grpcElements := attrs["grpc"].(types.List).Elements()
 
 	if probeType == "http" {
 		if len(httpElements) == 0 {

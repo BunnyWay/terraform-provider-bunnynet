@@ -32,30 +32,30 @@ func TestContainerProbeObject(t *testing.T) {
 	attrTypes := map[string]attr.Type{
 		"type": types.StringType,
 		"port": types.Int64Type,
-		"http": types.SetType{ElemType: computeContainerAppContainerProbeHttpType},
-		"grpc": types.SetType{ElemType: computeContainerAppContainerProbeGrpcType},
+		"http": types.ListType{ElemType: computeContainerAppContainerProbeHttpType},
+		"grpc": types.ListType{ElemType: computeContainerAppContainerProbeGrpcType},
 	}
 
-	httpSetNull := types.SetNull(computeContainerAppContainerProbeHttpType)
-	gprcSetNull := types.SetNull(computeContainerAppContainerProbeGrpcType)
+	httpListNull := types.ListNull(computeContainerAppContainerProbeHttpType)
+	grpcListNull := types.ListNull(computeContainerAppContainerProbeGrpcType)
 
-	httpSetEmpty := types.SetValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{})
-	gprcSetEmpty := types.SetValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{})
+	httpListEmpty := types.ListValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{})
+	gprcListEmpty := types.ListValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{})
 
-	httpSetValid := types.SetValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{
+	httpListValid := types.ListValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{
 		types.ObjectValueMust(computeContainerAppContainerProbeHttpType.AttrTypes, map[string]attr.Value{
 			"path":            types.StringValue("/ping"),
 			"expected_status": types.Int64Null(),
 		}),
 	})
 
-	grpcSetValid := types.SetValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{
+	grpcListValid := types.ListValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{
 		types.ObjectValueMust(computeContainerAppContainerProbeGrpcType.AttrTypes, map[string]attr.Value{
 			"service": types.StringValue("ping"),
 		}),
 	})
 
-	httpSetMany := types.SetValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{
+	httpListMany := types.ListValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{
 		types.ObjectValueMust(computeContainerAppContainerProbeHttpType.AttrTypes, map[string]attr.Value{
 			"path":            types.StringValue("/ping"),
 			"expected_status": types.Int64Null(),
@@ -66,7 +66,7 @@ func TestContainerProbeObject(t *testing.T) {
 		}),
 	})
 
-	grpcSetMany := types.SetValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{
+	grpcListMany := types.ListValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{
 		types.ObjectValueMust(computeContainerAppContainerProbeGrpcType.AttrTypes, map[string]attr.Value{
 			"service": types.StringValue("ping"),
 		}),
@@ -81,8 +81,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Value(8080),
-				"http": httpSetValid,
-				"grpc": gprcSetNull,
+				"http": httpListValid,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -90,8 +90,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("tcp"),
 				"port": types.Int64Value(8080),
-				"http": httpSetNull,
-				"grpc": gprcSetNull,
+				"http": httpListNull,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -99,8 +99,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("grpc"),
 				"port": types.Int64Value(8080),
-				"http": httpSetNull,
-				"grpc": grpcSetValid,
+				"http": httpListNull,
+				"grpc": grpcListValid,
 			},
 		},
 		{
@@ -108,8 +108,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringNull(),
 				"port": types.Int64Null(),
-				"http": httpSetNull,
-				"grpc": gprcSetNull,
+				"http": httpListNull,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -117,8 +117,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("test"),
 				"port": types.Int64Null(),
-				"http": httpSetNull,
-				"grpc": gprcSetNull,
+				"http": httpListNull,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -126,8 +126,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Null(),
-				"http": httpSetValid,
-				"grpc": gprcSetNull,
+				"http": httpListValid,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -135,8 +135,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Value(-1),
-				"http": httpSetValid,
-				"grpc": gprcSetNull,
+				"http": httpListValid,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -144,8 +144,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Value(123456),
-				"http": httpSetValid,
-				"grpc": gprcSetNull,
+				"http": httpListValid,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -153,8 +153,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Value(8080),
-				"http": httpSetEmpty,
-				"grpc": gprcSetNull,
+				"http": httpListEmpty,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -162,8 +162,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("grpc"),
 				"port": types.Int64Value(8080),
-				"http": httpSetNull,
-				"grpc": gprcSetEmpty,
+				"http": httpListNull,
+				"grpc": gprcListEmpty,
 			},
 		},
 		{
@@ -171,8 +171,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Value(8080),
-				"http": httpSetMany,
-				"grpc": gprcSetNull,
+				"http": httpListMany,
+				"grpc": grpcListNull,
 			},
 		},
 		{
@@ -180,8 +180,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("grpc"),
 				"port": types.Int64Value(8080),
-				"http": httpSetNull,
-				"grpc": grpcSetMany,
+				"http": httpListNull,
+				"grpc": grpcListMany,
 			},
 		},
 		{
@@ -189,8 +189,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("http"),
 				"port": types.Int64Value(8080),
-				"http": httpSetValid,
-				"grpc": grpcSetValid,
+				"http": httpListValid,
+				"grpc": grpcListValid,
 			},
 		},
 		{
@@ -198,8 +198,8 @@ func TestContainerProbeObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"type": types.StringValue("grpc"),
 				"port": types.Int64Value(8080),
-				"http": httpSetValid,
-				"grpc": grpcSetValid,
+				"http": httpListValid,
+				"grpc": grpcListValid,
 			},
 		},
 	}

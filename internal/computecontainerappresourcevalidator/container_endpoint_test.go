@@ -35,8 +35,8 @@ func TestContainerEndpointObject(t *testing.T) {
 	attrTypes := map[string]attr.Type{
 		"name": types.StringType,
 		"type": types.StringType,
-		"port": types.SetType{ElemType: portType},
-		"cdn":  types.SetType{ElemType: cdnType},
+		"port": types.ListType{ElemType: portType},
+		"cdn":  types.ListType{ElemType: cdnType},
 	}
 
 	testCases := []testCase{
@@ -46,8 +46,8 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetNull(portType),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"port": types.ListNull(portType),
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -61,14 +61,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -82,14 +82,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -97,14 +97,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -123,14 +123,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolNull(),
 						"sticky_sessions":         types.BoolValue(true),
@@ -145,14 +145,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -166,7 +166,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
@@ -178,7 +178,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -192,14 +192,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Null(),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -213,14 +213,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Null(),
 						"exposed":   types.Int64Value(1234),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -234,7 +234,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("CDN"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
@@ -243,7 +243,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -259,8 +259,8 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetNull(portType),
-				"cdn":  types.SetNull(cdnType),
+				"port": types.ListNull(portType),
+				"cdn":  types.ListNull(cdnType),
 			},
 		},
 		{
@@ -268,7 +268,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
@@ -278,7 +278,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -286,7 +286,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
@@ -296,7 +296,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -304,7 +304,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
@@ -322,7 +322,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -330,14 +330,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Null(),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -345,14 +345,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Null(),
 						"exposed":   types.Int64Value(1234),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -360,14 +360,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -375,14 +375,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
 						"protocols": types.SetValueMust(types.StringType, []attr.Value{}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -390,7 +390,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("Anycast"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
@@ -400,7 +400,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
@@ -416,8 +416,8 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetNull(portType),
-				"cdn":  types.SetNull(cdnType),
+				"port": types.ListNull(portType),
+				"cdn":  types.ListNull(cdnType),
 			},
 		},
 		{
@@ -425,7 +425,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
@@ -435,7 +435,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -443,7 +443,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Value(8080),
@@ -453,7 +453,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -461,7 +461,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
@@ -479,7 +479,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -487,14 +487,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Null(),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -502,7 +502,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Null(),
 						"exposed":   types.Int64Null(),
@@ -512,7 +512,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -520,14 +520,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetNull(types.StringType),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -535,14 +535,14 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
 						"protocols": types.SetValueMust(types.StringType, []attr.Value{}),
 					}),
 				}),
-				"cdn": types.SetNull(cdnType),
+				"cdn": types.ListNull(cdnType),
 			},
 		},
 		{
@@ -550,7 +550,7 @@ func TestContainerEndpointObject(t *testing.T) {
 			Values: map[string]attr.Value{
 				"name": types.StringValue("test"),
 				"type": types.StringValue("InternalIP"),
-				"port": types.SetValueMust(portType, []attr.Value{
+				"port": types.ListValueMust(portType, []attr.Value{
 					types.ObjectValueMust(portType.AttrTypes, map[string]attr.Value{
 						"container": types.Int64Value(8080),
 						"exposed":   types.Int64Null(),
@@ -560,7 +560,7 @@ func TestContainerEndpointObject(t *testing.T) {
 						}),
 					}),
 				}),
-				"cdn": types.SetValueMust(cdnType, []attr.Value{
+				"cdn": types.ListValueMust(cdnType, []attr.Value{
 					types.ObjectValueMust(cdnType.AttrTypes, map[string]attr.Value{
 						"origin_ssl":              types.BoolValue(false),
 						"sticky_sessions":         types.BoolValue(true),
