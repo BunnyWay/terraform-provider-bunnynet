@@ -10,20 +10,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
-	"golang.org/x/exp/slices"
 	"net/http"
-	"strings"
 )
 
 type PullzoneHostname struct {
-	Id               int64  `json:"Id,omitempty"`
-	PullzoneId       int64  `json:"-"`
-	Name             string `json:"Value"`
-	IsSystemHostname bool   `json:"IsSystemHostname"`
-	HasCertificate   bool   `json:"HasCertificate"`
-	ForceSSL         bool   `json:"ForceSSL"`
-	Certificate      string `json:"Certificate"`
-	CertificateKey   string `json:"CertificateKey"`
+	Id                int64  `json:"Id,omitempty"`
+	PullzoneId        int64  `json:"-"`
+	Name              string `json:"Value"`
+	IsSystemHostname  bool   `json:"IsSystemHostname"`
+	IsManagedHostname bool   `json:"IsManagedHostname"`
+	HasCertificate    bool   `json:"HasCertificate"`
+	ForceSSL          bool   `json:"ForceSSL"`
+	Certificate       string `json:"Certificate"`
+	CertificateKey    string `json:"CertificateKey"`
 }
 
 func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname, error) {
@@ -37,19 +36,19 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 		return PullzoneHostname{}, err
 	}
 
-	// if creating the default hostname, return existing
-	if strings.HasSuffix(data.Name, "."+pullzone.CnameDomain) {
-		hostnameIdx := slices.IndexFunc(pullzone.Hostnames, func(hostname PullzoneHostname) bool {
-			return hostname.IsSystemHostname && hostname.Name == data.Name
-		})
+	for hostnameIdx, h := range pullzone.Hostnames {
+		if h.Name != data.Name {
+			continue
+		}
 
-		if hostnameIdx > -1 {
+		if h.IsSystemHostname || h.IsManagedHostname {
 			data.Id = pullzone.Hostnames[hostnameIdx].Id
 			data.PullzoneId = pullzone.Id
+
 			return c.UpdatePullzoneHostname(data, pullzone.Hostnames[hostnameIdx])
 		}
 
-		// if system hostname not found, try to create it, the API should return an error
+		return PullzoneHostname{}, errors.New("The hostname is already registed for this pullzone")
 	}
 
 	body, err := json.Marshal(map[string]string{

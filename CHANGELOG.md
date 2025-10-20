@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+
+- resource pullzone_hostname: allow deletion of `bunny.run` subdomains ([#54](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/54));
+
 ## 0.10.5 - 2025-10-16
 
 ## Added
