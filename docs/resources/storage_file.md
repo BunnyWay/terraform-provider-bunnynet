@@ -51,6 +51,8 @@ resource "bunnynet_storage_file" "homepage" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 terraform import bunnynet_storage_file.test "$STORAGE_ZONE_ID|blog/index.html"
 ```

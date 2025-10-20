@@ -39,6 +39,8 @@ resource "bunnynet_compute_script_variable" "APP_ENV" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 terraform import bunnynet_compute_script_variable.test "1234|APP_ENV"
 ```

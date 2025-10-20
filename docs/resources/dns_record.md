@@ -60,6 +60,8 @@ resource "bunnynet_dns_record" "MX" {
 
 Import is supported using the following syntax:
 
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 terraform import bunnynet_dns_record.test "$ZONE_ID|$RECORD_ID"
 ```
