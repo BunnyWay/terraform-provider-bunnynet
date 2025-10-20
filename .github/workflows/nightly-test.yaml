@@ -43,7 +43,7 @@ jobs:
           TESTACC_MC_REGION: ${{ vars.TESTACC_MC_REGION_STAGING }}
 
       - name: Notify results
-        uses: bryannice/gitactions-slack-notification@2.0.0
+        uses: bunnyway/gitactions-slack-notification@0.1.0
         if: always()
         env:
           SLACK_INCOMING_WEBHOOK: ${{ secrets.SLACK_INCOMING_WEBHOOK }}
