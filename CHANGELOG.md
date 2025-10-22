@@ -24,9 +24,10 @@ The resource `compute_container_app` now uses a [list type](https://developer.ha
 #### Upgrade path
 
 1. Make sure `terraform plan` reports no changes;
-2. Sort the `container`, `endpoint` and `env` blocks in your .tf files;
-3. Upgrade the bunny.net provider;
-4. Run `terraform plan`, it should report no changes;
+2. Upgrade the bunny.net provider;
+3. Sort the `container`, `endpoint` and `env` blocks in your .tf files;
+4. Add `version = 2` to your `bunnynet_compute_container_app` resources;
+5. Run `terraform plan`, it should report no changes apart from the `version` attribute;
 
 #### Motivation
 

@@ -51,6 +51,7 @@ type ComputeContainerAppResource struct {
 
 type ComputeContainerAppResourceModel struct {
 	Id                types.String `tfsdk:"id"`
+	Version           types.Int64  `tfsdk:"version"`
 	Name              types.String `tfsdk:"name"`
 	AutoscalingMin    types.Int64  `tfsdk:"autoscaling_min"`
 	AutoscalingMax    types.Int64  `tfsdk:"autoscaling_max"`
@@ -395,6 +396,16 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Description: "The unique identifier for the application.",
+			},
+			"version": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					computecontainerappresourcevalidator.Version(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -1186,6 +1197,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 	var diags diag.Diagnostics
 	dataTf := ComputeContainerAppResourceModel{}
 	dataTf.Id = types.StringValue(dataApi.Id)
+	dataTf.Version = types.Int64Value(2)
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.AutoscalingMin = types.Int64Value(dataApi.AutoScaling.Min)
 	dataTf.AutoscalingMax = types.Int64Value(dataApi.AutoScaling.Max)
