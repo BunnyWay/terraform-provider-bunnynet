@@ -14,7 +14,8 @@ This resource manages a Magic Containers application in bunny.net.
 
 ```terraform
 resource "bunnynet_compute_container_app" "app" {
-  name = "my-app"
+  name    = "my-app"
+  version = 2
 
   autoscaling_min = 1
   autoscaling_max = 3
@@ -53,8 +54,8 @@ resource "bunnynet_compute_container_app" "app" {
     }
 
     env {
-      name  = "APP_ENV"
-      value = "prod"
+      name  = "LISTEN_PORT"
+      value = "3000"
     }
   }
 
@@ -83,6 +84,7 @@ resource "bunnynet_compute_container_app" "app" {
 - `autoscaling_min` (Number) The minimum number of instances that will be provisioned per active region.
 - `container` (Block List) Defines a container for the application. (see [below for nested schema](#nestedblock--container))
 - `regions_max_allowed` (Number) The maximum amount of regions to be deployed at any given time.
+- `version` (Number)
 
 ### Read-Only
 
@@ -286,3 +288,9 @@ Required:
 Optional:
 
 - `expected_status` (Number) The expected HTTP response status code.
+
+## Limitations
+
+- `container`, `endpoint` and `env` blocks have to sorted by `name`. You'll need to follow the same order on your .tf files, otherwise terraform will show them as modified after an `apply`;
+- Renaming a `container`, `endpoint` or `env` will cause the plan to show unrelated items being modified, as their order jumps up or down. We recommend deleting the block, applying, and then adding the block again with the new name;
+- Renaming an `endpoint` of type CDN may cause pullzones to be recreated, even if they aren't directly affected;
