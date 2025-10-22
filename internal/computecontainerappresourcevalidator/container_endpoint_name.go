@@ -29,17 +29,17 @@ func (v containerEndpointNameValidator) ValidateResource(ctx context.Context, re
 	}
 
 	containerAttr := path.Root("container")
-	var containerSet types.Set
-	request.Config.GetAttribute(ctx, containerAttr, &containerSet)
+	var containerList types.List
+	request.Config.GetAttribute(ctx, containerAttr, &containerList)
 	endpointNames := map[string][]endpointNameType{}
 
-	if len(containerSet.Elements()) == 0 {
+	if len(containerList.Elements()) == 0 {
 		response.Diagnostics.AddError("No containers found", "No containers found")
 		return
 	}
 
-	for cIndex, c := range containerSet.Elements() {
-		for eIndex, e := range c.(types.Object).Attributes()["endpoint"].(types.Set).Elements() {
+	for cIndex, c := range containerList.Elements() {
+		for eIndex, e := range c.(types.Object).Attributes()["endpoint"].(types.List).Elements() {
 			name := e.(types.Object).Attributes()["name"].(types.String).ValueString()
 			if _, ok := endpointNames[name]; !ok {
 				endpointNames[name] = make([]endpointNameType, 0, 5)

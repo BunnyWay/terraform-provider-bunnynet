@@ -14,7 +14,8 @@ This resource manages a Magic Containers application in bunny.net.
 
 ```terraform
 resource "bunnynet_compute_container_app" "app" {
-  name = "my-app"
+  name    = "my-app"
+  version = 2
 
   autoscaling_min = 1
   autoscaling_max = 3
@@ -53,8 +54,8 @@ resource "bunnynet_compute_container_app" "app" {
     }
 
     env {
-      name  = "APP_ENV"
-      value = "prod"
+      name  = "LISTEN_PORT"
+      value = "3000"
     }
   }
 
@@ -81,8 +82,9 @@ resource "bunnynet_compute_container_app" "app" {
 
 - `autoscaling_max` (Number) The maximum number of instances that will be provisioned per active region.
 - `autoscaling_min` (Number) The minimum number of instances that will be provisioned per active region.
-- `container` (Block Set) Defines a container for the application. (see [below for nested schema](#nestedblock--container))
+- `container` (Block List) Defines a container for the application. (see [below for nested schema](#nestedblock--container))
 - `regions_max_allowed` (Number) The maximum amount of regions to be deployed at any given time.
+- `version` (Number)
 
 ### Read-Only
 
@@ -103,12 +105,12 @@ Optional:
 
 - `arguments` (String) The arguments that will be added to the container entry point when starting the image.
 - `command` (String) A custom startup command that will execute once the container is launched.
-- `endpoint` (Block Set) Defines a public endpoint for the application. (see [below for nested schema](#nestedblock--container--endpoint))
-- `env` (Block Set) Defines an environment variable for the container (see [below for nested schema](#nestedblock--container--env))
+- `endpoint` (Block List) Defines a public endpoint for the application. (see [below for nested schema](#nestedblock--container--endpoint))
+- `env` (Block List) Defines an environment variable for the container (see [below for nested schema](#nestedblock--container--env))
 - `image_pull_policy` (String) Options: `Always`, `IfNotPresent`
-- `liveness_probe` (Block Set) Checks that the application is actively running without issues. It the check fails, the container will be automatically restarted (see [below for nested schema](#nestedblock--container--liveness_probe))
-- `readiness_probe` (Block Set) Checks if the application is fully prepared to handle incoming requests. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--readiness_probe))
-- `startup_probe` (Block Set) Checks if the application has successfully started. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--startup_probe))
+- `liveness_probe` (Block List) Checks that the application is actively running without issues. It the check fails, the container will be automatically restarted (see [below for nested schema](#nestedblock--container--liveness_probe))
+- `readiness_probe` (Block List) Checks if the application is fully prepared to handle incoming requests. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--readiness_probe))
+- `startup_probe` (Block List) Checks if the application has successfully started. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--startup_probe))
 - `working_dir` (String) The working directory of the container runtime.
 
 Read-Only:
@@ -125,8 +127,8 @@ Required:
 
 Optional:
 
-- `cdn` (Block Set) Configurations for CDN endpoint. (see [below for nested schema](#nestedblock--container--endpoint--cdn))
-- `port` (Block Set) Endpoint port configuration. (see [below for nested schema](#nestedblock--container--endpoint--port))
+- `cdn` (Block List) Configurations for CDN endpoint. (see [below for nested schema](#nestedblock--container--endpoint--cdn))
+- `port` (Block List) Endpoint port configuration. (see [below for nested schema](#nestedblock--container--endpoint--port))
 
 <a id="nestedblock--container--endpoint--cdn"></a>
 ### Nested Schema for `container.endpoint.cdn`
@@ -134,7 +136,7 @@ Optional:
 Optional:
 
 - `origin_ssl` (Boolean) Indicates whether the container will handle TLS termination.
-- `sticky_sessions` (Block Set) Indicates whether sticky sessions is enabled. (see [below for nested schema](#nestedblock--container--endpoint--cdn--sticky_sessions))
+- `sticky_sessions` (Block List) Indicates whether sticky sessions is enabled. (see [below for nested schema](#nestedblock--container--endpoint--cdn--sticky_sessions))
 
 Read-Only:
 
@@ -183,8 +185,8 @@ Required:
 Optional:
 
 - `failure_threshold` (Number) The number of failed probes to consider the container unhealthy.
-- `grpc` (Block Set) gRPC-specific configurations. (see [below for nested schema](#nestedblock--container--liveness_probe--grpc))
-- `http` (Block Set) HTTP-specific configurations. (see [below for nested schema](#nestedblock--container--liveness_probe--http))
+- `grpc` (Block List) gRPC-specific configurations. (see [below for nested schema](#nestedblock--container--liveness_probe--grpc))
+- `http` (Block List) HTTP-specific configurations. (see [below for nested schema](#nestedblock--container--liveness_probe--http))
 - `initial_delay` (Number) The amount of time in seconds after the container is started to wait before the first probe is sent.
 - `period` (Number) The amount of time in seconds between each probe.
 - `success_threshold` (Number) The number of successful probes to consider the container healthy.
@@ -222,8 +224,8 @@ Required:
 Optional:
 
 - `failure_threshold` (Number) The number of failed probes to consider the container unhealthy.
-- `grpc` (Block Set) gRPC-specific configurations. (see [below for nested schema](#nestedblock--container--readiness_probe--grpc))
-- `http` (Block Set) HTTP-specific configurations. (see [below for nested schema](#nestedblock--container--readiness_probe--http))
+- `grpc` (Block List) gRPC-specific configurations. (see [below for nested schema](#nestedblock--container--readiness_probe--grpc))
+- `http` (Block List) HTTP-specific configurations. (see [below for nested schema](#nestedblock--container--readiness_probe--http))
 - `initial_delay` (Number) The amount of time in seconds after the container is started to wait before the first probe is sent.
 - `period` (Number) The amount of time in seconds between each probe.
 - `success_threshold` (Number) The number of successful probes to consider the container healthy.
@@ -261,8 +263,8 @@ Required:
 Optional:
 
 - `failure_threshold` (Number) The number of failed probes to consider the container unhealthy.
-- `grpc` (Block Set) gRPC-specific configurations. (see [below for nested schema](#nestedblock--container--startup_probe--grpc))
-- `http` (Block Set) HTTP-specific configurations. (see [below for nested schema](#nestedblock--container--startup_probe--http))
+- `grpc` (Block List) gRPC-specific configurations. (see [below for nested schema](#nestedblock--container--startup_probe--grpc))
+- `http` (Block List) HTTP-specific configurations. (see [below for nested schema](#nestedblock--container--startup_probe--http))
 - `initial_delay` (Number) The amount of time in seconds after the container is started to wait before the first probe is sent.
 - `period` (Number) The amount of time in seconds between each probe.
 - `success_threshold` (Number) The number of successful probes to consider the container healthy.
@@ -286,3 +288,9 @@ Required:
 Optional:
 
 - `expected_status` (Number) The expected HTTP response status code.
+
+## Limitations
+
+- `container`, `endpoint` and `env` blocks have to sorted by `name`. You'll need to follow the same order on your .tf files, otherwise terraform will show them as modified after an `apply`;
+- Renaming a `container`, `endpoint` or `env` will cause the plan to show unrelated items being modified, as their order jumps up or down. We recommend deleting the block, applying, and then adding the block again with the new name;
+- Renaming an `endpoint` of type CDN may cause pullzones to be recreated, even if they aren't directly affected;

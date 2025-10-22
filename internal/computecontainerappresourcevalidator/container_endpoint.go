@@ -40,8 +40,8 @@ func (c containerEndpoint) ValidateObject(ctx context.Context, request validator
 
 	attrs := request.ConfigValue.Attributes()
 	endpointType := attrs["type"].(types.String).ValueString()
-	ports := attrs["port"].(types.Set).Elements()
-	cdn := attrs["cdn"].(types.Set).Elements()
+	ports := attrs["port"].(types.List).Elements()
+	cdn := attrs["cdn"].(types.List).Elements()
 	errorSummary := fmt.Sprintf("Invalid endpoint.%s configuration", attrs["name"].(types.String).ValueString())
 
 	if endpointType == "CDN" && len(cdn) == 0 {

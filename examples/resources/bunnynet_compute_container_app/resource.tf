@@ -1,5 +1,6 @@
 resource "bunnynet_compute_container_app" "app" {
-  name = "my-app"
+  name    = "my-app"
+  version = 2
 
   autoscaling_min = 1
   autoscaling_max = 3
@@ -38,8 +39,8 @@ resource "bunnynet_compute_container_app" "app" {
     }
 
     env {
-      name  = "APP_ENV"
-      value = "prod"
+      name  = "LISTEN_PORT"
+      value = "3000"
     }
   }
 
