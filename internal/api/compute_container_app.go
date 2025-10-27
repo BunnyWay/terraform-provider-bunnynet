@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
 )
@@ -204,6 +205,8 @@ func (c *Client) GetComputeContainerApp(id string) (ComputeContainerApp, error) 
 		return ComputeContainerApp{}, err
 	}
 
+	computeContainerAppSort(&result)
+
 	return result, nil
 }
 
@@ -351,4 +354,44 @@ func (c *Client) DeleteComputeContainerApp(id string) error {
 	}
 
 	return nil
+}
+
+func computeContainerAppSort(app *ComputeContainerApp) {
+	slices.SortFunc(app.ContainerTemplates, func(a, b ComputeContainerAppContainer) int {
+		if a.Name == b.Name {
+			return 0
+		}
+
+		if a.Name < b.Name {
+			return -1
+		}
+
+		return 1
+	})
+
+	for _, container := range app.ContainerTemplates {
+		slices.SortFunc(container.Endpoints, func(a, b ComputeContainerAppContainerEndpoint) int {
+			if a.DisplayName == b.DisplayName {
+				return 0
+			}
+
+			if a.DisplayName < b.DisplayName {
+				return -1
+			}
+
+			return 1
+		})
+
+		slices.SortFunc(container.EnvironmentVariables, func(a, b ComputeContainerAppContainerEnv) int {
+			if a.Name == b.Name {
+				return 0
+			}
+
+			if a.Name < b.Name {
+				return -1
+			}
+
+			return 1
+		})
+	}
 }

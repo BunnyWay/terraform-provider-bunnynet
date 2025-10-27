@@ -46,7 +46,7 @@ Read-Only:
 
 - `origin_ssl` (Boolean)
 - `pullzone_id` (Number)
-- `sticky_sessions` (Set of Object) (see [below for nested schema](#nestedobjatt--cdn--sticky_sessions))
+- `sticky_sessions` (List of Object) (see [below for nested schema](#nestedobjatt--cdn--sticky_sessions))
 
 <a id="nestedobjatt--cdn--sticky_sessions"></a>
 ### Nested Schema for `cdn.sticky_sessions`

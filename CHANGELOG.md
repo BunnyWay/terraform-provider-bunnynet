@@ -9,8 +9,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.11.0 - 2025-10-27
+
+### Backwards compatibility break
+
+The resource `compute_container_app` now uses a [list type](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/list) to define `container`, `endpoint` and `env` blocks. While both set and list types are compatible at the [state](https://developer.hashicorp.com/terraform/language/state) level, this change has some limitations:
+
+#### Limitations
+
+- `container`, `endpoint` and `env` blocks have to sorted by `name`. You'll need to follow the same order on your .tf files, otherwise terraform will show them as modified after an `apply`;
+- Renaming a `container`, `endpoint` or `env` will cause the plan to show unrelated items being modified, as their order jumps up or down. We recommend deleting the block, applying, and then adding the block again with the new name;
+- Renaming an `endpoint` of type CDN might cause pullzones to be recreated, even if they aren't directly affected;
+
+#### Upgrade path
+
+1. Make sure `terraform plan` reports no changes;
+2. Upgrade the bunny.net provider;
+3. Sort the `container`, `endpoint` and `env` blocks in your .tf files;
+4. Add `version = 2` to your `bunnynet_compute_container_app` resources;
+5. Run `terraform plan`, it should report no changes apart from the `version` attribute;
+
+#### Motivation
+
+While the [set type](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/set) would be the semantically correct type to use for those blocks, Terraform's implementation is neither complete nor uses the same internal details as the List type. This means that changing attributes in a sub-block often causes the entire `container` to be replaced, causing endpoints to be re-created, including their pullzones. It is also not possible to reference set objects in `lifecycle.ignore_changes`.
+
+Related issues: [#777](https://github.com/hashicorp/terraform-plugin-framework/issues/777), [#974](https://github.com/hashicorp/terraform-plugin-framework/issues/974), [#1036](https://github.com/hashicorp/terraform-plugin-framework/issues/1036).
+
 ### Changed
 
+- resource compute_container_app: replace Set with List types;
 - Bumped minimum Go version to 1.24;
 - Bumped minimum Terraform version to 1.5;
 

@@ -10,6 +10,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/computecontainerappresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -20,9 +21,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -48,13 +51,14 @@ type ComputeContainerAppResource struct {
 
 type ComputeContainerAppResourceModel struct {
 	Id                types.String `tfsdk:"id"`
+	Version           types.Int64  `tfsdk:"version"`
 	Name              types.String `tfsdk:"name"`
 	AutoscalingMin    types.Int64  `tfsdk:"autoscaling_min"`
 	AutoscalingMax    types.Int64  `tfsdk:"autoscaling_max"`
 	RegionsAllowed    types.Set    `tfsdk:"regions_allowed"`
 	RegionsRequired   types.Set    `tfsdk:"regions_required"`
 	RegionsMaxAllowed types.Int64  `tfsdk:"regions_max_allowed"`
-	Containers        types.Set    `tfsdk:"container"`
+	Containers        types.List   `tfsdk:"container"`
 }
 
 var computeContainerAppImagePullPolicyOptions = []string{"Always", "IfNotPresent"}
@@ -80,7 +84,7 @@ var computeContainerAppContainerEndpointCdnType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
 		"origin_ssl":  types.BoolType,
 		"pullzone_id": types.Int64Type,
-		"sticky_sessions": types.SetType{
+		"sticky_sessions": types.ListType{
 			ElemType: computeContainerAppContainerEndpointCdnStickySessionsType,
 		},
 	},
@@ -104,10 +108,10 @@ var computeContainerAppContainerEndpointType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
 		"name": types.StringType,
 		"type": types.StringType,
-		"cdn": types.SetType{
+		"cdn": types.ListType{
 			ElemType: computeContainerAppContainerEndpointCdnType,
 		},
-		"port": types.SetType{
+		"port": types.ListType{
 			ElemType: computeContainerAppContainerEndpointPortType,
 		},
 	},
@@ -212,10 +216,10 @@ var computeContainerAppContainerProbeType = types.ObjectType{
 		"timeout":           types.Int64Type,
 		"failure_threshold": types.Int64Type,
 		"success_threshold": types.Int64Type,
-		"http": types.SetType{
+		"http": types.ListType{
 			ElemType: computeContainerAppContainerProbeHttpType,
 		},
-		"grpc": types.SetType{
+		"grpc": types.ListType{
 			ElemType: computeContainerAppContainerProbeGrpcType,
 		},
 	},
@@ -233,11 +237,11 @@ var computeContainerAppContainerType = types.ObjectType{
 		"command":           types.StringType,
 		"arguments":         types.StringType,
 		"working_dir":       types.StringType,
-		"endpoint":          types.SetType{ElemType: computeContainerAppContainerEndpointType},
-		"env":               types.SetType{ElemType: computeContainerAppContainerEnvType},
-		"startup_probe":     types.SetType{ElemType: computeContainerAppContainerProbeType},
-		"readiness_probe":   types.SetType{ElemType: computeContainerAppContainerProbeType},
-		"liveness_probe":    types.SetType{ElemType: computeContainerAppContainerProbeType},
+		"endpoint":          types.ListType{ElemType: computeContainerAppContainerEndpointType},
+		"env":               types.ListType{ElemType: computeContainerAppContainerEnvType},
+		"startup_probe":     types.ListType{ElemType: computeContainerAppContainerProbeType},
+		"readiness_probe":   types.ListType{ElemType: computeContainerAppContainerProbeType},
+		"liveness_probe":    types.ListType{ElemType: computeContainerAppContainerProbeType},
 	},
 }
 
@@ -332,13 +336,13 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 			objectplanmodifier.UseStateForUnknown(),
 		},
 		Blocks: map[string]schema.Block{
-			"http": schema.SetNestedBlock{
+			"http": schema.ListNestedBlock{
 				Description: "HTTP-specific configurations.",
-				Validators: []validator.Set{
-					setvalidator.SizeBetween(0, 1),
+				Validators: []validator.List{
+					listvalidator.SizeBetween(0, 1),
 				},
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
@@ -360,13 +364,13 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 					},
 				},
 			},
-			"grpc": schema.SetNestedBlock{
+			"grpc": schema.ListNestedBlock{
 				Description: "gRPC-specific configurations.",
-				Validators: []validator.Set{
-					setvalidator.SizeBetween(0, 1),
+				Validators: []validator.List{
+					listvalidator.SizeBetween(0, 1),
 				},
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
@@ -392,6 +396,16 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Description: "The unique identifier for the application.",
+			},
+			"version": schema.Int64Attribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Int64{
+					computecontainerappresourcevalidator.Version(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required: true,
@@ -458,10 +472,10 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 		Blocks: map[string]schema.Block{
 			// a set does not work here, as the "id" attribute will not be copied over from state to plan (even though we have useStateForUnknown)
 			// @see https://github.com/hashicorp/terraform-plugin-framework/issues/726
-			"container": schema.SetNestedBlock{
+			"container": schema.ListNestedBlock{
 				Description: "Defines a container for the application.",
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedBlockObject{
 					PlanModifiers: []planmodifier.Object{
@@ -516,6 +530,8 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 						},
 						"image_pull_policy": schema.StringAttribute{
 							Optional: true,
+							Computed: true,
+							Default:  stringdefault.StaticString("Always"),
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -556,10 +572,10 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 						},
 					},
 					Blocks: map[string]schema.Block{
-						"endpoint": schema.SetNestedBlock{
+						"endpoint": schema.ListNestedBlock{
 							Description: "Defines a public endpoint for the application.",
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedBlockObject{
 								PlanModifiers: []planmodifier.Object{
@@ -592,13 +608,13 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 									},
 								},
 								Blocks: map[string]schema.Block{
-									"cdn": schema.SetNestedBlock{
+									"cdn": schema.ListNestedBlock{
 										Description: "Configurations for CDN endpoint.",
-										Validators: []validator.Set{
-											setvalidator.SizeBetween(0, 1),
+										Validators: []validator.List{
+											listvalidator.SizeBetween(0, 1),
 										},
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										PlanModifiers: []planmodifier.List{
+											listplanmodifier.UseStateForUnknown(),
 										},
 										NestedObject: schema.NestedBlockObject{
 											Attributes: map[string]schema.Attribute{
@@ -620,13 +636,13 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 												},
 											},
 											Blocks: map[string]schema.Block{
-												"sticky_sessions": schema.SetNestedBlock{
+												"sticky_sessions": schema.ListNestedBlock{
 													Description: "Indicates whether sticky sessions is enabled.",
-													Validators: []validator.Set{
-														setvalidator.SizeBetween(0, 1),
+													Validators: []validator.List{
+														listvalidator.SizeBetween(0, 1),
 													},
-													PlanModifiers: []planmodifier.Set{
-														setplanmodifier.UseStateForUnknown(),
+													PlanModifiers: []planmodifier.List{
+														listplanmodifier.UseStateForUnknown(),
 													},
 													NestedObject: schema.NestedBlockObject{
 														Attributes: map[string]schema.Attribute{
@@ -650,10 +666,10 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 											},
 										},
 									},
-									"port": schema.SetNestedBlock{
+									"port": schema.ListNestedBlock{
 										Description: "Endpoint port configuration.",
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										PlanModifiers: []planmodifier.List{
+											listplanmodifier.UseStateForUnknown(),
 										},
 										NestedObject: schema.NestedBlockObject{
 											Attributes: map[string]schema.Attribute{
@@ -700,10 +716,10 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 								},
 							},
 						},
-						"env": schema.SetNestedBlock{
+						"env": schema.ListNestedBlock{
 							Description: "Defines an environment variable for the container",
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedBlockObject{
 								PlanModifiers: []planmodifier.Object{
@@ -731,33 +747,33 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 								},
 							},
 						},
-						"startup_probe": schema.SetNestedBlock{
+						"startup_probe": schema.ListNestedBlock{
 							Description: "Checks if the application has successfully started. No requests will be routed to the application until this check is successful.",
-							Validators: []validator.Set{
-								setvalidator.SizeBetween(0, 1),
+							Validators: []validator.List{
+								listvalidator.SizeBetween(0, 1),
 							},
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: containerAppContainerProbeSchema,
 						},
-						"readiness_probe": schema.SetNestedBlock{
+						"readiness_probe": schema.ListNestedBlock{
 							Description: "Checks if the application is fully prepared to handle incoming requests. No requests will be routed to the application until this check is successful.",
-							Validators: []validator.Set{
-								setvalidator.SizeBetween(0, 1),
+							Validators: []validator.List{
+								listvalidator.SizeBetween(0, 1),
 							},
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: containerAppContainerProbeSchema,
 						},
-						"liveness_probe": schema.SetNestedBlock{
+						"liveness_probe": schema.ListNestedBlock{
 							Description: "Checks that the application is actively running without issues. It the check fails, the container will be automatically restarted",
-							Validators: []validator.Set{
-								setvalidator.SizeBetween(0, 1),
+							Validators: []validator.List{
+								listvalidator.SizeBetween(0, 1),
 							},
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: containerAppContainerProbeSchema,
 						},
@@ -808,11 +824,6 @@ func (r *ComputeContainerAppResource) ModifyPlan(ctx context.Context, req resour
 	for i, container := range containerElements {
 		containerAttr := container.(types.Object).Attributes()
 
-		// default for image_pull_policy
-		if v, ok := containerAttr["image_pull_policy"]; ok && v.(types.String).IsNull() {
-			containerAttr["image_pull_policy"] = types.StringValue("Always")
-		}
-
 		containerObj, diags := types.ObjectValue(computeContainerAppContainerType.AttrTypes, containerAttr)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
@@ -822,13 +833,13 @@ func (r *ComputeContainerAppResource) ModifyPlan(ctx context.Context, req resour
 		containerElements[i] = containerObj
 	}
 
-	containersSet, diags := types.SetValue(computeContainerAppContainerType, containerElements)
+	containerList, diags := types.ListValue(computeContainerAppContainerType, containerElements)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	dataTf.Containers = containersSet
+	dataTf.Containers = containerList
 	resp.Plan.Set(ctx, dataTf)
 }
 
@@ -955,10 +966,10 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 
 	for i, container := range dataTf.Containers.Elements() {
 		cAttr := container.(types.Object).Attributes()
-		endpointElements := make([]api.ComputeContainerAppContainerEndpoint, 0, len(cAttr["endpoint"].(types.Set).Elements()))
-		envElements := make([]api.ComputeContainerAppContainerEnv, len(cAttr["env"].(types.Set).Elements()))
+		endpointElements := make([]api.ComputeContainerAppContainerEndpoint, 0, len(cAttr["endpoint"].(types.List).Elements()))
+		envElements := make([]api.ComputeContainerAppContainerEnv, len(cAttr["env"].(types.List).Elements()))
 
-		for _, endpoint := range cAttr["endpoint"].(types.Set).Elements() {
+		for _, endpoint := range cAttr["endpoint"].(types.List).Elements() {
 			endpointAttr := endpoint.(types.Object).Attributes()
 			endpointType := endpointAttr["type"].(types.String).ValueString()
 
@@ -967,16 +978,16 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 			stickySessionsHeaders := []string{}
 
 			if endpointType == "CDN" {
-				cdnset := endpointAttr["cdn"].(types.Set).Elements()
-				if len(cdnset) > 0 {
-					cdnAttr := cdnset[0].(types.Object).Attributes()
+				cdnList := endpointAttr["cdn"].(types.List).Elements()
+				if len(cdnList) > 0 {
+					cdnAttr := cdnList[0].(types.Object).Attributes()
 					if cdnAttr["origin_ssl"].(types.Bool).ValueBool() {
 						originSsl = true
 					}
 
-					if !cdnAttr["sticky_sessions"].(types.Set).IsNull() {
-						stickySessionsSet := cdnAttr["sticky_sessions"].(types.Set).Elements()
-						stickySessionsAttr := stickySessionsSet[0].(types.Object).Attributes()
+					if !cdnAttr["sticky_sessions"].(types.List).IsNull() {
+						stickySessionsList := cdnAttr["sticky_sessions"].(types.List).Elements()
+						stickySessionsAttr := stickySessionsList[0].(types.Object).Attributes()
 						stickySessions = true
 
 						for _, header := range stickySessionsAttr["headers"].(types.Set).Elements() {
@@ -986,7 +997,7 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 				}
 			}
 
-			portElements := endpointAttr["port"].(types.Set).Elements()
+			portElements := endpointAttr["port"].(types.List).Elements()
 			portMappings := make([]api.ComputeContainerAppContainerEndpointPortMapping, 0, len(portElements))
 
 			for _, port := range portElements {
@@ -1026,24 +1037,24 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 			})
 		}
 
-		for iEnv, env := range cAttr["env"].(types.Set).Elements() {
+		for iEnv, env := range cAttr["env"].(types.List).Elements() {
 			envElements[iEnv] = api.ComputeContainerAppContainerEnv{
 				Name:  env.(types.Object).Attributes()["name"].(types.String).ValueString(),
 				Value: env.(types.Object).Attributes()["value"].(types.String).ValueString(),
 			}
 		}
 
-		startupProbe, diags := r.convertModelContainerProbeToApi(cAttr["startup_probe"].(types.Set))
+		startupProbe, diags := r.convertModelContainerProbeToApi(cAttr["startup_probe"].(types.List))
 		if diags != nil {
 			return dataApi, diags
 		}
 
-		readinessProbe, diags := r.convertModelContainerProbeToApi(cAttr["readiness_probe"].(types.Set))
+		readinessProbe, diags := r.convertModelContainerProbeToApi(cAttr["readiness_probe"].(types.List))
 		if diags != nil {
 			return dataApi, diags
 		}
 
-		livenessProbe, diags := r.convertModelContainerProbeToApi(cAttr["liveness_probe"].(types.Set))
+		livenessProbe, diags := r.convertModelContainerProbeToApi(cAttr["liveness_probe"].(types.List))
 		if diags != nil {
 			return dataApi, diags
 		}
@@ -1077,7 +1088,7 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 	return dataApi, nil
 }
 
-func (r *ComputeContainerAppResource) convertModelContainerProbeToApi(dataTf types.Set) (*api.ComputeContainerAppContainerProbe, diag.Diagnostics) {
+func (r *ComputeContainerAppResource) convertModelContainerProbeToApi(dataTf types.List) (*api.ComputeContainerAppContainerProbe, diag.Diagnostics) {
 	if dataTf.IsNull() {
 		return nil, nil
 	}
@@ -1123,7 +1134,7 @@ func (r *ComputeContainerAppResource) convertModelContainerProbeToApi(dataTf typ
 
 	switch computecontainerappresourcevalidator.ContainerProbeType(probeType) {
 	case computecontainerappresourcevalidator.ContainerProbeTypeHttp:
-		httpBlocks := attrs["http"].(types.Set).Elements()
+		httpBlocks := attrs["http"].(types.List).Elements()
 		if len(httpBlocks) != 1 {
 			diags := diag.Diagnostics{}
 			diags.AddError("Unexpected number of http blocks defined", "A single http block should be defined")
@@ -1156,7 +1167,7 @@ func (r *ComputeContainerAppResource) convertModelContainerProbeToApi(dataTf typ
 			},
 		}
 	case computecontainerappresourcevalidator.ContainerProbeTypeGrpc:
-		grpcBlocks := attrs["grpc"].(types.Set).Elements()
+		grpcBlocks := attrs["grpc"].(types.List).Elements()
 		if len(grpcBlocks) != 1 {
 			diags := diag.Diagnostics{}
 			diags.AddError("Unexpected number of grpc blocks defined", "A single grpc block should be defined")
@@ -1186,6 +1197,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 	var diags diag.Diagnostics
 	dataTf := ComputeContainerAppResourceModel{}
 	dataTf.Id = types.StringValue(dataApi.Id)
+	dataTf.Version = types.Int64Value(2)
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.AutoscalingMin = types.Int64Value(dataApi.AutoScaling.Min)
 	dataTf.AutoscalingMax = types.Int64Value(dataApi.AutoScaling.Max)
@@ -1215,7 +1227,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 	}
 
 	if len(dataApi.ContainerTemplates) == 0 {
-		dataTf.Containers = types.SetNull(computeContainerAppContainerType)
+		dataTf.Containers = types.ListNull(computeContainerAppContainerType)
 	} else {
 		containers := make([]attr.Value, len(dataApi.ContainerTemplates))
 		for i, c := range dataApi.ContainerTemplates {
@@ -1227,18 +1239,18 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 			}
 
 			// endpoint
-			endpointSetValues := make([]attr.Value, len(c.Endpoints))
+			endpointListValues := make([]attr.Value, len(c.Endpoints))
 			for iEndpoint, endpoint := range c.Endpoints {
-				cdnSet := types.SetNull(computeContainerAppContainerEndpointCdnType)
+				cdnList := types.ListNull(computeContainerAppContainerEndpointCdnType)
 
 				if endpoint.Type == "CDN" {
-					cdnSet, diags = convertContainerAppContainerEndpointCdnApiToTf(endpoint)
+					cdnList, diags = convertContainerAppContainerEndpointCdnApiToTf(endpoint)
 					if diags.HasError() {
 						return dataTf, diags
 					}
 				}
 
-				portSetValues := make([]attr.Value, 0, len(endpoint.PortMappings))
+				portListValues := make([]attr.Value, 0, len(endpoint.PortMappings))
 				for _, port := range endpoint.PortMappings {
 					var exposedPort types.Int64
 					if port.ExposedPort > 0 {
@@ -1270,10 +1282,10 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 						return dataTf, diags
 					}
 
-					portSetValues = append(portSetValues, portObj)
+					portListValues = append(portListValues, portObj)
 				}
 
-				portSet, diags := types.SetValue(computeContainerAppContainerEndpointPortType, portSetValues)
+				portList, diags := types.ListValue(computeContainerAppContainerEndpointPortType, portListValues)
 				if diags.HasError() {
 					return dataTf, diags
 				}
@@ -1281,8 +1293,8 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 				endpointAttrs := map[string]attr.Value{
 					"name": types.StringValue(endpoint.DisplayName),
 					"type": types.StringValue(endpointTypeMap[endpoint.Type]),
-					"cdn":  cdnSet,
-					"port": portSet,
+					"cdn":  cdnList,
+					"port": portList,
 				}
 
 				endpointObject, diags := types.ObjectValue(computeContainerAppContainerEndpointType.AttrTypes, endpointAttrs)
@@ -1290,16 +1302,16 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 					return dataTf, diags
 				}
 
-				endpointSetValues[iEndpoint] = endpointObject
+				endpointListValues[iEndpoint] = endpointObject
 			}
 
-			containerEndpoints, diags := types.SetValue(computeContainerAppContainerEndpointType, endpointSetValues)
+			containerEndpoints, diags := types.ListValue(computeContainerAppContainerEndpointType, endpointListValues)
 			if diags.HasError() {
 				return dataTf, diags
 			}
 
 			// env
-			envSetValues := make([]attr.Value, len(c.EnvironmentVariables))
+			envListValues := make([]attr.Value, len(c.EnvironmentVariables))
 			for iEnv, env := range c.EnvironmentVariables {
 				envObject, diags := types.ObjectValue(computeContainerAppContainerEnvType.AttrTypes, map[string]attr.Value{
 					"name":  types.StringValue(env.Name),
@@ -1310,10 +1322,10 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 					return dataTf, diags
 				}
 
-				envSetValues[iEnv] = envObject
+				envListValues[iEnv] = envObject
 			}
 
-			containerEnvs, diags := types.SetValue(computeContainerAppContainerEnvType, envSetValues)
+			containerEnvs, diags := types.ListValue(computeContainerAppContainerEnvType, envListValues)
 			if diags.HasError() {
 				return dataTf, diags
 			}
@@ -1360,7 +1372,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 			containers[i] = container
 		}
 
-		containerTf, diags := types.SetValue(computeContainerAppContainerType, containers)
+		containerTf, diags := types.ListValue(computeContainerAppContainerType, containers)
 		if diags.HasError() {
 			return dataTf, diags
 		}
@@ -1371,8 +1383,8 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 	return dataTf, nil
 }
 
-func convertContainerAppContainerEndpointCdnApiToTf(endpoint api.ComputeContainerAppContainerEndpoint) (types.Set, diag.Diagnostics) {
-	stickySessionsSet := types.SetNull(computeContainerAppContainerEndpointCdnStickySessionsType)
+func convertContainerAppContainerEndpointCdnApiToTf(endpoint api.ComputeContainerAppContainerEndpoint) (types.List, diag.Diagnostics) {
+	stickySessionsList := types.ListNull(computeContainerAppContainerEndpointCdnStickySessionsType)
 
 	if endpoint.StickySessions != nil {
 		headerValues := make([]attr.Value, 0, len(endpoint.StickySessions.SessionHeaders))
@@ -1382,7 +1394,7 @@ func convertContainerAppContainerEndpointCdnApiToTf(endpoint api.ComputeContaine
 
 		headersSet, diags := types.SetValue(types.StringType, headerValues)
 		if diags.HasError() {
-			return basetypes.SetValue{}, diags
+			return basetypes.ListValue{}, diags
 		}
 
 		stickySessionsObj, diags := types.ObjectValue(computeContainerAppContainerEndpointCdnStickySessionsType.AttrTypes, map[string]attr.Value{
@@ -1390,12 +1402,12 @@ func convertContainerAppContainerEndpointCdnApiToTf(endpoint api.ComputeContaine
 		})
 
 		if diags.HasError() {
-			return basetypes.SetValue{}, diags
+			return basetypes.ListValue{}, diags
 		}
 
-		stickySessionsSet, diags = types.SetValue(computeContainerAppContainerEndpointCdnStickySessionsType, []attr.Value{stickySessionsObj})
+		stickySessionsList, diags = types.ListValue(computeContainerAppContainerEndpointCdnStickySessionsType, []attr.Value{stickySessionsObj})
 		if diags.HasError() {
-			return basetypes.SetValue{}, diags
+			return basetypes.ListValue{}, diags
 		}
 	}
 
@@ -1403,25 +1415,25 @@ func convertContainerAppContainerEndpointCdnApiToTf(endpoint api.ComputeContaine
 	if err != nil {
 		diags := diag.Diagnostics{}
 		diags.AddError("Could not convert pullzone ID to integer", err.Error())
-		return basetypes.SetValue{}, diags
+		return basetypes.ListValue{}, diags
 	}
 
-	cdnSetObj, diags := types.ObjectValue(computeContainerAppContainerEndpointCdnType.AttrTypes, map[string]attr.Value{
+	cdnObj, diags := types.ObjectValue(computeContainerAppContainerEndpointCdnType.AttrTypes, map[string]attr.Value{
 		"origin_ssl":      types.BoolValue(endpoint.IsSslEnabled),
 		"pullzone_id":     types.Int64Value(pullzoneId),
-		"sticky_sessions": stickySessionsSet,
+		"sticky_sessions": stickySessionsList,
 	})
 
 	if diags.HasError() {
-		return basetypes.SetValue{}, diags
+		return basetypes.ListValue{}, diags
 	}
 
-	return types.SetValue(computeContainerAppContainerEndpointCdnType, []attr.Value{cdnSetObj})
+	return types.ListValue(computeContainerAppContainerEndpointCdnType, []attr.Value{cdnObj})
 }
 
-func (r *ComputeContainerAppResource) convertApiContainerProbeToModel(probe *api.ComputeContainerAppContainerProbe) (basetypes.SetValue, diag.Diagnostics) {
+func (r *ComputeContainerAppResource) convertApiContainerProbeToModel(probe *api.ComputeContainerAppContainerProbe) (basetypes.ListValue, diag.Diagnostics) {
 	if probe == nil {
-		return types.SetNull(computeContainerAppContainerProbeType), diag.Diagnostics{}
+		return types.ListNull(computeContainerAppContainerProbeType), diag.Diagnostics{}
 	}
 
 	objAttr := map[string]attr.Value{
@@ -1430,8 +1442,8 @@ func (r *ComputeContainerAppResource) convertApiContainerProbeToModel(probe *api
 		"timeout":           types.Int64Value(probe.TimeoutSeconds),
 		"failure_threshold": types.Int64Value(probe.FailureThreshold),
 		"success_threshold": types.Int64Value(probe.SuccessThreshold),
-		"http":              types.SetNull(computeContainerAppContainerProbeHttpType),
-		"grpc":              types.SetNull(computeContainerAppContainerProbeGrpcType),
+		"http":              types.ListNull(computeContainerAppContainerProbeHttpType),
+		"grpc":              types.ListNull(computeContainerAppContainerProbeGrpcType),
 	}
 
 	if probe.HttpGet != nil {
@@ -1444,7 +1456,7 @@ func (r *ComputeContainerAppResource) convertApiContainerProbeToModel(probe *api
 
 		objAttr["type"] = types.StringValue(string(computecontainerappresourcevalidator.ContainerProbeTypeHttp))
 		objAttr["port"] = types.Int64Value(probe.HttpGet.Request.PortNumber)
-		objAttr["http"] = types.SetValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{
+		objAttr["http"] = types.ListValueMust(computeContainerAppContainerProbeHttpType, []attr.Value{
 			types.ObjectValueMust(computeContainerAppContainerProbeHttpType.AttrTypes, map[string]attr.Value{
 				"path":            types.StringValue(probe.HttpGet.Request.Path),
 				"expected_status": expectedStatus,
@@ -1460,18 +1472,18 @@ func (r *ComputeContainerAppResource) convertApiContainerProbeToModel(probe *api
 	if probe.Grpc != nil {
 		objAttr["type"] = types.StringValue(string(computecontainerappresourcevalidator.ContainerProbeTypeGrpc))
 		objAttr["port"] = types.Int64Value(probe.Grpc.Request.PortNumber)
-		objAttr["grpc"] = types.SetValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{
+		objAttr["grpc"] = types.ListValueMust(computeContainerAppContainerProbeGrpcType, []attr.Value{
 			types.ObjectValueMust(computeContainerAppContainerProbeGrpcType.AttrTypes, map[string]attr.Value{
 				"service": types.StringValue(probe.Grpc.Request.ServiceName),
 			}),
 		})
 	}
 
-	setObj, diags := types.ObjectValue(computeContainerAppContainerProbeType.AttrTypes, objAttr)
+	obj, diags := types.ObjectValue(computeContainerAppContainerProbeType.AttrTypes, objAttr)
 
 	if diags.HasError() {
-		return types.SetNull(computeContainerAppContainerProbeType), diags
+		return types.ListNull(computeContainerAppContainerProbeType), diags
 	}
 
-	return types.SetValue(computeContainerAppContainerProbeType, []attr.Value{setObj})
+	return types.ListValue(computeContainerAppContainerProbeType, []attr.Value{obj})
 }
