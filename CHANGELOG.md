@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
-## 0.11.0 - Unreleased
+## 0.11.0 - 2025-10-27
 
 ### Backwards compatibility break
 
@@ -31,7 +31,7 @@ The resource `compute_container_app` now uses a [list type](https://developer.ha
 
 #### Motivation
 
-While the [set type](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/set) would be the semantically correct type to use for those blocks, Terraform's implementation is neither complete nor uses the same internal semantics as the List type. This means that changing some attributes in a sub-block often causes the entire `container` to be replaced, which in turn causes the endpoints to be re-created, including their pullzones. It is also not possible to reference set objects in `lifecycle.ignore_changes`.
+While the [set type](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/set) would be the semantically correct type to use for those blocks, Terraform's implementation is neither complete nor uses the same internal details as the List type. This means that changing attributes in a sub-block often causes the entire `container` to be replaced, causing endpoints to be re-created, including their pullzones. It is also not possible to reference set objects in `lifecycle.ignore_changes`.
 
 Related issues: [#777](https://github.com/hashicorp/terraform-plugin-framework/issues/777), [#974](https://github.com/hashicorp/terraform-plugin-framework/issues/974), [#1036](https://github.com/hashicorp/terraform-plugin-framework/issues/1036).
 
