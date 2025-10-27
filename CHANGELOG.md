@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Bumped minimum Go version to 1.24;
+- Bumped minimum Terraform version to 1.5;
 
 ## 0.10.6 - 2025-10-20
 
