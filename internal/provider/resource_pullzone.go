@@ -432,7 +432,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether the cache slice (Optimize for video) feature is enabled for the Pull Zone",
+				Description: "Indicates whether the cache slice (Optimize for large object delivery) feature is enabled for the Pull Zone",
 			},
 			"cache_stale": schema.SetAttribute{
 				ElementType: types.StringType,

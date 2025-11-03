@@ -28,7 +28,7 @@ This data source represents a bunny.net Pullzone.
 - `block_post_requests` (Boolean) Indicates whether to block POST requests.
 - `block_referers` (Set of String) The list of referrer hostnames that are blocked to access the pull zone. Requests containing the header "Referer: hostname" that is not on the list will be rejected. If empty, all the referrers are allowed.
 - `block_root_path` (Boolean) This property indicates whether to block the root path.
-- `cache_chunked` (Boolean) Indicates whether the cache slice (Optimize for video) feature is enabled for the Pull Zone
+- `cache_chunked` (Boolean) Indicates whether the cache slice (Optimize for large object delivery) feature is enabled for the Pull Zone
 - `cache_enabled` (Boolean) Indicates whether smart caching is enabled.
 - `cache_errors` (Boolean) Indicates whether bunny.net should be caching error responses.
 - `cache_expiration_time` (Number) The override cache time, in seconds.
