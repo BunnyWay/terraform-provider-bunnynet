@@ -352,6 +352,7 @@ func (r *DnsRecordResource) Configure(ctx context.Context, req resource.Configur
 
 func (r *DnsRecordResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
+		dnsrecordresourcevalidator.Hostname(),
 		dnsrecordresourcevalidator.PullzoneId(),
 	}
 }
