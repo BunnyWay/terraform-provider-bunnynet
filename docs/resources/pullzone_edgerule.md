@@ -86,11 +86,17 @@ Optional:
 - `parameter3` (String)
 - `type` (String)
 
+## Field values
+
+### `triggers[].type`
+Options: `Url`, `RequestHeader`, `ResponseHeader`, `UrlExtension`, `CountryCode`, `RemoteIP`, `UrlQueryString`, `RandomChance`, `StatusCode`, `RequestMethod`, `CookieValue`, `CountryStateCode`, `OriginRetryAttemptCount`, `OriginConnectionError`
+
+### `triggers[].match_type`
+Options: `MatchAll`, `MatchAny`, `MatchNone`
+
 ## Import
 
 Import is supported using the following syntax:
-
-The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 terraform import bunnynet_pullzone_edgerule.test "$PULLZONE_ID|$EDGERULE_GUID"
