@@ -21,25 +21,33 @@ func (v pullzoneIdValidator) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
-func (v pullzoneIdValidator) ValidateResource(ctx context.Context, request resource.ValidateConfigRequest, response *resource.ValidateConfigResponse) {
+func (v pullzoneIdValidator) ValidateResource(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	pullzoneIdAttr := path.Root("pullzone_id")
-	var pullzoneId types.Int64
-	request.Config.GetAttribute(ctx, pullzoneIdAttr, &pullzoneId)
+	typeAttr := path.Root("type")
 
-	if pullzoneId.IsNull() {
+	var planType types.String
+	req.Config.GetAttribute(ctx, typeAttr, &planType)
+
+	var planPullzoneId types.Int64
+	req.Config.GetAttribute(ctx, pullzoneIdAttr, &planPullzoneId)
+
+	if planType.IsUnknown() || planType.IsNull() {
 		return
 	}
 
-	var rType types.String
-	request.Config.GetAttribute(ctx, path.Root("type"), &rType)
-
-	if rType.IsUnknown() || rType.IsNull() {
+	if planPullzoneId.IsUnknown() {
 		return
 	}
 
-	if rType.ValueString() == "PullZone" {
+	if planType.ValueString() == "PullZone" {
+		if planPullzoneId.IsNull() {
+			resp.Diagnostics.AddAttributeError(pullzoneIdAttr, "Invalid attribute configuration", "pullzone_id is required")
+		}
+
 		return
 	}
 
-	response.Diagnostics.AddAttributeError(pullzoneIdAttr, "Invalid attribute configuration", v.Description(ctx))
+	if !planPullzoneId.IsNull() {
+		resp.Diagnostics.AddAttributeError(pullzoneIdAttr, "Invalid attribute configuration", v.Description(ctx))
+	}
 }
