@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.11.1 - 2025-11-11
+
 ### Added
 - resource dns_record: validate trailing dots on hostname values ([#48](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/48));
 - resource pullzone_edgerule: document `triggers[].type` accepted values;
