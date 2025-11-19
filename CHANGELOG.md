@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- resource dns_record: validate weight for type Redirect ([#29](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/29#issuecomment-3549960461))
+
 ## 0.11.1 - 2025-11-11
 
 ### Added

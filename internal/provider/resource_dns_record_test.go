@@ -5,6 +5,9 @@ package provider
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"regexp"
 	"testing"
 
@@ -58,6 +61,19 @@ func TestAccDnsRecordResourcePZ(t *testing.T) {
 		},
 	})
 }
+
+const configDnsRecordNoWeightTest = `
+data "bunnynet_dns_zone" "domain" {
+  domain = "terraform.internal"
+}
+
+resource "bunnynet_dns_record" "record" {
+  zone      = data.bunnynet_dns_zone.domain.id
+  name      = "test-%s"
+  type      = "%s"
+  value     = "%s"
+}
+`
 
 const configDnsRecordWeightTest = `
 data "bunnynet_dns_zone" "domain" {
@@ -168,6 +184,76 @@ func TestAccDnsRecordResourceWeightSRV(t *testing.T) {
 			{
 				Config:      configError,
 				ExpectError: regexp.MustCompile(`The weight must be between 0 and 65535`),
+			},
+		},
+	})
+}
+
+func TestAccDnsRecordResourceWeightRedirect(t *testing.T) {
+	testKeyOk := generateRandomString(4)
+	configOk := fmt.Sprintf(configDnsRecordNoWeightTest, testKeyOk, "Redirect", "https://bunny.net")
+
+	testKeyError := generateRandomString(4)
+	configError := fmt.Sprintf(configDnsRecordWeightTest, testKeyError, "Redirect", "https://bunny.net", 29)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: configOk,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("type"), knownvalue.StringExact("Redirect")),
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("name"), knownvalue.StringExact(fmt.Sprintf("test-%s", testKeyOk))),
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("value"), knownvalue.StringExact("https://bunny.net")),
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("weight"), knownvalue.Null()),
+				},
+			},
+		},
+	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      configError,
+				ExpectError: regexp.MustCompile(`The weight attribute is only available for SRV, A and AAAA records`),
+			},
+		},
+	})
+}
+
+func TestAccDnsRecordResourceWeightTXT(t *testing.T) {
+	testKeyOk := generateRandomString(4)
+	configOk := fmt.Sprintf(configDnsRecordNoWeightTest, testKeyOk, "TXT", "test-bunny-net")
+
+	testKeyError := generateRandomString(4)
+	configError := fmt.Sprintf(configDnsRecordWeightTest, testKeyError, "TXT", "test-bunny-net", 29)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: configOk,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("type"), knownvalue.StringExact("TXT")),
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("name"), knownvalue.StringExact(fmt.Sprintf("test-%s", testKeyOk))),
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("value"), knownvalue.StringExact("test-bunny-net")),
+					statecheck.ExpectKnownValue("bunnynet_dns_record.record", tfjsonpath.New("weight"), knownvalue.Null()),
+				},
+			},
+		},
+	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      configError,
+				ExpectError: regexp.MustCompile(`The weight attribute is only available for SRV, A and AAAA records`),
 			},
 		},
 	})

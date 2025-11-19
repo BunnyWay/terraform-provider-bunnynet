@@ -371,6 +371,10 @@ func (r *DnsRecordResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 	var planWeight types.Int64
 	req.Plan.GetAttribute(ctx, weightAttr, &planWeight)
 
+	if planWeight.IsUnknown() {
+		return
+	}
+
 	weight := planWeight.ValueInt64()
 
 	switch planType.ValueString() {
@@ -389,15 +393,8 @@ func (r *DnsRecordResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 			resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(weightAttr, "Invalid attribute configuration", "The weight must be between 0 and 65535."))
 		}
 
-	case "Redirect":
-		if weight != 0 && weight != 100 {
-			resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(weightAttr, "Attribute is not available", "The weight attribute is only available for SRV, A and AAAA records."))
-		}
-
-		resp.Plan.SetAttribute(ctx, weightAttr, types.Int64Value(100))
-
 	default:
-		if weight != 0 {
+		if !planWeight.IsNull() {
 			resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(weightAttr, "Attribute is not available", "The weight attribute is only available for SRV, A and AAAA records."))
 		}
 	}
