@@ -49,7 +49,13 @@ resource "bunnynet_compute_container_app" "test" {
 func TestAccComputeContainerAppResource(t *testing.T) {
 	mcRegion := os.Getenv("TESTACC_MC_REGION")
 	if mcRegion == "" {
-		t.Fatal("TESTACC_MC_REGION is missing")
+		if os.Getenv("TF_ACC") == "1" {
+			t.Fatal("TESTACC_MC_REGION is missing")
+		} else {
+			t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+		}
+
+		return
 	}
 
 	resourceName := "bunnynet_compute_container_app.test"
