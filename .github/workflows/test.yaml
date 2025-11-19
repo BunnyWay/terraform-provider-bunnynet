@@ -5,6 +5,7 @@ on:
     paths-ignore:
       - 'README.md'
       - 'CHANGELOG.md'
+      - 'GNUmakefile'
       - '.goreleaser.yml'
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths-ignore:
       - 'README.md'
       - 'CHANGELOG.md'
+      - 'GNUmakefile'
       - '.goreleaser.yml'
 
 permissions:
