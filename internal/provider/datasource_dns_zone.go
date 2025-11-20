@@ -66,6 +66,30 @@ func (d *DnsZoneDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 				Computed:            true,
 				MarkdownDescription: dnsZoneDescription.LogAnonymizedStyle,
 			},
+			"dnssec_enabled": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecEnabled,
+			},
+			"dnssec_algorithm": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecAlgorithm,
+			},
+			"dnssec_digest": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecDigest,
+			},
+			"dnssec_digest_type": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecDigestType,
+			},
+			"dnssec_flags": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecFlags,
+			},
+			"dnssec_keytag": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecKeyTag,
+			},
 		},
 	}
 }

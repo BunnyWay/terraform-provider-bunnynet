@@ -10,6 +10,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/dnszoneresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -28,6 +29,7 @@ import (
 
 var _ resource.Resource = &DnsZoneResource{}
 var _ resource.ResourceWithImportState = &DnsZoneResource{}
+var _ resource.ResourceWithModifyPlan = &DnsZoneResource{}
 
 func NewDnsZoneResourceResource() resource.Resource {
 	return &DnsZoneResource{}
@@ -47,6 +49,12 @@ type DnsZoneResourceModel struct {
 	LogEnabled         types.Bool   `tfsdk:"log_enabled"`
 	LogAnonymized      types.Bool   `tfsdk:"log_anonymized"`
 	LogAnonymizedStyle types.String `tfsdk:"log_anonymized_style"`
+	DnssecEnabled      types.Bool   `tfsdk:"dnssec_enabled"`
+	DnssecDigest       types.String `tfsdk:"dnssec_digest"`
+	DnssecDigestType   types.Int64  `tfsdk:"dnssec_digest_type"`
+	DnssecAlgorithm    types.Int64  `tfsdk:"dnssec_algorithm"`
+	DnssecFlags        types.Int64  `tfsdk:"dnssec_flags"`
+	DnssecKeytag       types.Int64  `tfsdk:"dnssec_keytag"`
 }
 
 var dnsZoneLogAnonymizedStyleMap = map[uint8]string{
@@ -156,6 +164,50 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 				MarkdownDescription: dnsZoneDescription.LogAnonymizedStyle,
 			},
+			"dnssec_enabled": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: dnsZoneDescription.DnssecEnabled,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"dnssec_algorithm": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecAlgorithm,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"dnssec_digest": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecDigest,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"dnssec_digest_type": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecDigestType,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"dnssec_flags": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecFlags,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
+			"dnssec_keytag": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecKeyTag,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
 		},
 	}
 }
@@ -164,6 +216,40 @@ func (r *DnsZoneResource) ConfigValidators(ctx context.Context) []resource.Confi
 	return []resource.ConfigValidator{
 		dnszoneresourcevalidator.CustomNameserver(),
 	}
+}
+
+func (r *DnsZoneResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {
+	enabledAttr := path.Root("dnssec_enabled")
+
+	var enabledPlan types.Bool
+	var enabledState types.Bool
+	var diags diag.Diagnostics
+
+	diags = request.Plan.GetAttribute(ctx, enabledAttr, &enabledPlan)
+	if diags.HasError() {
+		response.Diagnostics = append(response.Diagnostics, diags...)
+		return
+	}
+
+	diags = request.State.GetAttribute(ctx, enabledAttr, &enabledState)
+	if diags.HasError() {
+		response.Diagnostics = append(response.Diagnostics, diags...)
+		return
+	}
+
+	if enabledPlan.IsNull() || enabledState.IsNull() || enabledPlan.IsUnknown() || enabledState.IsUnknown() {
+		return
+	}
+
+	if enabledPlan.ValueBool() == enabledState.ValueBool() {
+		return
+	}
+
+	response.Plan.SetAttribute(ctx, path.Root("dnssec_algorithm"), types.Int64Unknown())
+	response.Plan.SetAttribute(ctx, path.Root("dnssec_digest"), types.StringUnknown())
+	response.Plan.SetAttribute(ctx, path.Root("dnssec_digest_type"), types.Int64Unknown())
+	response.Plan.SetAttribute(ctx, path.Root("dnssec_flags"), types.Int64Unknown())
+	response.Plan.SetAttribute(ctx, path.Root("dnssec_keytag"), types.Int64Unknown())
 }
 
 func (r *DnsZoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -302,6 +388,7 @@ func (r *DnsZoneResource) convertModelToApi(ctx context.Context, dataTf DnsZoneR
 	dataApi.LoggingEnabled = dataTf.LogEnabled.ValueBool()
 	dataApi.LoggingIPAnonymizationEnabled = dataTf.LogAnonymized.ValueBool()
 	dataApi.LogAnonymizationType = mapValueToKey(dnsZoneLogAnonymizedStyleMap, dataTf.LogAnonymizedStyle.ValueString())
+	dataApi.DnssecEnabled = dataTf.DnssecEnabled.ValueBool()
 
 	return dataApi
 }
@@ -317,6 +404,12 @@ func dnsZoneApiToTf(dataApi api.DnsZone) (DnsZoneResourceModel, diag.Diagnostics
 	dataTf.LogEnabled = types.BoolValue(dataApi.LoggingEnabled)
 	dataTf.LogAnonymized = types.BoolValue(dataApi.LoggingIPAnonymizationEnabled)
 	dataTf.LogAnonymizedStyle = types.StringValue(mapKeyToValue(dnsZoneLogAnonymizedStyleMap, dataApi.LogAnonymizationType))
+	dataTf.DnssecEnabled = types.BoolValue(dataApi.DnssecEnabled)
+	dataTf.DnssecAlgorithm = types.Int64Value(int64(dataApi.DnssecAlgorithm))
+	dataTf.DnssecDigest = types.StringValue(dataApi.DnssecDigest)
+	dataTf.DnssecDigestType = types.Int64Value(int64(dataApi.DnssecDigestType))
+	dataTf.DnssecFlags = types.Int64Value(int64(dataApi.DnssecFlags))
+	dataTf.DnssecKeytag = types.Int64Value(int64(dataApi.DnssecKeyTag))
 
 	return dataTf, nil
 }

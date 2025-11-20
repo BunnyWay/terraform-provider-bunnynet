@@ -26,6 +26,24 @@ type DnsZone struct {
 	LoggingIPAnonymizationEnabled bool        `json:"LoggingIPAnonymizationEnabled"`
 	LogAnonymizationType          uint8       `json:"LogAnonymizationType"`
 	Records                       []DnsRecord `json:"Records"`
+	DnssecEnabled                 bool        `json:"DnsSecEnabled"`
+	DnssecDigest                  string      `json:"-"`
+	DnssecDigestType              uint8       `json:"-"`
+	DnssecAlgorithm               uint8       `json:"-"`
+	DnssecKeyTag                  uint16      `json:"-"`
+	DnssecFlags                   uint16      `json:"-"`
+}
+
+type dnssecInfo struct {
+	Enabled      bool   `json:"Enabled"`
+	DsRecord     string `json:"DsRecord"`
+	Digest       string `json:"Digest"`
+	DigestType   string `json:"DigestType"`
+	Algorithm    int    `json:"Algorithm"`
+	PublicKey    string `json:"PublicKey"`
+	KeyTag       int    `json:"KeyTag"`
+	Flags        int    `json:"Flags"`
+	DsConfigured bool   `json:"DsConfigured"`
 }
 
 func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
@@ -50,6 +68,15 @@ func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
+	}
+
+	if data.DnssecEnabled {
+		info, err := c.postDnssec(ctx, id)
+		if err != nil {
+			return data, err
+		}
+
+		hydrateDnsZoneWithDnssec(&data, &info)
 	}
 
 	return data, nil
@@ -83,6 +110,15 @@ func (c *Client) GetDnsZoneByDomain(ctx context.Context, domain string) (DnsZone
 
 	for _, record := range result.Items {
 		if record.Domain == domain {
+			if record.DnssecEnabled {
+				info, err := c.postDnssec(ctx, record.Id)
+				if err != nil {
+					return data, err
+				}
+
+				hydrateDnsZoneWithDnssec(&record, &info)
+			}
+
 			return record, nil
 		}
 	}
@@ -132,6 +168,15 @@ func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, erro
 		_ = c.DeleteDnsZone(ctx, data.Id)
 	}
 
+	if dataApiResult.DnssecEnabled {
+		info, err := c.postDnssec(ctx, dataApiResult.Id)
+		if err != nil {
+			return dataApiResult, err
+		}
+
+		hydrateDnsZoneWithDnssec(&dataApiResult, &info)
+	}
+
 	return dataApiResult, err
 }
 
@@ -159,6 +204,20 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 		}
 	}
 
+	if dataApi.DnssecEnabled {
+		info, err := c.postDnssec(ctx, dataApi.Id)
+		if err != nil {
+			return DnsZone{}, err
+		}
+
+		tflog.Debug(ctx, fmt.Sprintf("POST /dnszone/%d/dnssec: %+v", dataApi.Id, info))
+	} else {
+		err = c.deleteDnssec(ctx, dataApi.Id)
+		if err != nil {
+			return DnsZone{}, err
+		}
+	}
+
 	dataApiResult, err := c.GetDnsZone(ctx, id)
 	if err != nil {
 		return dataApiResult, err
@@ -180,4 +239,73 @@ func (c *Client) DeleteDnsZone(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (c *Client) postDnssec(ctx context.Context, zoneId int64) (dnssecInfo, error) {
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/dnszone/%d/dnssec", c.apiUrl, zoneId), nil)
+	if err != nil {
+		return dnssecInfo{}, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := utils.ExtractErrorMessage(resp)
+		if err != nil {
+			return dnssecInfo{}, err
+		} else {
+			return dnssecInfo{}, errors.New("DNSSEC endpoint failed with " + resp.Status)
+		}
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return dnssecInfo{}, err
+	}
+	_ = resp.Body.Close()
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /dnszone/%d/dnssec: %+v", zoneId, string(bodyResp)))
+
+	dataApiResult := dnssecInfo{}
+	err = json.Unmarshal(bodyResp, &dataApiResult)
+	return dataApiResult, err
+}
+
+func (c *Client) deleteDnssec(ctx context.Context, zoneId int64) error {
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d/dnssec", c.apiUrl, zoneId), nil)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := utils.ExtractErrorMessage(resp)
+		if err != nil {
+			return err
+		} else {
+			return errors.New("DNSSEC endpoint failed with " + resp.Status)
+		}
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	_ = resp.Body.Close()
+
+	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d/dnssec: %+v", zoneId, string(bodyResp)))
+
+	return nil
+}
+
+func hydrateDnsZoneWithDnssec(data *DnsZone, info *dnssecInfo) {
+	data.DnssecEnabled = true
+	data.DnssecDigest = info.Digest
+	data.DnssecAlgorithm = uint8(info.Algorithm)
+	data.DnssecKeyTag = uint16(info.KeyTag)
+	data.DnssecFlags = uint16(info.Flags)
+
+	switch info.DigestType {
+	case "SHA256 (2)":
+		data.DnssecDigestType = 2
+	default:
+		panic("unsupported digest type")
+	}
 }

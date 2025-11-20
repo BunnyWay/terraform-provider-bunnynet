@@ -32,8 +32,17 @@ output "nameservers" {
 
 - `domain` (String) The domain name for the DNS zone.
 
+### Optional
+
+- `dnssec_enabled` (Boolean) Indicates whether DNSSEC is enabled.
+
 ### Read-Only
 
+- `dnssec_algorithm` (Number) The DNSSEC algorithm.
+- `dnssec_digest` (String) The DNSSEC digest.
+- `dnssec_digest_type` (Number) The DNSSEC digest type.
+- `dnssec_flags` (Number) The DNSSEC flags.
+- `dnssec_keytag` (Number) The DNSSEC key tag.
 - `id` (Number) The unique identifier for the DNS zone.
 - `log_anonymized` (Boolean) Indicates whether DNS logs are anonymized.
 - `log_anonymized_style` (String) Options: `Drop`, `OneDigit`

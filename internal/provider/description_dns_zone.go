@@ -13,6 +13,12 @@ type dnsZoneDescriptionType struct {
 	LogEnabled         string
 	LogAnonymized      string
 	LogAnonymizedStyle string
+	DnssecEnabled      string
+	DnssecAlgorithm    string
+	DnssecDigest       string
+	DnssecDigestType   string
+	DnssecFlags        string
+	DnssecKeyTag       string
 }
 
 var dnsZoneDescription = dnsZoneDescriptionType{
@@ -25,4 +31,10 @@ var dnsZoneDescription = dnsZoneDescriptionType{
 	LogEnabled:         "Indicates whether permanent logging for DNS queries is enabled.",
 	LogAnonymized:      "Indicates whether DNS logs are anonymized.",
 	LogAnonymizedStyle: generateMarkdownMapOptions(pullzoneLogAnonymizedStyleMap),
+	DnssecEnabled:      "Indicates whether DNSSEC is enabled.",
+	DnssecAlgorithm:    "The DNSSEC algorithm.",
+	DnssecDigest:       "The DNSSEC digest.",
+	DnssecDigestType:   "The DNSSEC digest type.",
+	DnssecFlags:        "The DNSSEC flags.",
+	DnssecKeyTag:       "The DNSSEC key tag.",
 }

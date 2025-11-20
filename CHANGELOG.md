@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- resource dns_zone: support DNSSEC;
 ### Fixed
 - resource dns_record: validate weight for type Redirect ([#29](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/29#issuecomment-3549960461))
 
