@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.11.2 - 2025-11-20
+
 ### Added
 - resource dns_zone: support DNSSEC;
 ### Fixed
