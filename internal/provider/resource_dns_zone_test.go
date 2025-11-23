@@ -35,6 +35,12 @@ func TestAccDnsZoneDnssecDisabled(t *testing.T) {
 					statecheck.ExpectKnownValue("bunnynet_dns_zone.domain", tfjsonpath.New("domain"), knownvalue.StringExact(fmt.Sprintf("terraform-acc-%s.internal", testKeyOk))),
 					statecheck.ExpectKnownValue("bunnynet_dns_zone.domain", tfjsonpath.New("dnssec_enabled"), knownvalue.Bool(false)),
 					statecheck.ExpectKnownValue("bunnynet_dns_zone.domain", tfjsonpath.New("dnssec_algorithm"), knownvalue.Int64Exact(0)),
+					statecheck.ExpectKnownValue("bunnynet_dns_zone.domain", tfjsonpath.New("dnssec_public_key"), knownvalue.StringFunc(func(v string) error {
+						if v != "" {
+							return errors.New("value not empty")
+						}
+						return nil
+					})),
 					statecheck.ExpectKnownValue("bunnynet_dns_zone.domain", tfjsonpath.New("dnssec_digest"), knownvalue.StringFunc(func(v string) error {
 						if v != "" {
 							return errors.New("value not empty")

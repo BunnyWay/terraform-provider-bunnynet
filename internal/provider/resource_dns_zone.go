@@ -53,6 +53,7 @@ type DnsZoneResourceModel struct {
 	DnssecDigest       types.String `tfsdk:"dnssec_digest"`
 	DnssecDigestType   types.Int64  `tfsdk:"dnssec_digest_type"`
 	DnssecAlgorithm    types.Int64  `tfsdk:"dnssec_algorithm"`
+	DnssecPublicKey    types.String `tfsdk:"dnssec_public_key"`
 	DnssecFlags        types.Int64  `tfsdk:"dnssec_flags"`
 	DnssecKeytag       types.Int64  `tfsdk:"dnssec_keytag"`
 }
@@ -180,6 +181,13 @@ func (r *DnsZoneResource) Schema(ctx context.Context, req resource.SchemaRequest
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
+			"dnssec_public_key": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecPublicKey,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"dnssec_digest": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: dnsZoneDescription.DnssecDigest,
@@ -246,6 +254,7 @@ func (r *DnsZoneResource) ModifyPlan(ctx context.Context, request resource.Modif
 	}
 
 	response.Plan.SetAttribute(ctx, path.Root("dnssec_algorithm"), types.Int64Unknown())
+	response.Plan.SetAttribute(ctx, path.Root("dnssec_public_key"), types.StringUnknown())
 	response.Plan.SetAttribute(ctx, path.Root("dnssec_digest"), types.StringUnknown())
 	response.Plan.SetAttribute(ctx, path.Root("dnssec_digest_type"), types.Int64Unknown())
 	response.Plan.SetAttribute(ctx, path.Root("dnssec_flags"), types.Int64Unknown())
@@ -406,6 +415,7 @@ func dnsZoneApiToTf(dataApi api.DnsZone) (DnsZoneResourceModel, diag.Diagnostics
 	dataTf.LogAnonymizedStyle = types.StringValue(mapKeyToValue(dnsZoneLogAnonymizedStyleMap, dataApi.LogAnonymizationType))
 	dataTf.DnssecEnabled = types.BoolValue(dataApi.DnssecEnabled)
 	dataTf.DnssecAlgorithm = types.Int64Value(int64(dataApi.DnssecAlgorithm))
+	dataTf.DnssecPublicKey = types.StringValue(dataApi.DnssecPublicKey)
 	dataTf.DnssecDigest = types.StringValue(dataApi.DnssecDigest)
 	dataTf.DnssecDigestType = types.Int64Value(int64(dataApi.DnssecDigestType))
 	dataTf.DnssecFlags = types.Int64Value(int64(dataApi.DnssecFlags))

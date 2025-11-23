@@ -39,6 +39,7 @@ output "nameservers" {
 ### Read-Only
 
 - `dnssec_algorithm` (Number) The DNSSEC algorithm.
+- `dnssec_public_key` (String) The DNSSEC public key.
 - `dnssec_digest` (String) The DNSSEC digest.
 - `dnssec_digest_type` (Number) The DNSSEC digest type.
 - `dnssec_flags` (Number) The DNSSEC flags.
