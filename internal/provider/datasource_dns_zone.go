@@ -74,6 +74,10 @@ func (d *DnsZoneDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 				Computed:            true,
 				MarkdownDescription: dnsZoneDescription.DnssecAlgorithm,
 			},
+			"dnssec_public_key": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: dnsZoneDescription.DnssecPublicKey,
+			},
 			"dnssec_digest": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: dnsZoneDescription.DnssecDigest,

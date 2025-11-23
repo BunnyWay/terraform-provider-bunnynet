@@ -30,6 +30,7 @@ type DnsZone struct {
 	DnssecDigest                  string      `json:"-"`
 	DnssecDigestType              uint8       `json:"-"`
 	DnssecAlgorithm               uint8       `json:"-"`
+	DnssecPublicKey               string      `json:"-"`
 	DnssecKeyTag                  uint16      `json:"-"`
 	DnssecFlags                   uint16      `json:"-"`
 }
@@ -299,6 +300,7 @@ func hydrateDnsZoneWithDnssec(data *DnsZone, info *dnssecInfo) {
 	data.DnssecEnabled = true
 	data.DnssecDigest = info.Digest
 	data.DnssecAlgorithm = uint8(info.Algorithm)
+	data.DnssecPublicKey = info.PublicKey
 	data.DnssecKeyTag = uint16(info.KeyTag)
 	data.DnssecFlags = uint16(info.Flags)
 

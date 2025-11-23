@@ -15,6 +15,7 @@ type dnsZoneDescriptionType struct {
 	LogAnonymizedStyle string
 	DnssecEnabled      string
 	DnssecAlgorithm    string
+	DnssecPublicKey    string
 	DnssecDigest       string
 	DnssecDigestType   string
 	DnssecFlags        string
@@ -33,6 +34,7 @@ var dnsZoneDescription = dnsZoneDescriptionType{
 	LogAnonymizedStyle: generateMarkdownMapOptions(pullzoneLogAnonymizedStyleMap),
 	DnssecEnabled:      "Indicates whether DNSSEC is enabled.",
 	DnssecAlgorithm:    "The DNSSEC algorithm.",
+	DnssecPublicKey:    "The DNSSEC public key.",
 	DnssecDigest:       "The DNSSEC digest.",
 	DnssecDigestType:   "The DNSSEC digest type.",
 	DnssecFlags:        "The DNSSEC flags.",
