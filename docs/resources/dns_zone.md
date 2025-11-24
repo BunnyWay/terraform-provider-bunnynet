@@ -39,11 +39,11 @@ resource "bunnynet_dns_zone" "example" {
 ### Read-Only
 
 - `dnssec_algorithm` (Number) The DNSSEC algorithm.
-- `dnssec_public_key` (String) The DNSSEC public key.
 - `dnssec_digest` (String) The DNSSEC digest.
 - `dnssec_digest_type` (Number) The DNSSEC digest type.
 - `dnssec_flags` (Number) The DNSSEC flags.
 - `dnssec_keytag` (Number) The DNSSEC key tag.
+- `dnssec_public_key` (String) The DNSSEC public key.
 - `id` (Number) The unique identifier for the DNS zone.
 
 ## Import
