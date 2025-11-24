@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.11.3 - 2025-11-24
+
+### Added
+- resource dns_zone: expose `dnssec_public_key` ([#57](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/57));
+- data source dns_zone: expose `dnssec_public_key` ([#57](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/57));
+
 ## 0.11.2 - 2025-11-20
 
 ### Added
