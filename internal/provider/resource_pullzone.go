@@ -1212,7 +1212,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 			"websockets_enabled": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				Default:  booldefault.StaticBool(false),
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
