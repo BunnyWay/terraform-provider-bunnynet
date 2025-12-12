@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.11.4 - 2025-12-12
+
 ### Added
 - data source pullzone: allow references by either `id` or `name`;
 ### Fixed
