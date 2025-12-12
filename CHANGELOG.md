@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- data source pullzone: allow references by either `id` or `name`;
 ### Fixed
 - resource pullzone: change default for websockets_enabled;
 

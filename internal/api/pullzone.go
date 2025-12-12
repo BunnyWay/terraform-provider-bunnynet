@@ -5,10 +5,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -183,6 +185,44 @@ func (c *Client) GetPullzone(id int64) (Pullzone, error) {
 	}
 
 	return data, nil
+}
+
+func (c *Client) GetPullzoneByName(ctx context.Context, name string) (Pullzone, error) {
+	var data Pullzone
+
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/pullzone?search=%s", c.apiUrl, name), nil)
+	if err != nil {
+		return data, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return data, errors.New(resp.Status)
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return data, err
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("GET /pullzone?search=%s: %+v", name, string(bodyResp)))
+
+	var result struct {
+		Items []Pullzone `json:"Items"`
+	}
+
+	_ = resp.Body.Close()
+	err = json.Unmarshal(bodyResp, &result)
+	if err != nil {
+		return data, err
+	}
+
+	for _, pullzone := range result.Items {
+		if pullzone.Name == name {
+			return c.GetPullzone(pullzone.Id)
+		}
+	}
+
+	return data, errors.New("Pullzone not found")
 }
 
 func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {

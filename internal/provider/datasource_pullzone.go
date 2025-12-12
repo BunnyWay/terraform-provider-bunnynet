@@ -45,7 +45,16 @@ func (d *PullzoneDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 	for k, v := range rResp.Schema.Attributes {
 		if k == "id" {
 			schemaAttributes[k] = dschema.Int64Attribute{
-				Required:            true,
+				Optional:            true,
+				Description:         v.GetDescription(),
+				MarkdownDescription: v.GetMarkdownDescription(),
+			}
+			continue
+		}
+
+		if k == "name" {
+			schemaAttributes[k] = dschema.StringAttribute{
+				Optional:            true,
 				Description:         v.GetDescription(),
 				MarkdownDescription: v.GetMarkdownDescription(),
 			}
@@ -102,7 +111,28 @@ func (d *PullzoneDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	zone, err := d.client.GetPullzone(data.Id.ValueInt64())
+	id := data.Id.ValueInt64()
+	name := data.Name.ValueString()
+
+	if id == 0 && name == "" {
+		resp.Diagnostics.AddError("Missing identifier attribute", "Either `id` or `name` attribute must be specified.")
+		return
+	}
+
+	if id > 0 && name != "" {
+		resp.Diagnostics.AddError("Ambiguous identifier attribute", "Only one of `id` or `name` attribute must be specified.")
+		return
+	}
+
+	var zone api.Pullzone
+	var err error
+
+	if id > 0 {
+		zone, err = d.client.GetPullzone(id)
+	} else {
+		zone, err = d.client.GetPullzoneByName(ctx, name)
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Could not fetch pullzone", err.Error())
 		return
