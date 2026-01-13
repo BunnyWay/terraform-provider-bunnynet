@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.11.5 - 2026-01-13
+
 ### Fixed
 - data source pullzone: mark `id` and `name` as computed to avoid dependencies being marked as empty ([#63](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/63));
 
