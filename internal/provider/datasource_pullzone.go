@@ -46,6 +46,7 @@ func (d *PullzoneDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 		if k == "id" {
 			schemaAttributes[k] = dschema.Int64Attribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         v.GetDescription(),
 				MarkdownDescription: v.GetMarkdownDescription(),
 			}
@@ -55,6 +56,7 @@ func (d *PullzoneDataSource) Schema(ctx context.Context, req datasource.SchemaRe
 		if k == "name" {
 			schemaAttributes[k] = dschema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Description:         v.GetDescription(),
 				MarkdownDescription: v.GetMarkdownDescription(),
 			}
