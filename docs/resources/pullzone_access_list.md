@@ -30,7 +30,7 @@ resource "bunnynet_pullzone_access_list" "hetzner" {
 
 ### Required
 
-- `action` (String) Options: `Allow`, `Block`, `Challenge`, `Log`
+- `action` (String) Options: `Allow`, `Block`, `Bypass`, `Challenge`, `Log`
 - `entries` (Set of String) The Access List entries.
 - `name` (String) The Access List name.
 - `pullzone` (Number) The ID of the linked pullzone.

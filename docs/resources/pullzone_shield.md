@@ -54,7 +54,7 @@ resource "bunnynet_pullzone_shield" "test" {
 
 Required:
 
-- `action` (String) Options: `Allow`, `Block`, `Challenge`, `Log`
+- `action` (String) Options: `Allow`, `Block`, `Bypass`, `Challenge`, `Log`
 - `id` (Number) The ID of the Access List.
 
 

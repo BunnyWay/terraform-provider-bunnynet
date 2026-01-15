@@ -62,6 +62,7 @@ var pullzoneAccessListActionMap = map[uint8]string{
 	2: "Block",
 	3: "Challenge",
 	4: "Log",
+	5: "Bypass",
 }
 
 func (r *PullzoneAccessListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {

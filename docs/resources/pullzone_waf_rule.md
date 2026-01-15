@@ -69,7 +69,7 @@ Optional:
 
 Required:
 
-- `action` (String) The action to take if the WAF rule is triggered. Options: `Block`, `Challenge`, `Log`
+- `action` (String) The action to take if the WAF rule is triggered. Options: `Allow`, `Block`, `Bypass`, `Challenge`, `Log`
 
 ## Import
 

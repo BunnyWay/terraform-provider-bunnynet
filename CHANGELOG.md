@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - resource pullzone_waf_rule: concurrent creation failure ([#64](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/64))
 
+### Changed
+- resource pullzone_access_list: update enums;
+- resource pullzone_ratelimit_rule: update enums;
+- resource pullzone_waf_rule: update enums;
+
 ## 0.11.5 - 2026-01-13
 
 ### Fixed

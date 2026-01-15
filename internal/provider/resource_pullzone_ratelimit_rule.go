@@ -144,7 +144,7 @@ var pullzoneRatelimitRuleConditionVariableMap = map[int64]string{
 }
 
 // curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRateLimitTimeframeType")'
-var pullzoneRatelimitRuleLimitTimeframeOptions = []int64{1, 10, 30, 60, 300, 900}
+var pullzoneRatelimitRuleLimitTimeframeOptions = []int64{1, 10}
 
 // curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRatelimitBlockType")'
 var pullzoneRatelimitRuleResponseTimeframeOptions = []int64{30, 60, 300, 900, 1800, 3600}

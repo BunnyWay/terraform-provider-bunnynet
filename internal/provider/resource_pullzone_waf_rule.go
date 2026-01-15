@@ -142,6 +142,8 @@ var pullzoneWafRuleResponseActionMap = map[uint8]string{
 	1: "Block",
 	2: "Log",
 	3: "Challenge",
+	4: "Allow",
+	5: "Bypass",
 }
 
 func (r *PullzoneWafRuleResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
