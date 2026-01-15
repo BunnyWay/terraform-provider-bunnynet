@@ -143,7 +143,7 @@ func (r *ComputeContainerImageregistryResource) Read(ctx context.Context, req re
 		return
 	}
 
-	dataApi, err := r.client.GetComputeContainerImageregistry(data.Id.ValueInt64())
+	dataApi, err := r.client.GetComputeContainerImageregistry(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container image registry", err.Error()))
 		return
@@ -168,7 +168,7 @@ func (r *ComputeContainerImageregistryResource) Update(ctx context.Context, req 
 	}
 
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApi, err := r.client.UpdateComputeContainerImageregistry(dataApi)
+	dataApi, err := r.client.UpdateComputeContainerImageregistry(ctx, dataApi)
 
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating container image registry", err.Error()))
@@ -204,7 +204,7 @@ func (r *ComputeContainerImageregistryResource) ImportState(ctx context.Context,
 		return
 	}
 
-	dataApi, err := r.client.GetComputeContainerImageregistry(id)
+	dataApi, err := r.client.GetComputeContainerImageregistry(ctx, id)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container image registry", err.Error()))
 		return

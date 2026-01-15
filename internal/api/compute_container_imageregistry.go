@@ -5,6 +5,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -71,7 +72,7 @@ func (c *Client) CreateComputeContainerImageregistry(data ComputeContainerImager
 	return data, nil
 }
 
-func (c *Client) getAllComputeContainerImageregistries() ([]ComputeContainerImageregistry, error) {
+func (c *Client) getAllComputeContainerImageregistries(ctx context.Context) ([]ComputeContainerImageregistry, error) {
 	resp, err := c.doJWTRequest(http.MethodGet, fmt.Sprintf("%s/v2/user/namespaces/default/container-registries", c.apiUrl), nil)
 	if err != nil {
 		return nil, err
@@ -96,8 +97,8 @@ func (c *Client) getAllComputeContainerImageregistries() ([]ComputeContainerImag
 	return result, nil
 }
 
-func (c *Client) GetComputeContainerImageregistry(id int64) (ComputeContainerImageregistry, error) {
-	result, err := c.getAllComputeContainerImageregistries()
+func (c *Client) GetComputeContainerImageregistry(ctx context.Context, id int64) (ComputeContainerImageregistry, error) {
+	result, err := c.getAllComputeContainerImageregistries(ctx)
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
@@ -112,8 +113,8 @@ func (c *Client) GetComputeContainerImageregistry(id int64) (ComputeContainerIma
 	return ComputeContainerImageregistry{}, errors.New("Could not get compute container imageregistry")
 }
 
-func (c *Client) FindComputeContainerImageregistry(registry string, username string) (ComputeContainerImageregistry, error) {
-	result, err := c.getAllComputeContainerImageregistries()
+func (c *Client) FindComputeContainerImageregistry(ctx context.Context, registry string, username string) (ComputeContainerImageregistry, error) {
+	result, err := c.getAllComputeContainerImageregistries(ctx)
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
@@ -141,7 +142,7 @@ func (c *Client) FindComputeContainerImageregistry(registry string, username str
 	return ComputeContainerImageregistry{}, errors.New("Could not find compute container imageregistry")
 }
 
-func (c *Client) UpdateComputeContainerImageregistry(data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
+func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
 	idStr := data.Id
 	token := data.Token
 
@@ -189,7 +190,7 @@ func (c *Client) UpdateComputeContainerImageregistry(data ComputeContainerImager
 		return ComputeContainerImageregistry{}, errors.New(obj.Title + ": " + obj.Detail)
 	}
 
-	dataApiResult, err := c.GetComputeContainerImageregistry(id)
+	dataApiResult, err := c.GetComputeContainerImageregistry(ctx, id)
 	if err != nil {
 		return dataApiResult, err
 	}

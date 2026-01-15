@@ -86,7 +86,7 @@ func (d *ComputeContainerImageRegistryDataSource) Read(ctx context.Context, req 
 		return
 	}
 
-	dataApi, err := d.client.FindComputeContainerImageregistry(data.Registry.ValueString(), data.Username.ValueString())
+	dataApi, err := d.client.FindComputeContainerImageregistry(ctx, data.Registry.ValueString(), data.Username.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Could not find the Compute Image Registry", err.Error())
 		return
