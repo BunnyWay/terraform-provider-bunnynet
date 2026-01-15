@@ -39,9 +39,11 @@ func mapKeyToValue[T constraints.Integer](mapped map[T]string, value T) string {
 // Mutex to manage concurrent changes to pullzone sub-resources (i.e. bunnynet_pullzone_edgerule and bunnynet_pullzone_optimizer_class)
 // Based on https://discuss.hashicorp.com/t/cooping-with-parallelism-is-there-a-way-to-prioritise-resource-types/55690
 var pzMutex *pullzoneMutex
+var pzWafRuleMutex *pullzoneMutex
 
 func init() {
 	pzMutex = &pullzoneMutex{mu: sync.Mutex{}, pullzones: map[int64]*sync.Mutex{}}
+	pzWafRuleMutex = &pullzoneMutex{mu: sync.Mutex{}, pullzones: map[int64]*sync.Mutex{}}
 }
 
 type pullzoneMutex struct {

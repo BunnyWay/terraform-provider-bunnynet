@@ -305,14 +305,20 @@ func (r *PullzoneWafRuleResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
+	pullzoneId := dataTf.PullzoneId.ValueInt64()
+	pzWafRuleMutex.Lock(pullzoneId)
+
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	dataApi, err := r.client.CreatePullzoneWafRule(ctx, dataApi)
+
+	pzWafRuleMutex.Unlock(pullzoneId)
+
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create waf rule", err.Error())
 		return
 	}
 
-	tflog.Trace(ctx, fmt.Sprintf("created waf rule for pullzone %d", dataTf.PullzoneId.ValueInt64()))
+	tflog.Trace(ctx, fmt.Sprintf("created waf rule for pullzone %d", pullzoneId))
 	dataTf, diags := r.convertApiToModel(ctx, dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
@@ -374,7 +380,13 @@ func (r *PullzoneWafRuleResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
+	pullzoneId := data.PullzoneId.ValueInt64()
+	pzWafRuleMutex.Lock(pullzoneId)
+
 	err := r.client.DeletePullzoneWafRule(data.Id.ValueInt64())
+
+	pzWafRuleMutex.Unlock(pullzoneId)
+
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting waf rule", err.Error()))
 	}
