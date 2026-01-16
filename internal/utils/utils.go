@@ -49,6 +49,25 @@ func ExtractErrorMessage(response *http.Response) error {
 	return errors.New(responseObj.Message)
 }
 
+func ExtractDatabaseErrorMessage(response *http.Response) error {
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil
+	}
+
+	_ = response.Body.Close()
+	var responseObj struct {
+		Message string `json:"error"`
+	}
+
+	err = json.Unmarshal(bodyBytes, &responseObj)
+	if err != nil {
+		return nil
+	}
+
+	return errors.New(responseObj.Message)
+}
+
 func ExtractShieldErrorMessage(response *http.Response) error {
 	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
