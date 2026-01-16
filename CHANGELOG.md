@@ -42,7 +42,7 @@ Both `pullzone_ratelimit_rule` and `pullzone_waf_rule` now support multiple `con
 - Changing a `variable` will cause the plan to show unrelated conditions being modified, as their order jumps up or down. We recommend deleting the block, applying, and then adding the block again with the new variable name;
 
 ### Added
-
+- Support for Database
 - resource pullzone_ratelimit_rule: support multiple `condition` blocks;
 - resource pullzone_waf_rule: support multiple `condition` blocks;
 
