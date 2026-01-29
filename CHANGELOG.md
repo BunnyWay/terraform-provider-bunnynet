@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.12.0 - 2026-01-29
+
 ### Backwards compatibility break
 
 The `transformations` attribute in both `pullzone_ratelimit_rule` and `pullzone_waf_rule` resources was moved from the `condition` block to the resource itself. This was done in order to accommodate multiple `condition` blocks, although you can only apply transformations on a per-resource basis.
