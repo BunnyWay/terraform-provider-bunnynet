@@ -42,6 +42,11 @@ resource "bunnynet_compute_container_app" "app" {
       name  = "LISTEN_PORT"
       value = "3000"
     }
+
+    volumemount {
+      name = "data"
+      path = "/data"
+    }
   }
 
   container {
@@ -50,5 +55,10 @@ resource "bunnynet_compute_container_app" "app" {
     image_namespace = "my-org"
     image_name      = "my-sidecar"
     image_tag       = "1.3.7"
+  }
+
+  volume {
+    name = "data"
+    size = 2 # GB
   }
 }

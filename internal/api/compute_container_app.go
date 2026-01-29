@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/slices"
 	"io"
@@ -40,6 +41,11 @@ type ComputeContainerAppContainerEndpoint struct {
 type ComputeContainerAppContainerEnv struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+type ComputeContainerAppContainerVolumeMount struct {
+	Name string `json:"name"`
+	Path string `json:"mountPath"`
 }
 
 type ComputeContainerAppAutoscaling struct {
@@ -108,18 +114,24 @@ type ComputeContainerAppContainerProbe struct {
 }
 
 type ComputeContainerAppContainer struct {
-	Id                   string                                 `json:"id,omitempty"`
-	Name                 string                                 `json:"name"`
-	PackageId            string                                 `json:"packageId"`
-	ImageNamespace       string                                 `json:"imageNamespace"`
-	ImageName            string                                 `json:"imageName"`
-	ImageTag             string                                 `json:"imageTag"`
-	ImageRegistryId      string                                 `json:"imageRegistryId"`
-	ImagePullPolicy      string                                 `json:"imagePullPolicy"`
-	EntryPoint           ComputeContainerAppContainerEntrypoint `json:"entryPoint"`
-	Probes               ComputeContainerAppContainerProbes     `json:"probes"`
-	EnvironmentVariables []ComputeContainerAppContainerEnv      `json:"environmentVariables"`
-	Endpoints            []ComputeContainerAppContainerEndpoint `json:"endpoints"`
+	Id                   string                                    `json:"id,omitempty"`
+	Name                 string                                    `json:"name"`
+	PackageId            string                                    `json:"packageId"`
+	ImageNamespace       string                                    `json:"imageNamespace"`
+	ImageName            string                                    `json:"imageName"`
+	ImageTag             string                                    `json:"imageTag"`
+	ImageRegistryId      string                                    `json:"imageRegistryId"`
+	ImagePullPolicy      string                                    `json:"imagePullPolicy"`
+	EntryPoint           ComputeContainerAppContainerEntrypoint    `json:"entryPoint"`
+	Probes               ComputeContainerAppContainerProbes        `json:"probes"`
+	EnvironmentVariables []ComputeContainerAppContainerEnv         `json:"environmentVariables"`
+	Endpoints            []ComputeContainerAppContainerEndpoint    `json:"endpoints"`
+	VolumeMounts         []ComputeContainerAppContainerVolumeMount `json:"volumeMounts"`
+}
+
+type ComputeContainerAppVolume struct {
+	Name string `json:"name"`
+	Size int64  `json:"size"`
 }
 
 type computeContainerAppSaveApplicationContainerEndpointPortMappingRequest struct {
@@ -163,6 +175,7 @@ type computeContainerAppSaveApplicationContainerRequest struct {
 	Probes               ComputeContainerAppContainerProbes                           `json:"probes"`
 	Endpoints            []computeContainerAppSaveApplicationContainerEndpointRequest `json:"endpoints"`
 	EnvironmentVariables []ComputeContainerAppContainerEnv                            `json:"environmentVariables"`
+	VolumeMounts         []ComputeContainerAppContainerVolumeMount                    `json:"volumeMounts,omitempty"`
 }
 
 type computeContainerAppSaveApplicationRequest struct {
@@ -172,6 +185,7 @@ type computeContainerAppSaveApplicationRequest struct {
 	AutoScaling        ComputeContainerAppAutoscaling                       `json:"autoScaling"`
 	RegionSettings     ComputeContainerAppRegions                           `json:"regionSettings"`
 	ContainerTemplates []computeContainerAppSaveApplicationContainerRequest `json:"containerTemplates"`
+	Volumes            []ComputeContainerAppVolume                          `json:"volumes,omitempty"`
 }
 
 type ComputeContainerApp struct {
@@ -180,6 +194,7 @@ type ComputeContainerApp struct {
 	RuntimeType        string                         `json:"runtimeType"`
 	RegionSettings     ComputeContainerAppRegions     `json:"regionSettings"`
 	ContainerTemplates []ComputeContainerAppContainer `json:"containerTemplates"`
+	Volumes            []ComputeContainerAppVolume    `json:"volumes"`
 	AutoScaling        ComputeContainerAppAutoscaling `json:"autoScaling"`
 }
 
@@ -246,25 +261,34 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 			Probes:               b.Probes,
 			Endpoints:            endpoints,
 			EnvironmentVariables: b.EnvironmentVariables,
+			VolumeMounts:         b.VolumeMounts,
 		})
 	}
+
+	dataRequest.Volumes = append(dataRequest.Volumes, data.Volumes...)
 
 	body, err := json.Marshal(dataRequest)
 	if err != nil {
 		return ComputeContainerApp{}, err
 	}
 
-	tflog.Debug(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
+	tflog.Info(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
 
 	resp, err := c.doJWTRequest(http.MethodPut, fmt.Sprintf("%s/v1/namespaces/default/applications", c.containerApiUrl), bytes.NewReader(body))
 	if err != nil {
 		return ComputeContainerApp{}, err
 	}
 
-	bodyStr, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		return ComputeContainerApp{}, errors.New(resp.Status + string(bodyStr))
+		err := utils.ExtractMCErrorMessage(resp)
+		if err != nil {
+			return ComputeContainerApp{}, err
+		} else {
+			return ComputeContainerApp{}, errors.New(resp.Status)
+		}
 	}
+
+	bodyStr, _ := io.ReadAll(resp.Body)
 
 	defer func() {
 		_ = resp.Body.Close()
@@ -394,4 +418,16 @@ func computeContainerAppSort(app *ComputeContainerApp) {
 			return 1
 		})
 	}
+
+	slices.SortFunc(app.Volumes, func(a, b ComputeContainerAppVolume) int {
+		if a.Name == b.Name {
+			return 0
+		}
+
+		if a.Name < b.Name {
+			return -1
+		}
+
+		return 1
+	})
 }

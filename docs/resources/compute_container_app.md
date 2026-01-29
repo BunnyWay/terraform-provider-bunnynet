@@ -57,6 +57,11 @@ resource "bunnynet_compute_container_app" "app" {
       name  = "LISTEN_PORT"
       value = "3000"
     }
+
+    volumemount {
+      name = "data"
+      path = "/data"
+    }
   }
 
   container {
@@ -65,6 +70,11 @@ resource "bunnynet_compute_container_app" "app" {
     image_namespace = "my-org"
     image_name      = "my-sidecar"
     image_tag       = "1.3.7"
+  }
+
+  volume {
+    name = "data"
+    size = 2 # GB
   }
 }
 ```
@@ -85,6 +95,7 @@ resource "bunnynet_compute_container_app" "app" {
 - `container` (Block List) Defines a container for the application. (see [below for nested schema](#nestedblock--container))
 - `regions_max_allowed` (Number) The maximum amount of regions to be deployed at any given time.
 - `version` (Number)
+- `volume` (Block List) Defines a persistent volume to be used by the application. (see [below for nested schema](#nestedblock--volume))
 
 ### Read-Only
 
@@ -111,6 +122,7 @@ Optional:
 - `liveness_probe` (Block List) Checks that the application is actively running without issues. It the check fails, the container will be automatically restarted (see [below for nested schema](#nestedblock--container--liveness_probe))
 - `readiness_probe` (Block List) Checks if the application is fully prepared to handle incoming requests. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--readiness_probe))
 - `startup_probe` (Block List) Checks if the application has successfully started. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--startup_probe))
+- `volumemount` (Block List) Mounts a volume within a container (see [below for nested schema](#nestedblock--container--volumemount))
 - `working_dir` (String) The working directory of the container runtime.
 
 Read-Only:
@@ -288,6 +300,26 @@ Required:
 Optional:
 
 - `expected_status` (Number) The expected HTTP response status code.
+
+
+
+<a id="nestedblock--container--volumemount"></a>
+### Nested Schema for `container.volumemount`
+
+Required:
+
+- `name` (String) The name of the volume.
+- `path` (String) The path within the container where the volume will be mounted.
+
+
+
+<a id="nestedblock--volume"></a>
+### Nested Schema for `volume`
+
+Required:
+
+- `name` (String) The name of the volume.
+- `size` (Number) The size of the volume, in Gigabytes (10^9 bytes).
 
 ## Limitations
 

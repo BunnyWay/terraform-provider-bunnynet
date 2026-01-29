@@ -43,6 +43,7 @@ Both `pullzone_ratelimit_rule` and `pullzone_waf_rule` now support multiple `con
 
 ### Added
 - Support for Database
+- resource compute_container_app: support persistent volumes;
 - resource pullzone_ratelimit_rule: support multiple `condition` blocks;
 - resource pullzone_waf_rule: support multiple `condition` blocks;
 

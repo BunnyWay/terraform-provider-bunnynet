@@ -59,6 +59,7 @@ type ComputeContainerAppResourceModel struct {
 	RegionsRequired   types.Set    `tfsdk:"regions_required"`
 	RegionsMaxAllowed types.Int64  `tfsdk:"regions_max_allowed"`
 	Containers        types.List   `tfsdk:"container"`
+	Volumes           types.List   `tfsdk:"volume"`
 }
 
 var computeContainerAppImagePullPolicyOptions = []string{"Always", "IfNotPresent"}
@@ -121,6 +122,13 @@ var computeContainerAppContainerEnvType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
 		"name":  types.StringType,
 		"value": types.StringType,
+	},
+}
+
+var computeContainerAppContainerVolumeMountType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"name": types.StringType,
+		"path": types.StringType,
 	},
 }
 
@@ -239,9 +247,17 @@ var computeContainerAppContainerType = types.ObjectType{
 		"working_dir":       types.StringType,
 		"endpoint":          types.ListType{ElemType: computeContainerAppContainerEndpointType},
 		"env":               types.ListType{ElemType: computeContainerAppContainerEnvType},
+		"volumemount":       types.ListType{ElemType: computeContainerAppContainerVolumeMountType},
 		"startup_probe":     types.ListType{ElemType: computeContainerAppContainerProbeType},
 		"readiness_probe":   types.ListType{ElemType: computeContainerAppContainerProbeType},
 		"liveness_probe":    types.ListType{ElemType: computeContainerAppContainerProbeType},
+	},
+}
+
+var computeContainerAppVolumeType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"name": types.StringType,
+		"size": types.Int64Type,
 	},
 }
 
@@ -747,6 +763,41 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 								},
 							},
 						},
+						"volumemount": schema.ListNestedBlock{
+							Description: "Mounts a volume within a container",
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
+							},
+							NestedObject: schema.NestedBlockObject{
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Required: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
+										Validators: []validator.String{
+											stringvalidator.LengthAtLeast(1),
+											stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z_]+[a-zA-Z0-9_]*$"), "Invalid name"),
+										},
+										Description: "The name of the volume.",
+									},
+									"path": schema.StringAttribute{
+										Required: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
+										Validators: []validator.String{
+											stringvalidator.LengthAtLeast(1),
+											stringvalidator.RegexMatches(regexp.MustCompile(`^/[^\t\n\f\r ]*$`), "Invalid path"),
+										},
+										Description: "The path within the container where the volume will be mounted.",
+									},
+								},
+							},
+						},
 						"startup_probe": schema.ListNestedBlock{
 							Description: "Checks if the application has successfully started. No requests will be routed to the application until this check is successful.",
 							Validators: []validator.List{
@@ -780,6 +831,41 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 					},
 				},
 			},
+			"volume": schema.ListNestedBlock{
+				Description: "Defines a persistent volume to be used by the application.",
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedBlockObject{
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
+					},
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Required: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.LengthAtLeast(1),
+								stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9-]+$"), "name should only contain letters, numbers and dash"),
+							},
+							Description: "The name of the volume.",
+						},
+						"size": schema.Int64Attribute{
+							Required: true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.Int64{
+								int64validator.AtLeast(1),
+								int64validator.AtMost(100),
+							},
+							Description: "The size of the volume, in Gigabytes (10^9 bytes).",
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -806,6 +892,8 @@ func (r *ComputeContainerAppResource) ConfigValidators(ctx context.Context) []re
 	return []resource.ConfigValidator{
 		computecontainerappresourcevalidator.RegionRequiredMustAlsoBeAllowed(),
 		computecontainerappresourcevalidator.EndpointNameShouldBeUnique(),
+		computecontainerappresourcevalidator.ContainerVolumeMounts(),
+		computecontainerappresourcevalidator.VolumeNamesShouldBeUnique(),
 	}
 }
 
@@ -963,11 +1051,13 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 	dataApi.RegionSettings.RequiredRegionIds = utils.ConvertSetToStringSlice(dataTf.RegionsRequired)
 	dataApi.RegionSettings.MaxAllowedRegions = dataTf.RegionsMaxAllowed.ValueInt64Pointer()
 	dataApi.ContainerTemplates = make([]api.ComputeContainerAppContainer, len(dataTf.Containers.Elements()))
+	dataApi.Volumes = make([]api.ComputeContainerAppVolume, len(dataTf.Volumes.Elements()))
 
 	for i, container := range dataTf.Containers.Elements() {
 		cAttr := container.(types.Object).Attributes()
 		endpointElements := make([]api.ComputeContainerAppContainerEndpoint, 0, len(cAttr["endpoint"].(types.List).Elements()))
 		envElements := make([]api.ComputeContainerAppContainerEnv, len(cAttr["env"].(types.List).Elements()))
+		volumeMountElements := make([]api.ComputeContainerAppContainerVolumeMount, len(cAttr["volumemount"].(types.List).Elements()))
 
 		for _, endpoint := range cAttr["endpoint"].(types.List).Elements() {
 			endpointAttr := endpoint.(types.Object).Attributes()
@@ -1044,6 +1134,13 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 			}
 		}
 
+		for iMount, mount := range cAttr["volumemount"].(types.List).Elements() {
+			volumeMountElements[iMount] = api.ComputeContainerAppContainerVolumeMount{
+				Name: mount.(types.Object).Attributes()["name"].(types.String).ValueString(),
+				Path: mount.(types.Object).Attributes()["path"].(types.String).ValueString(),
+			}
+		}
+
 		startupProbe, diags := r.convertModelContainerProbeToApi(cAttr["startup_probe"].(types.List))
 		if diags != nil {
 			return dataApi, diags
@@ -1082,6 +1179,16 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 			Probes:               probes,
 			Endpoints:            endpointElements,
 			EnvironmentVariables: envElements,
+			VolumeMounts:         volumeMountElements,
+		}
+	}
+
+	for i, volume := range dataTf.Volumes.Elements() {
+		vAttr := volume.(types.Object).Attributes()
+
+		dataApi.Volumes[i] = api.ComputeContainerAppVolume{
+			Name: vAttr["name"].(types.String).ValueString(),
+			Size: vAttr["size"].(types.Int64).ValueInt64(),
 		}
 	}
 
@@ -1330,6 +1437,26 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 				return dataTf, diags
 			}
 
+			// volumemounts
+			volumeMountValues := make([]attr.Value, len(c.VolumeMounts))
+			for iMount, mount := range c.VolumeMounts {
+				mountObject, diags := types.ObjectValue(computeContainerAppContainerVolumeMountType.AttrTypes, map[string]attr.Value{
+					"name": types.StringValue(mount.Name),
+					"path": types.StringValue(mount.Path),
+				})
+
+				if diags.HasError() {
+					return dataTf, diags
+				}
+
+				volumeMountValues[iMount] = mountObject
+			}
+
+			containerVolumeMounts, diags := types.ListValue(computeContainerAppContainerVolumeMountType, volumeMountValues)
+			if diags.HasError() {
+				return dataTf, diags
+			}
+
 			// probes
 			startupProbe, diags := r.convertApiContainerProbeToModel(c.Probes.Startup)
 			if diags.HasError() {
@@ -1360,6 +1487,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 				"working_dir":       typeStringOrNull(c.EntryPoint.WorkingDirectory),
 				"endpoint":          containerEndpoints,
 				"env":               containerEnvs,
+				"volumemount":       containerVolumeMounts,
 				"startup_probe":     startupProbe,
 				"readiness_probe":   readinessProbe,
 				"liveness_probe":    livenessProbe,
@@ -1378,6 +1506,31 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 		}
 
 		dataTf.Containers = containerTf
+	}
+
+	if len(dataApi.Volumes) == 0 {
+		dataTf.Volumes = types.ListNull(computeContainerAppVolumeType)
+	} else {
+		volumes := make([]attr.Value, len(dataApi.Volumes))
+		for i, v := range dataApi.Volumes {
+			volume, diags := types.ObjectValue(computeContainerAppVolumeType.AttrTypes, map[string]attr.Value{
+				"name": types.StringValue(v.Name),
+				"size": types.Int64Value(v.Size),
+			})
+
+			if diags.HasError() {
+				return dataTf, diags
+			}
+
+			volumes[i] = volume
+		}
+
+		volumeTf, diags := types.ListValue(computeContainerAppVolumeType, volumes)
+		if diags.HasError() {
+			return dataTf, diags
+		}
+
+		dataTf.Volumes = volumeTf
 	}
 
 	return dataTf, nil

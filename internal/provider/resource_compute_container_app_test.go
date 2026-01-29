@@ -46,6 +46,51 @@ resource "bunnynet_compute_container_app" "test" {
 }
 `
 
+const configComputeContainerAppWithPersistentVolumeTest = `
+data "bunnynet_compute_container_imageregistry" "dockerhub" {
+  registry = "DockerHub"
+  username = ""
+}
+
+resource "bunnynet_compute_container_app" "testpv" {
+	name = "test-acceptance-%s"
+	version = 2
+	regions_allowed = ["%s"]
+	regions_required = ["%s"]
+
+	container {
+		name = "echo"
+		image_registry = data.bunnynet_compute_container_imageregistry.dockerhub.id
+		image_namespace = "hashicorp"
+		image_name = "http-echo"
+		image_tag = "latest"
+
+		endpoint {
+			name = "cdn"
+			type = "CDN"
+
+			cdn {
+				origin_ssl = false
+			}
+
+			port {
+				container = 5678
+			}
+		}
+
+		volumemount {
+			name = "data"
+			path = "/data"
+		}
+	}
+
+    volume {
+		name = "data"
+		size = 1
+	}
+}
+`
+
 func TestAccComputeContainerAppResource(t *testing.T) {
 	mcRegion := os.Getenv("TESTACC_MC_REGION")
 	if mcRegion == "" {
@@ -61,6 +106,42 @@ func TestAccComputeContainerAppResource(t *testing.T) {
 	resourceName := "bunnynet_compute_container_app.test"
 	testKey := generateRandomString(12)
 	config := fmt.Sprintf(configComputeContainerAppTest, testKey, mcRegion, mcRegion)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("test-acceptance-%s", testKey)),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateIdFunc: testAccComputeContainerAppImportStateIdFunc(resourceName),
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeContainerAppWithPersistentVolumeResource(t *testing.T) {
+	mcRegion := os.Getenv("TESTACC_MC_REGION")
+	if mcRegion == "" {
+		if os.Getenv("TF_ACC") == "1" {
+			t.Fatal("TESTACC_MC_REGION is missing")
+		} else {
+			t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+		}
+
+		return
+	}
+
+	resourceName := "bunnynet_compute_container_app.testpv"
+	testKey := generateRandomString(12)
+	config := fmt.Sprintf(configComputeContainerAppWithPersistentVolumeTest, testKey, mcRegion, mcRegion)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
