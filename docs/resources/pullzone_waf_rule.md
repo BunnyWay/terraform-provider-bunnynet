@@ -14,15 +14,15 @@ This resource manages a WAF rule for a bunny.net pullzone.
 
 ```terraform
 resource "bunnynet_pullzone_waf_rule" "test" {
-  pullzone    = bunnynet_pullzone.test.id
-  name        = "WordPress Login"
-  description = "Challenge any request"
+  pullzone        = bunnynet_pullzone.test.id
+  name            = "WordPress Login"
+  description     = "Challenge any request"
+  transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
 
   condition {
-    variable        = "REQUEST_URI"
-    operator        = "BEGINSWITH"
-    value           = "/wp-login.php"
-    transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
+    variable = "REQUEST_URI"
+    operator = "BEGINSWITH"
+    value    = "/wp-login.php"
   }
 
   response {
@@ -41,9 +41,10 @@ resource "bunnynet_pullzone_waf_rule" "test" {
 
 ### Optional
 
-- `condition` (Block, Optional) The condition to trigger the WAF rule. (see [below for nested schema](#nestedblock--condition))
+- `condition` (Block List) The condition to trigger the WAF rule. (see [below for nested schema](#nestedblock--condition))
 - `description` (String) The WAF rule description.
 - `response` (Block, Optional) The response once the WAF rule is triggered. (see [below for nested schema](#nestedblock--response))
+- `transformations` (Set of String) Options: `CMDLINE`, `COMPRESSWHITESPACE`, `CSSDECODE`, `HEXENCODE`, `HTMLENTITYDECODE`, `JSDECODE`, `LENGTH`, `LOWERCASE`, `MD5`, `NORMALISEPATH`, `NORMALISEPATHWIN`, `NORMALIZEPATH`, `NORMALIZEPATHWIN`, `REMOVECOMMENTS`, `REMOVENULLS`, `REMOVEWHITESPACE`, `REPLACECOMMENTS`, `SHA1`, `URLDECODE`, `URLDECODEUNI`, `UTF8TOUNICODE`
 
 ### Read-Only
 
@@ -60,7 +61,6 @@ Required:
 
 Optional:
 
-- `transformations` (Set of String) Options: `CMDLINE`, `COMPRESSWHITESPACE`, `CSSDECODE`, `HEXENCODE`, `HTMLENTITYDECODE`, `JSDECODE`, `LENGTH`, `LOWERCASE`, `MD5`, `NORMALISEPATH`, `NORMALISEPATHWIN`, `NORMALIZEPATH`, `NORMALIZEPATHWIN`, `REMOVECOMMENTS`, `REMOVENULLS`, `REMOVEWHITESPACE`, `REPLACECOMMENTS`, `SHA1`, `URLDECODE`, `URLDECODEUNI`, `UTF8TOUNICODE`
 - `variable_value` (String)
 
 

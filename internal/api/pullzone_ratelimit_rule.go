@@ -10,19 +10,27 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
 
 type PullzoneRatelimitRuleConfiguration struct {
-	ActionType          uint8             `json:"actionType"`
-	VariableTypes       map[string]string `json:"variableTypes"`
-	OperatorType        int64             `json:"operatorType"`
-	TransformationTypes []int64           `json:"transformationTypes"`
-	Value               string            `json:"value"`
-	RequestCount        int64             `json:"requestCount"`
-	BlockTime           int64             `json:"blockTime"`
-	Timeframe           int64             `json:"timeframe"`
+	ActionType          uint8                              `json:"actionType"`
+	VariableTypes       map[string]string                  `json:"variableTypes"`
+	OperatorType        int64                              `json:"operatorType"`
+	TransformationTypes []int64                            `json:"transformationTypes"`
+	Value               string                             `json:"value"`
+	RequestCount        int64                              `json:"requestCount"`
+	BlockTime           int64                              `json:"blockTime"`
+	Timeframe           int64                              `json:"timeframe"`
+	ChainedRules        []PullzoneRatelimitRuleChainedRule `json:"chainedRuleConditions"`
+}
+
+type PullzoneRatelimitRuleChainedRule struct {
+	VariableTypes map[string]string `json:"variableTypes"`
+	OperatorType  int64             `json:"operatorType"`
+	Value         string            `json:"value"`
 }
 
 type PullzoneRatelimitRule struct {
@@ -77,6 +85,8 @@ func (c *Client) CreatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 	if err != nil {
 		return PullzoneRatelimitRule{}, err
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("POST /shield/rate-limit: %s", string(body)))
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/shield/rate-limit", c.apiUrl), bytes.NewReader(body))
 	if err != nil {

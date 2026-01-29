@@ -14,15 +14,15 @@ This resource manages a rate limit rule for a bunny.net pullzone.
 
 ```terraform
 resource "bunnynet_pullzone_ratelimit_rule" "wplogin" {
-  pullzone    = bunnynet_pullzone.test.id
-  name        = "WordPress Login"
-  description = "WordPress Login"
+  pullzone        = bunnynet_pullzone.test.id
+  name            = "WordPress Login"
+  description     = "WordPress Login"
+  transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
 
   condition {
-    variable        = "REQUEST_URI"
-    operator        = "BEGINSWITH"
-    value           = "/wp-login.php"
-    transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
+    variable = "REQUEST_URI"
+    operator = "BEGINSWITH"
+    value    = "/wp-login.php"
   }
 
   limit {
@@ -46,10 +46,11 @@ resource "bunnynet_pullzone_ratelimit_rule" "wplogin" {
 
 ### Optional
 
-- `condition` (Block, Optional) The condition to trigger the rate limit rule. (see [below for nested schema](#nestedblock--condition))
+- `condition` (Block List) The condition to trigger the rate limit rule. (see [below for nested schema](#nestedblock--condition))
 - `description` (String) The rate limit rule description.
 - `limit` (Block, Optional) (see [below for nested schema](#nestedblock--limit))
 - `response` (Block, Optional) The response once the rate limit rule is triggered. (see [below for nested schema](#nestedblock--response))
+- `transformations` (Set of String) Options: `CMDLINE`, `COMPRESSWHITESPACE`, `CSSDECODE`, `HEXENCODE`, `HTMLENTITYDECODE`, `JSDECODE`, `LENGTH`, `LOWERCASE`, `MD5`, `NORMALISEPATH`, `NORMALISEPATHWIN`, `NORMALIZEPATH`, `NORMALIZEPATHWIN`, `REMOVECOMMENTS`, `REMOVENULLS`, `REMOVEWHITESPACE`, `REPLACECOMMENTS`, `SHA1`, `URLDECODE`, `URLDECODEUNI`, `UTF8TOUNICODE`
 
 ### Read-Only
 
@@ -66,7 +67,6 @@ Required:
 
 Optional:
 
-- `transformations` (Set of String) Options: `CMDLINE`, `COMPRESSWHITESPACE`, `CSSDECODE`, `HEXENCODE`, `HTMLENTITYDECODE`, `JSDECODE`, `LENGTH`, `LOWERCASE`, `MD5`, `NORMALISEPATH`, `NORMALISEPATHWIN`, `NORMALIZEPATH`, `NORMALIZEPATHWIN`, `REMOVECOMMENTS`, `REMOVENULLS`, `REMOVEWHITESPACE`, `REPLACECOMMENTS`, `SHA1`, `URLDECODE`, `URLDECODEUNI`, `UTF8TOUNICODE`
 - `variable_value` (String)
 
 

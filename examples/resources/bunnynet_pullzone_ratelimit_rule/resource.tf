@@ -1,13 +1,13 @@
 resource "bunnynet_pullzone_ratelimit_rule" "wplogin" {
-  pullzone    = bunnynet_pullzone.test.id
-  name        = "WordPress Login"
-  description = "WordPress Login"
+  pullzone        = bunnynet_pullzone.test.id
+  name            = "WordPress Login"
+  description     = "WordPress Login"
+  transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
 
   condition {
-    variable        = "REQUEST_URI"
-    operator        = "BEGINSWITH"
-    value           = "/wp-login.php"
-    transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
+    variable = "REQUEST_URI"
+    operator = "BEGINSWITH"
+    value    = "/wp-login.php"
   }
 
   limit {

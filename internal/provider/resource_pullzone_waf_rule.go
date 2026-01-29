@@ -9,6 +9,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -25,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,21 +45,21 @@ type PullzoneWafRuleResource struct {
 }
 
 type PullzoneWafRuleResourceModel struct {
-	Id          types.Int64  `tfsdk:"id"`
-	PullzoneId  types.Int64  `tfsdk:"pullzone"`
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-	Condition   types.Object `tfsdk:"condition"`
-	Response    types.Object `tfsdk:"response"`
+	Id              types.Int64  `tfsdk:"id"`
+	PullzoneId      types.Int64  `tfsdk:"pullzone"`
+	Name            types.String `tfsdk:"name"`
+	Description     types.String `tfsdk:"description"`
+	Conditions      types.List   `tfsdk:"condition"`
+	Transformations types.Set    `tfsdk:"transformations"`
+	Response        types.Object `tfsdk:"response"`
 }
 
 var pullzoneWafConditionType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
-		"variable":        types.StringType,
-		"variable_value":  types.StringType,
-		"operator":        types.StringType,
-		"value":           types.StringType,
-		"transformations": types.SetType{ElemType: types.StringType},
+		"variable":       types.StringType,
+		"variable_value": types.StringType,
+		"operator":       types.StringType,
+		"value":          types.StringType,
 	},
 }
 
@@ -85,7 +88,7 @@ var pullzoneWafRuleConditionOperationMap = map[int64]string{
 }
 
 // curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRuleTransformationType")'
-var pullzoneWafRuleConditionTransformationMap = map[int64]string{
+var pullzoneWafRuleTransformationMap = map[int64]string{
 	1:  "CMDLINE",
 	2:  "COMPRESSWHITESPACE",
 	3:  "CSSDECODE",
@@ -193,65 +196,74 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 				},
 				Description: "The WAF rule description.",
 			},
+			"transformations": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(maps.Values(pullzoneWafRuleTransformationMap)...),
+					),
+				},
+				Description: generateMarkdownMapOptions(pullzoneWafRuleTransformationMap),
+			},
 		},
 		Blocks: map[string]schema.Block{
-			"condition": schema.SingleNestedBlock{
-				Attributes: map[string]schema.Attribute{
-					"variable": schema.StringAttribute{
-						// @TODO some variables are only available on advanced
-						Required: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-						Validators: []validator.String{
-							stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionVariableMap)...),
-						},
-						Description: generateMarkdownMapOptions(pullzoneWafRuleConditionVariableMap),
-					},
-					"variable_value": schema.StringAttribute{
-						// @TODO validate, depends on variable
-						Optional: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"operator": schema.StringAttribute{
-						Required: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-						Validators: []validator.String{
-							stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionOperationMap)...),
-						},
-						Description: generateMarkdownMapOptions(pullzoneWafRuleConditionOperationMap),
-					},
-					"value": schema.StringAttribute{
-						Required: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"transformations": schema.SetAttribute{
-						ElementType: types.StringType,
-						Optional:    true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
-						},
-						Validators: []validator.Set{
-							setvalidator.ValueStringsAre(
-								stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionTransformationMap)...),
-							),
-						},
-						Description: generateMarkdownMapOptions(pullzoneWafRuleConditionTransformationMap),
-					},
-				},
-				Validators: []validator.Object{
-					objectvalidator.IsRequired(),
-				},
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
+			"condition": schema.ListNestedBlock{
 				Description: "The condition to trigger the WAF rule.",
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.List{
+					listvalidator.IsRequired(),
+				},
+				NestedObject: schema.NestedBlockObject{
+					Attributes: map[string]schema.Attribute{
+						"variable": schema.StringAttribute{
+							// @TODO some variables are only available on advanced
+							Required: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionVariableMap)...),
+							},
+							Description: generateMarkdownMapOptions(pullzoneWafRuleConditionVariableMap),
+						},
+						"variable_value": schema.StringAttribute{
+							// @TODO validate, depends on variable
+							Optional: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"operator": schema.StringAttribute{
+							Required: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionOperationMap)...),
+							},
+							Description: generateMarkdownMapOptions(pullzoneWafRuleConditionOperationMap),
+						},
+						"value": schema.StringAttribute{
+							Required: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+					},
+					Validators: []validator.Object{
+						objectvalidator.IsRequired(),
+					},
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
+					},
+				},
 			},
 			"response": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
@@ -435,20 +447,44 @@ func (r *PullzoneWafRuleResource) convertModelToApi(ctx context.Context, dataTf 
 	dataApi.Name = dataTf.Name.ValueString()
 	dataApi.Description = dataTf.Description.ValueString()
 
-	// condition
+	// conditions
 	{
-		conditionAttr := dataTf.Condition.Attributes()
+		conditions := dataTf.Conditions.Elements()
 
-		variable := conditionAttr["variable"].(types.String).ValueString()
-		variableValue := conditionAttr["variable_value"].(types.String).ValueString()
-		dataApi.RuleConfiguration.VariableTypes = map[string]string{variable: variableValue}
-		dataApi.RuleConfiguration.OperatorType = mapValueToKey(pullzoneWafRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
-		dataApi.RuleConfiguration.Value = conditionAttr["value"].(types.String).ValueString()
+		for i, c := range conditions {
+			conditionAttr := c.(types.Object).Attributes()
 
-		for _, item := range conditionAttr["transformations"].(types.Set).Elements() {
-			v := mapValueToKey(pullzoneWafRuleConditionTransformationMap, item.(types.String).ValueString())
-			dataApi.RuleConfiguration.TransformationTypes = append(dataApi.RuleConfiguration.TransformationTypes, v)
+			variable := conditionAttr["variable"].(types.String).ValueString()
+			variableValue := conditionAttr["variable_value"].(types.String).ValueString()
+			variableTypes := map[string]string{variable: variableValue}
+			operator := mapValueToKey(pullzoneWafRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
+			value := conditionAttr["value"].(types.String).ValueString()
+
+			if i == 0 {
+				dataApi.RuleConfiguration.VariableTypes = variableTypes
+				dataApi.RuleConfiguration.OperatorType = operator
+				dataApi.RuleConfiguration.Value = value
+			} else {
+				dataApi.RuleConfiguration.ChainedRules = append(dataApi.RuleConfiguration.ChainedRules, api.PullzoneWafRuleChainedRule{
+					VariableTypes: variableTypes,
+					OperatorType:  operator,
+					Value:         value,
+				})
+			}
 		}
+	}
+
+	// transformations
+	{
+		transformationElements := dataTf.Transformations.Elements()
+		transformationIds := make([]int64, 0, len(transformationElements))
+
+		for _, t := range transformationElements {
+			v := mapValueToKey(pullzoneWafRuleTransformationMap, t.(types.String).ValueString())
+			transformationIds = append(transformationIds, v)
+		}
+
+		dataApi.RuleConfiguration.TransformationTypes = transformationIds
 	}
 
 	// response
@@ -461,25 +497,18 @@ func (r *PullzoneWafRuleResource) convertModelToApi(ctx context.Context, dataTf 
 }
 
 func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi api.PullzoneWafRule) (PullzoneWafRuleResourceModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	dataTf := PullzoneWafRuleResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.Description = types.StringValue(dataApi.Description)
 
+	conditions := make([]attr.Value, 0, len(dataApi.RuleConfiguration.ChainedRules)+1)
+
 	// condition
 	{
-		var transformations []attr.Value
-		for _, item := range dataApi.RuleConfiguration.TransformationTypes {
-			transformations = append(transformations, types.StringValue(mapKeyToValue(pullzoneWafRuleConditionTransformationMap, item)))
-		}
-
-		transformationsSet, diags := types.SetValue(types.StringType, transformations)
-
-		if diags.HasError() {
-			return PullzoneWafRuleResourceModel{}, diags
-		}
-
 		if len(dataApi.RuleConfiguration.VariableTypes) != 1 {
 			diags.AddError("Invalid API response", "The API returned multiple variables, but that's not supported by the provider.")
 			return PullzoneWafRuleResourceModel{}, diags
@@ -505,19 +534,96 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 			return PullzoneWafRuleResourceModel{}, diags
 		}
 
-		condition, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
-			"variable":        types.StringValue(variable),
-			"variable_value":  variableValue,
-			"operator":        types.StringValue(mapKeyToValue(pullzoneWafRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
-			"value":           types.StringValue(dataApi.RuleConfiguration.Value),
-			"transformations": transformationsSet,
+		conditionObj, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
+			"variable":       types.StringValue(variable),
+			"variable_value": variableValue,
+			"operator":       types.StringValue(mapKeyToValue(pullzoneWafRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
+			"value":          types.StringValue(dataApi.RuleConfiguration.Value),
 		})
 
 		if diags.HasError() {
 			return PullzoneWafRuleResourceModel{}, diags
 		}
 
-		dataTf.Condition = condition
+		conditions = append(conditions, conditionObj)
+	}
+
+	// chained conditions
+	{
+		for _, rule := range dataApi.RuleConfiguration.ChainedRules {
+			var variable string
+			var variableValue types.String
+
+			for k, v := range rule.VariableTypes {
+				variable = k
+				if v == "" {
+					variableValue = types.StringNull()
+				} else {
+					variableValue = types.StringValue(v)
+				}
+
+				break
+			}
+
+			condition, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
+				"operator":       types.StringValue(mapKeyToValue(pullzoneWafRuleConditionOperationMap, rule.OperatorType)),
+				"variable":       types.StringValue(variable),
+				"variable_value": variableValue,
+				"value":          types.StringValue(rule.Value),
+			})
+
+			if diags.HasError() {
+				return dataTf, diags
+			}
+
+			conditions = append(conditions, condition)
+		}
+	}
+
+	slices.SortFunc(conditions, func(a, b attr.Value) int {
+		var aValue string
+		var bValue string
+
+		aAttr := a.(types.Object).Attributes()
+		bAttr := b.(types.Object).Attributes()
+
+		if v, ok := aAttr["variable"]; ok {
+			aValue = v.(types.String).ValueString()
+		}
+
+		if v, ok := bAttr["variable"]; ok {
+			bValue = v.(types.String).ValueString()
+		}
+
+		return strings.Compare(aValue, bValue)
+	})
+
+	conditionList, diags := types.ListValue(pullzoneWafConditionType, conditions)
+	if diags.HasError() {
+		return dataTf, diags
+	}
+
+	dataTf.Conditions = conditionList
+
+	// transformations
+	{
+		if len(dataApi.RuleConfiguration.TransformationTypes) == 0 {
+			dataTf.Transformations = types.SetNull(types.StringType)
+		} else {
+			transformationValues := make([]attr.Value, 0, len(dataApi.RuleConfiguration.TransformationTypes))
+
+			for _, r := range dataApi.RuleConfiguration.TransformationTypes {
+				value := mapKeyToValue(pullzoneWafRuleTransformationMap, r)
+				transformationValues = append(transformationValues, types.StringValue(value))
+			}
+
+			transformationsSet, diags := types.SetValue(types.StringType, transformationValues)
+			if diags.HasError() {
+				return dataTf, diags
+			}
+
+			dataTf.Transformations = transformationsSet
+		}
 	}
 
 	// response

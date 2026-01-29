@@ -15,14 +15,21 @@ import (
 )
 
 type PullzoneWafRuleConfiguration struct {
-	ActionType          uint8             `json:"actionType"`
-	VariableTypes       map[string]string `json:"variableTypes"`
-	OperatorType        int64             `json:"operatorType"`
-	TransformationTypes []int64           `json:"transformationTypes"`
-	Value               string            `json:"value"`
-	RequestCount        int64             `json:"requestCount"`
-	BlockTime           int64             `json:"blockTime"`
-	Timeframe           int64             `json:"timeframe"`
+	ActionType          uint8                        `json:"actionType"`
+	VariableTypes       map[string]string            `json:"variableTypes"`
+	OperatorType        int64                        `json:"operatorType"`
+	TransformationTypes []int64                      `json:"transformationTypes"`
+	Value               string                       `json:"value"`
+	RequestCount        int64                        `json:"requestCount"`
+	BlockTime           int64                        `json:"blockTime"`
+	Timeframe           int64                        `json:"timeframe"`
+	ChainedRules        []PullzoneWafRuleChainedRule `json:"chainedRuleConditions"`
+}
+
+type PullzoneWafRuleChainedRule struct {
+	VariableTypes map[string]string `json:"variableTypes"`
+	OperatorType  int64             `json:"operatorType"`
+	Value         string            `json:"value"`
 }
 
 type PullzoneWafRule struct {

@@ -7,6 +7,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > [!NOTE]
 > While we strive to maintain backwards compatibility as much as possible, we can't guarantee semantic versioning will be strictly followed, as this provider depends on the underlying [bunny.net API](https://docs.bunny.net/reference/bunnynet-api-overview).
 
+## Unreleased
+
+### Backwards compatibility break
+
+The `transformations` attribute in both `pullzone_ratelimit_rule` and `pullzone_waf_rule` resources was moved from the `condition` block to the resource itself. This was done in order to accommodate multiple `condition` blocks, although you can only apply transformations on a per-resource basis.
+
+This means that for a resource like the example below, both `LOWERCASE` and `NORMALIZEPATH` will apply to _both_ conditions:
+
+```terraform
+resource "bunnynet_pullzone_ratelimit_rule" "ratelimit_login_page" {
+  # ...
+  transformations = ["LOWERCASE", "NORMALIZEPATH"]
+
+  condition {
+    variable = "REQUEST_METHOD"
+    operator = "STREQ"
+    value = "post"
+  }
+
+  condition {
+    variable = "REQUEST_URI"
+    operator = "BEGINSWITH"
+    value = "/login"
+  }
+}
+```
+
+### Added multiple `condition` support
+
+Both `pullzone_ratelimit_rule` and `pullzone_waf_rule` now support multiple `condition` blocks. There are a few limitations though:
+
+- `condition` blocks have to sorted by `variable`. You'll need to follow the same order on your .tf files, otherwise terraform will show them as modified after an `apply`;
+- Changing a `variable` will cause the plan to show unrelated conditions being modified, as their order jumps up or down. We recommend deleting the block, applying, and then adding the block again with the new variable name;
+
+### Added
+
+- resource pullzone_ratelimit_rule: support multiple `condition` blocks;
+- resource pullzone_waf_rule: support multiple `condition` blocks;
+
 ## 0.11.6 - 2026-01-15
 
 ### Fixed
