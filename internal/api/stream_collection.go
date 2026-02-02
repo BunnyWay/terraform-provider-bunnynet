@@ -32,6 +32,10 @@ func (c *Client) GetStreamCollection(libraryId int64, id string) (StreamCollecti
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}

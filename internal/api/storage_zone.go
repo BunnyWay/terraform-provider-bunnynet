@@ -36,6 +36,10 @@ func (c *Client) GetStorageZone(ctx context.Context, id int64) (StorageZone, err
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}

@@ -56,6 +56,10 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 		return result, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return result, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {

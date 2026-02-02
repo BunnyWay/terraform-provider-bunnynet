@@ -101,7 +101,7 @@ func (c *Client) GetPullzoneEdgerule(pullzoneId int64, guid string) (PullzoneEdg
 		}
 	}
 
-	return PullzoneEdgerule{}, errors.New("Edgerule not found")
+	return PullzoneEdgerule{}, ErrNotFound
 }
 
 func (c *Client) DeletePullzoneEdgerule(pullzoneId int64, guid string) error {

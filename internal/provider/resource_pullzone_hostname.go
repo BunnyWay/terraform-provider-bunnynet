@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/boolvalidator"
@@ -227,6 +228,11 @@ func (r *PullzoneHostnameResource) Read(ctx context.Context, req resource.ReadRe
 
 	dataApi, err := r.client.GetPullzoneHostname(data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching hostname", err.Error()))
 		return
 	}

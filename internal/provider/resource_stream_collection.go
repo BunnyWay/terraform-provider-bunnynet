@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -127,6 +128,11 @@ func (r *StreamCollectionResource) Read(ctx context.Context, req resource.ReadRe
 
 	dataApi, err := r.client.GetStreamCollection(data.Library.ValueInt64(), data.Id.ValueString())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching stream collection", err.Error()))
 		return
 	}

@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -146,6 +147,11 @@ func (r *ComputeScriptSecretResource) Read(ctx context.Context, req resource.Rea
 
 	dataApi, err := r.client.GetComputeScriptSecretByName(data.Script.ValueInt64(), data.Name.ValueString())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script secret", err.Error()))
 		return
 	}

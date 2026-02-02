@@ -48,6 +48,10 @@ func (c *Client) GetPullzoneWafRule(pullzoneId int64, ruleId int64) (PullzoneWaf
 		return PullzoneWafRule{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return PullzoneWafRule{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {

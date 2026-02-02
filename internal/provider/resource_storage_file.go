@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/storageplanmodifier"
@@ -228,6 +229,11 @@ func (r *StorageFileResource) Read(ctx context.Context, req resource.ReadRequest
 
 	dataApi, err := r.client.GetStorageFile(ctx, data.Zone.ValueInt64(), data.Path.ValueString())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage file", err.Error()))
 		return
 	}

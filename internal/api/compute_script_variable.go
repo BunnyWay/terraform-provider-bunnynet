@@ -65,6 +65,10 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}

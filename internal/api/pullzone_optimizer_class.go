@@ -59,7 +59,7 @@ func (c *Client) GetPullzoneOptimizerClass(pullzoneId int64, name string) (Pullz
 		return *class, nil
 	}
 
-	return PullzoneOptimizerClass{}, errors.New("Optimizer Image Class not found")
+	return PullzoneOptimizerClass{}, ErrNotFound
 }
 
 func (c *Client) UpdatePullzoneOptimizerClass(data PullzoneOptimizerClass) (PullzoneOptimizerClass, error) {

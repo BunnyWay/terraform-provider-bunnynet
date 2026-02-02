@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/dnszoneresourcevalidator"
@@ -314,6 +315,11 @@ func (r *DnsZoneResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	dataApi, err := r.client.GetDnsZone(ctx, data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching dns zone", err.Error()))
 		return
 	}

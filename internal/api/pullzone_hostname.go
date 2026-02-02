@@ -226,7 +226,7 @@ func (c *Client) GetPullzoneHostname(pullzoneId int64, id int64) (PullzoneHostna
 		}
 	}
 
-	return PullzoneHostname{}, errors.New("Hostname not found")
+	return PullzoneHostname{}, ErrNotFound
 }
 
 func (c *Client) GetPullzoneHostnameByName(pullzoneId int64, hostname string) (PullzoneHostname, error) {

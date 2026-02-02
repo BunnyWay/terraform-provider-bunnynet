@@ -204,6 +204,10 @@ func (c *Client) GetComputeContainerApp(id string) (ComputeContainerApp, error) 
 		return ComputeContainerApp{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ComputeContainerApp{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return ComputeContainerApp{}, errors.New(resp.Status)
 	}

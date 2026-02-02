@@ -110,7 +110,7 @@ func (c *Client) GetComputeContainerImageregistry(ctx context.Context, id int64)
 		}
 	}
 
-	return ComputeContainerImageregistry{}, errors.New("Could not get compute container imageregistry")
+	return ComputeContainerImageregistry{}, ErrNotFound
 }
 
 func (c *Client) FindComputeContainerImageregistry(ctx context.Context, registry string, username string) (ComputeContainerImageregistry, error) {

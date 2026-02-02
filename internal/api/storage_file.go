@@ -143,6 +143,10 @@ func getStorageFileInfo(ctx context.Context, zone StorageZone, path string) (Sto
 		return StorageFile{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return StorageFile{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return StorageFile{}, err
 	}

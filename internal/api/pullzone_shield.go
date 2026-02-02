@@ -203,6 +203,10 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 			return PullzoneShield{}, err
 		}
 
+		if resp.StatusCode == http.StatusNotFound {
+			return PullzoneShield{}, ErrNotFound
+		}
+
 		if resp.StatusCode != http.StatusOK {
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
