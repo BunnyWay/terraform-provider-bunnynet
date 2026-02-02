@@ -49,6 +49,10 @@ func (c *Client) GetPullzoneRatelimitRule(pullzoneId int64, ruleId int64) (Pullz
 		return PullzoneRatelimitRule{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return PullzoneRatelimitRule{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {

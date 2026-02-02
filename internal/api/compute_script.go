@@ -36,6 +36,10 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}

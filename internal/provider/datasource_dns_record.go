@@ -120,6 +120,10 @@ func (d *DnsRecordDataSource) Schema(ctx context.Context, req datasource.SchemaR
 				Computed:    true,
 				Description: dnsRecordDescription.Comment,
 			},
+			"pullzone_id": schema.Int64Attribute{
+				Computed:    true,
+				Description: dnsRecordDescription.PullzoneId,
+			},
 		},
 	}
 }

@@ -54,6 +54,10 @@ func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}

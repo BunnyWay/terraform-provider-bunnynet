@@ -59,8 +59,7 @@ func (c *Client) GetDnsRecord(ctx context.Context, zoneId int64, id int64) (DnsR
 		}
 	}
 
-	return DnsRecord{}, errors.New("DNS record not found")
-
+	return DnsRecord{}, ErrNotFound
 }
 
 func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord, error) {

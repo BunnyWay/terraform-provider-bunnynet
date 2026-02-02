@@ -72,6 +72,10 @@ func (c *Client) GetStreamLibrary(id int64) (StreamLibrary, error) {
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}

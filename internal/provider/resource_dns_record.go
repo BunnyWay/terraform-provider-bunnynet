@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -439,6 +440,11 @@ func (r *DnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	dataApi, err := r.client.GetDnsRecord(ctx, data.Zone.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching dns record", err.Error()))
 		return
 	}
