@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/resourcestateupgrader"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -35,6 +36,7 @@ import (
 
 var _ resource.Resource = &PullzoneWafRuleResource{}
 var _ resource.ResourceWithImportState = &PullzoneWafRuleResource{}
+var _ resource.ResourceWithUpgradeState = &PullzoneWafRuleResource{}
 
 func NewPullzoneWafRule() resource.Resource {
 	return &PullzoneWafRuleResource{}
@@ -155,6 +157,7 @@ func (r *PullzoneWafRuleResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:     1,
 		Description: "This resource manages a WAF rule for a bunny.net pullzone.",
 
 		Attributes: map[string]schema.Attribute{
@@ -292,6 +295,12 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 
 func (r *PullzoneWafRuleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{}
+}
+
+func (r *PullzoneWafRuleResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {StateUpgrader: resourcestateupgrader.PullzoneWafRuleV0},
+	}
 }
 
 func (r *PullzoneWafRuleResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

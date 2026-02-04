@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- resource `pullzone_ratelimit_rule` and `pullzone_waf_rule`: fix upgrading pre v0.12 resources;
+
 ## 0.12.0 - 2026-01-29
 
 ### Backwards compatibility break

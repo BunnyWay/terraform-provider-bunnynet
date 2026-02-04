@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/resourcestateupgrader"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -35,6 +36,7 @@ import (
 
 var _ resource.Resource = &PullzoneRatelimitRuleResource{}
 var _ resource.ResourceWithImportState = &PullzoneRatelimitRuleResource{}
+var _ resource.ResourceWithUpgradeState = &PullzoneRatelimitRuleResource{}
 
 func NewPullzoneRatelimitRule() resource.Resource {
 	return &PullzoneRatelimitRuleResource{}
@@ -158,6 +160,7 @@ func (r *PullzoneRatelimitRuleResource) Metadata(ctx context.Context, req resour
 
 func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:     1,
 		Description: "This resource manages a rate limit rule for a bunny.net pullzone.",
 
 		Attributes: map[string]schema.Attribute{
@@ -325,6 +328,12 @@ func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource
 
 func (r *PullzoneRatelimitRuleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{}
+}
+
+func (r *PullzoneRatelimitRuleResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {StateUpgrader: resourcestateupgrader.PullzoneRatelimitRuleV0},
+	}
 }
 
 func (r *PullzoneRatelimitRuleResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
