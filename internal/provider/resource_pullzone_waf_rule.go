@@ -358,7 +358,7 @@ func (r *PullzoneWafRuleResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	dataApi, err := r.client.GetPullzoneWafRule(data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
+	dataApi, err := r.client.GetPullzoneWafRule(ctx, data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching waf rule", err.Error()))
 		return
@@ -381,7 +381,7 @@ func (r *PullzoneWafRuleResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApiResult, err := r.client.UpdatePullzoneWafRule(dataApi)
+	dataApiResult, err := r.client.UpdatePullzoneWafRule(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating waf rule", err.Error()))
 		return
@@ -406,7 +406,7 @@ func (r *PullzoneWafRuleResource) Delete(ctx context.Context, req resource.Delet
 	pullzoneId := data.PullzoneId.ValueInt64()
 	pzWafRuleMutex.Lock(pullzoneId)
 
-	err := r.client.DeletePullzoneWafRule(data.Id.ValueInt64())
+	err := r.client.DeletePullzoneWafRule(ctx, data.Id.ValueInt64())
 
 	pzWafRuleMutex.Unlock(pullzoneId)
 
@@ -434,7 +434,7 @@ func (r *PullzoneWafRuleResource) ImportState(ctx context.Context, req resource.
 		return
 	}
 
-	dataApi, err := r.client.GetPullzoneWafRule(pullzoneId, ruleId)
+	dataApi, err := r.client.GetPullzoneWafRule(ctx, pullzoneId, ruleId)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching waf rule", err.Error()))
 		return

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 )
@@ -42,7 +43,9 @@ type PullzoneWafRule struct {
 	RuleConfiguration PullzoneWafRuleConfiguration `json:"ruleConfiguration"`
 }
 
-func (c *Client) GetPullzoneWafRule(pullzoneId int64, ruleId int64) (PullzoneWafRule, error) {
+func (c *Client) GetPullzoneWafRule(ctx context.Context, pullzoneId int64, ruleId int64) (PullzoneWafRule, error) {
+	tflog.Info(ctx, fmt.Sprintf("GET /shield/waf/custom-rule/%d", ruleId))
+
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/waf/custom-rule/%d", c.apiUrl, ruleId), nil)
 	if err != nil {
 		return PullzoneWafRule{}, err
@@ -85,6 +88,8 @@ func (c *Client) CreatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		return PullzoneWafRule{}, err
 	}
 
+	tflog.Info(ctx, fmt.Sprintf("POST /shield/waf/custom-rule: %s", string(body)))
+
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/shield/waf/custom-rule", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
 		return PullzoneWafRule{}, err
@@ -110,14 +115,16 @@ func (c *Client) CreatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		return PullzoneWafRule{}, err
 	}
 
-	return c.GetPullzoneWafRule(data.PullzoneId, result.Id)
+	return c.GetPullzoneWafRule(ctx, data.PullzoneId, result.Id)
 }
 
-func (c *Client) UpdatePullzoneWafRule(data PullzoneWafRule) (PullzoneWafRule, error) {
+func (c *Client) UpdatePullzoneWafRule(ctx context.Context, data PullzoneWafRule) (PullzoneWafRule, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return PullzoneWafRule{}, err
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("PATCH /shield/waf/custom-rule/%d: %s", data.Id, string(body)))
 
 	resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/waf/custom-rule/%d", c.apiUrl, data.Id), bytes.NewReader(body))
 	if err != nil {
@@ -144,10 +151,12 @@ func (c *Client) UpdatePullzoneWafRule(data PullzoneWafRule) (PullzoneWafRule, e
 		return PullzoneWafRule{}, err
 	}
 
-	return c.GetPullzoneWafRule(data.PullzoneId, data.Id)
+	return c.GetPullzoneWafRule(ctx, data.PullzoneId, data.Id)
 }
 
-func (c *Client) DeletePullzoneWafRule(ruleId int64) error {
+func (c *Client) DeletePullzoneWafRule(ctx context.Context, ruleId int64) error {
+	tflog.Info(ctx, fmt.Sprintf("DELETE /shield/waf/custom-rule/%d", ruleId))
+
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/shield/waf/custom-rule/%d", c.apiUrl, ruleId), nil)
 	if err != nil {
 		return err

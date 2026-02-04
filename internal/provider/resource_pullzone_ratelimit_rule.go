@@ -385,7 +385,7 @@ func (r *PullzoneRatelimitRuleResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	dataApi, err := r.client.GetPullzoneRatelimitRule(data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
+	dataApi, err := r.client.GetPullzoneRatelimitRule(ctx, data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching ratelimit rule", err.Error()))
 		return
@@ -408,7 +408,7 @@ func (r *PullzoneRatelimitRuleResource) Update(ctx context.Context, req resource
 	}
 
 	dataApi := r.convertModelToApi(ctx, data)
-	dataApiResult, err := r.client.UpdatePullzoneRatelimitRule(dataApi)
+	dataApiResult, err := r.client.UpdatePullzoneRatelimitRule(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error updating ratelimit rule", err.Error()))
 		return
@@ -430,7 +430,7 @@ func (r *PullzoneRatelimitRuleResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	err := r.client.DeletePullzoneRatelimitRule(data.Id.ValueInt64())
+	err := r.client.DeletePullzoneRatelimitRule(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting ratelimit rule", err.Error()))
 	}
@@ -455,7 +455,7 @@ func (r *PullzoneRatelimitRuleResource) ImportState(ctx context.Context, req res
 		return
 	}
 
-	dataApi, err := r.client.GetPullzoneRatelimitRule(pullzoneId, ruleId)
+	dataApi, err := r.client.GetPullzoneRatelimitRule(ctx, pullzoneId, ruleId)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching rate limit rule", err.Error()))
 		return
