@@ -84,6 +84,9 @@ var dnsRecordTypeMap = map[uint8]string{
 	10: "PTR",
 	11: "Script",
 	12: "NS",
+	13: "SVCB",
+	14: "HTTPS",
+	15: "TLSA",
 }
 
 var dnsRecordMonitorTypeMap = map[uint8]string{
