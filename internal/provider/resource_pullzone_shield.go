@@ -161,13 +161,6 @@ var pullzoneShieldWafAllowedRequestContentTypesDefault = utils.ConvertStringSlic
 	"text/plain",
 })
 
-// curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WAFPayloadLimitAction")'
-var pullzoneShieldWafBodyLimitMap = map[uint8]string{
-	0: "Block",
-	1: "Log",
-	2: "Ignore",
-}
-
 func (r *PullzoneShieldResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone_shield"
 }

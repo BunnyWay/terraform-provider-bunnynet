@@ -69,88 +69,6 @@ var pullzoneWafRuleResponseType = map[string]attr.Type{
 	"action": types.StringType,
 }
 
-// jq -r '.enumValues[] | (.value|tostring)+":"+.name'
-// curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRuleOperatorType")'
-var pullzoneWafRuleConditionOperationMap = map[int64]string{
-	0:  "BEGINSWITH",
-	1:  "ENDSWITH",
-	2:  "CONTAINS",
-	3:  "CONTAINSWORD",
-	4:  "STRMATCH",
-	5:  "EQ",
-	6:  "GE",
-	7:  "GT",
-	8:  "LE",
-	9:  "LT",
-	12: "WITHIN",
-	14: "RX",
-	15: "STREQ",
-	17: "DETECTSQLI",
-	18: "DETECTXSS",
-}
-
-// curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRuleTransformationType")'
-var pullzoneWafRuleTransformationMap = map[int64]string{
-	1:  "CMDLINE",
-	2:  "COMPRESSWHITESPACE",
-	3:  "CSSDECODE",
-	4:  "HEXENCODE",
-	5:  "HTMLENTITYDECODE",
-	6:  "JSDECODE",
-	7:  "LENGTH",
-	8:  "LOWERCASE",
-	9:  "MD5",
-	10: "NORMALIZEPATH",
-	11: "NORMALISEPATH",
-	12: "NORMALIZEPATHWIN",
-	13: "NORMALISEPATHWIN",
-	14: "REMOVECOMMENTS",
-	15: "REMOVENULLS",
-	16: "REMOVEWHITESPACE",
-	17: "REPLACECOMMENTS",
-	18: "SHA1",
-	19: "URLDECODE",
-	20: "URLDECODEUNI",
-	21: "UTF8TOUNICODE",
-}
-
-// curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRuleVariableType")'
-var pullzoneWafRuleConditionVariableMap = map[int64]string{
-	0:  "REQUEST_URI",
-	1:  "REQUEST_URI_RAW",
-	2:  "ARGS",
-	3:  "ARGS_COMBINED_SIZE",
-	4:  "ARGS_GET",
-	5:  "ARGS_GET_NAMES",
-	6:  "ARGS_POST",
-	7:  "ARGS_POST_NAMES",
-	8:  "FILES_NAMES",
-	10: "REMOTE_ADDR",
-	11: "QUERY_STRING",
-	12: "REQUEST_BASENAME",
-	13: "REQUEST_BODY",
-	14: "REQUEST_COOKIES_NAMES",
-	15: "REQUEST_COOKIES",
-	16: "REQUEST_FILENAME",
-	17: "REQUEST_HEADERS_NAMES",
-	18: "REQUEST_HEADERS",
-	19: "REQUEST_LINE",
-	20: "REQUEST_METHOD",
-	21: "REQUEST_PROTOCOL",
-	22: "RESPONSE_BODY",
-	23: "RESPONSE_HEADERS",
-	24: "RESPONSE_STATUS",
-}
-
-// curl -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/waf/enums | jq -r '.data[] | select(.enumName=="WafRuleActionType")'
-var pullzoneWafRuleResponseActionMap = map[uint8]string{
-	1: "Block",
-	2: "Log",
-	3: "Challenge",
-	4: "Allow",
-	5: "Bypass",
-}
-
 func (r *PullzoneWafRuleResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone_waf_rule"
 }
@@ -208,10 +126,10 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 				Validators: []validator.Set{
 					setvalidator.SizeAtLeast(1),
 					setvalidator.ValueStringsAre(
-						stringvalidator.OneOf(maps.Values(pullzoneWafRuleTransformationMap)...),
+						stringvalidator.OneOf(maps.Values(pullzoneShieldRuleTransformationMap)...),
 					),
 				},
-				Description: generateMarkdownMapOptions(pullzoneWafRuleTransformationMap),
+				Description: generateMarkdownMapOptions(pullzoneShieldRuleTransformationMap),
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -232,9 +150,9 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 								stringplanmodifier.UseStateForUnknown(),
 							},
 							Validators: []validator.String{
-								stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionVariableMap)...),
+								stringvalidator.OneOf(maps.Values(pullzoneShieldRuleConditionVariableMap)...),
 							},
-							Description: generateMarkdownMapOptions(pullzoneWafRuleConditionVariableMap),
+							Description: generateMarkdownMapOptions(pullzoneShieldRuleConditionVariableMap),
 						},
 						"variable_value": schema.StringAttribute{
 							// @TODO validate, depends on variable
@@ -249,9 +167,9 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 								stringplanmodifier.UseStateForUnknown(),
 							},
 							Validators: []validator.String{
-								stringvalidator.OneOf(maps.Values(pullzoneWafRuleConditionOperationMap)...),
+								stringvalidator.OneOf(maps.Values(pullzoneShieldRuleConditionOperationMap)...),
 							},
-							Description: generateMarkdownMapOptions(pullzoneWafRuleConditionOperationMap),
+							Description: generateMarkdownMapOptions(pullzoneShieldRuleConditionOperationMap),
 						},
 						"value": schema.StringAttribute{
 							Required: true,
@@ -276,9 +194,9 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 							stringplanmodifier.UseStateForUnknown(),
 						},
 						Validators: []validator.String{
-							stringvalidator.OneOf(maps.Values(pullzoneWafRuleResponseActionMap)...),
+							stringvalidator.OneOf(maps.Values(pullzoneShieldWafRuleResponseActionMap)...),
 						},
-						Description: "The action to take if the WAF rule is triggered. " + generateMarkdownMapOptions(pullzoneWafRuleResponseActionMap),
+						Description: "The action to take if the WAF rule is triggered. " + generateMarkdownMapOptions(pullzoneShieldWafRuleResponseActionMap),
 					},
 				},
 				Validators: []validator.Object{
@@ -466,7 +384,7 @@ func (r *PullzoneWafRuleResource) convertModelToApi(ctx context.Context, dataTf 
 			variable := conditionAttr["variable"].(types.String).ValueString()
 			variableValue := conditionAttr["variable_value"].(types.String).ValueString()
 			variableTypes := map[string]string{variable: variableValue}
-			operator := mapValueToKey(pullzoneWafRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
+			operator := mapValueToKey(pullzoneShieldRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
 			value := conditionAttr["value"].(types.String).ValueString()
 
 			if i == 0 {
@@ -489,7 +407,7 @@ func (r *PullzoneWafRuleResource) convertModelToApi(ctx context.Context, dataTf 
 		transformationIds := make([]int64, 0, len(transformationElements))
 
 		for _, t := range transformationElements {
-			v := mapValueToKey(pullzoneWafRuleTransformationMap, t.(types.String).ValueString())
+			v := mapValueToKey(pullzoneShieldRuleTransformationMap, t.(types.String).ValueString())
 			transformationIds = append(transformationIds, v)
 		}
 
@@ -499,7 +417,7 @@ func (r *PullzoneWafRuleResource) convertModelToApi(ctx context.Context, dataTf 
 	// response
 	{
 		attrs := dataTf.Response.Attributes()
-		dataApi.RuleConfiguration.ActionType = mapValueToKey(pullzoneWafRuleResponseActionMap, attrs["action"].(types.String).ValueString())
+		dataApi.RuleConfiguration.ActionType = mapValueToKey(pullzoneShieldWafRuleResponseActionMap, attrs["action"].(types.String).ValueString())
 	}
 
 	return dataApi
@@ -537,7 +455,7 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 			break
 		}
 
-		variableMapByValue := utils.MapInvert(pullzoneWafRuleConditionVariableMap)
+		variableMapByValue := utils.MapInvert(pullzoneShieldRuleConditionVariableMap)
 		if _, ok := variableMapByValue[variable]; !ok {
 			diags.AddError("Invalid API response", fmt.Sprintf("The API returned a variable that is not supported by the provider: %s", variable))
 			return PullzoneWafRuleResourceModel{}, diags
@@ -546,7 +464,7 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 		conditionObj, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
 			"variable":       types.StringValue(variable),
 			"variable_value": variableValue,
-			"operator":       types.StringValue(mapKeyToValue(pullzoneWafRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
+			"operator":       types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
 			"value":          types.StringValue(dataApi.RuleConfiguration.Value),
 		})
 
@@ -575,7 +493,7 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 			}
 
 			condition, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
-				"operator":       types.StringValue(mapKeyToValue(pullzoneWafRuleConditionOperationMap, rule.OperatorType)),
+				"operator":       types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, rule.OperatorType)),
 				"variable":       types.StringValue(variable),
 				"variable_value": variableValue,
 				"value":          types.StringValue(rule.Value),
@@ -622,7 +540,7 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 			transformationValues := make([]attr.Value, 0, len(dataApi.RuleConfiguration.TransformationTypes))
 
 			for _, r := range dataApi.RuleConfiguration.TransformationTypes {
-				value := mapKeyToValue(pullzoneWafRuleTransformationMap, r)
+				value := mapKeyToValue(pullzoneShieldRuleTransformationMap, r)
 				transformationValues = append(transformationValues, types.StringValue(value))
 			}
 
@@ -638,7 +556,7 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 	// response
 	{
 		response, diags := types.ObjectValue(pullzoneWafRuleResponseType, map[string]attr.Value{
-			"action": types.StringValue(mapKeyToValue(pullzoneWafRuleResponseActionMap, dataApi.RuleConfiguration.ActionType)),
+			"action": types.StringValue(mapKeyToValue(pullzoneShieldWafRuleResponseActionMap, dataApi.RuleConfiguration.ActionType)),
 		})
 
 		if diags.HasError() {
