@@ -49,23 +49,6 @@ type PullzoneAccessListResourceModel struct {
 	Entries  types.Set    `tfsdk:"entries"`
 }
 
-// curl -sS -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/shield-zone/13939/access-lists/enums | jq -r '.AccessListType'
-var pullzoneAccessListTypeMap = map[uint8]string{
-	0: "IP",
-	1: "CIDR",
-	2: "ASN",
-	3: "Country",
-}
-
-// curl -sS -H "AccessKey: ${BUNNYNET_API_KEY}" https://api.bunny.net/shield/shield-zone/13939/access-lists/enums | jq -r '.AccessListAction'
-var pullzoneAccessListActionMap = map[uint8]string{
-	1: "Allow",
-	2: "Block",
-	3: "Challenge",
-	4: "Log",
-	5: "Bypass",
-}
-
 func (r *PullzoneAccessListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone_access_list"
 }

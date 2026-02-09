@@ -22,6 +22,9 @@ import (
 // can be customized.
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
+// Generate enums from the bunny.net api
+//go:generate go run ./internal/enumgen/main.go -o internal/provider/enums.go
+
 var (
 	// these will be set by the goreleaser configuration
 	// to appropriate values for the compiled binary.

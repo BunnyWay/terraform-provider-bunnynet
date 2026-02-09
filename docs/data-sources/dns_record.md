@@ -33,7 +33,7 @@ output "record" {
 ### Required
 
 - `name` (String) The name of the DNS record. Use <code>name = ""</code> for apex domain records.
-- `type` (String) Options: `A`, `AAAA`, `CAA`, `CNAME`, `Flatten`, `MX`, `NS`, `PTR`, `PullZone`, `Redirect`, `SRV`, `Script`, `TXT`
+- `type` (String) Options: `A`, `AAAA`, `CAA`, `CNAME`, `Flatten`, `HTTPS`, `MX`, `NS`, `PTR`, `PullZone`, `Redirect`, `SRV`, `SVCB`, `Script`, `TLSA`, `TXT`
 - `zone` (Number) ID of the related DNS zone.
 
 ### Optional

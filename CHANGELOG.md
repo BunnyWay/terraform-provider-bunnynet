@@ -13,6 +13,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 All resources are now being [marked as removed](https://github.com/hashicorp/terraform-plugin-framework/blob/v1.17.0/tfsdk/state.go#L100-L106) when the API reports them as not existing.
 
+### Added
+- resource `dns_record`: support `SVCB`, `HTTPS` and `TLSA` types;
+
+## 0.12.1 - 2026-02-04
+
+### Fixed
+- resource `pullzone_ratelimit_rule` and `pullzone_waf_rule`: fix upgrading pre v0.12 resources;
+
 ## 0.12.0 - 2026-01-29
 
 ### Backwards compatibility break

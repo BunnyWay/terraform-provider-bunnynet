@@ -43,7 +43,9 @@ type PullzoneRatelimitRule struct {
 	RuleConfiguration PullzoneRatelimitRuleConfiguration `json:"ruleConfiguration"`
 }
 
-func (c *Client) GetPullzoneRatelimitRule(pullzoneId int64, ruleId int64) (PullzoneRatelimitRule, error) {
+func (c *Client) GetPullzoneRatelimitRule(ctx context.Context, pullzoneId int64, ruleId int64) (PullzoneRatelimitRule, error) {
+	tflog.Info(ctx, fmt.Sprintf("GET /shield/rate-limit/%d", ruleId))
+
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/rate-limit/%d", c.apiUrl, ruleId), nil)
 	if err != nil {
 		return PullzoneRatelimitRule{}, err
@@ -117,14 +119,16 @@ func (c *Client) CreatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 		return PullzoneRatelimitRule{}, err
 	}
 
-	return c.GetPullzoneRatelimitRule(data.PullzoneId, result.Id)
+	return c.GetPullzoneRatelimitRule(ctx, data.PullzoneId, result.Id)
 }
 
-func (c *Client) UpdatePullzoneRatelimitRule(data PullzoneRatelimitRule) (PullzoneRatelimitRule, error) {
+func (c *Client) UpdatePullzoneRatelimitRule(ctx context.Context, data PullzoneRatelimitRule) (PullzoneRatelimitRule, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return PullzoneRatelimitRule{}, err
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("PATCH /shield/rate-limit/%d: %s", data.Id, string(body)))
 
 	resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/rate-limit/%d", c.apiUrl, data.Id), bytes.NewReader(body))
 	if err != nil {
@@ -151,10 +155,12 @@ func (c *Client) UpdatePullzoneRatelimitRule(data PullzoneRatelimitRule) (Pullzo
 		return PullzoneRatelimitRule{}, err
 	}
 
-	return c.GetPullzoneRatelimitRule(data.PullzoneId, data.Id)
+	return c.GetPullzoneRatelimitRule(ctx, data.PullzoneId, data.Id)
 }
 
-func (c *Client) DeletePullzoneRatelimitRule(ruleId int64) error {
+func (c *Client) DeletePullzoneRatelimitRule(ctx context.Context, ruleId int64) error {
+	tflog.Info(ctx, fmt.Sprintf("DELETE /shield/rate-limit/%d", ruleId))
+
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/shield/rate-limit/%d", c.apiUrl, ruleId), nil)
 	if err != nil {
 		return err
