@@ -501,7 +501,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 						"id": schema.StringAttribute{
 							Computed: true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 							Description: "The unique identifier for the container.",
 						},
@@ -647,7 +647,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 													Computed:    true,
 													Description: "The ID of the pullzone associated with the endpoint.",
 													PlanModifiers: []planmodifier.Int64{
-														int64planmodifier.UseStateForUnknown(),
+														int64planmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
