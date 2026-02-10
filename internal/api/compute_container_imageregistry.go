@@ -9,20 +9,28 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
 type ComputeContainerImageregistry struct {
-	Id          string `json:"id"`
-	DisplayName string `json:"displayName"`
-	HostName    string `json:"hostName"`
-	UserName    string `json:"userName"`
-	Token       string `json:"-"`
-	IsPublic    bool   `json:"isPublic,omitempty"`
+	Id                   int64  `json:"id"`
+	AccountId            string `json:"accountId"`
+	UserId               string `json:"userId"`
+	NamespaceId          string `json:"namespaceId"`
+	IsPublic             bool   `json:"isPublic"`
+	DisplayName          string `json:"displayName"`
+	HostName             string `json:"hostName"`
+	UserName             string `json:"userName"`
+	FirstPasswordSymbols string `json:"firstPasswordSymbols"`
+	LastPasswordSymbols  string `json:"lastPasswordSymbols"`
+	CreatedAt            string `json:"createdAt"`
+	LastUpdatedAt        string `json:"lastUpdatedAt"`
+
+	Token string `json:"-"`
 }
 
 func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
@@ -39,9 +47,9 @@ func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data C
 		return ComputeContainerImageregistry{}, err
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("POST /v2/user/namespaces/default/container-registries: %s", string(body)))
+	tflog.Debug(ctx, fmt.Sprintf("POST /mc/registries: %s", string(body)))
 
-	resp, err := c.doJWTRequest(http.MethodPost, fmt.Sprintf("%s/v2/user/namespaces/default/container-registries", c.apiUrl), bytes.NewReader(body))
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/mc/registries", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
@@ -60,10 +68,10 @@ func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data C
 		return ComputeContainerImageregistry{}, err
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("POST /v2/user/namespaces/default/container-registries response: %s", string(bodyResp)))
+	tflog.Debug(ctx, fmt.Sprintf("POST /mc/registries response: %s", string(bodyResp)))
 
 	var result struct {
-		Id string `json:"id"`
+		Id int64 `json:"id"`
 	}
 
 	err = json.Unmarshal(bodyResp, &result)
@@ -74,11 +82,12 @@ func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data C
 	}
 
 	data.Id = result.Id
+
 	return data, nil
 }
 
 func (c *Client) getAllComputeContainerImageregistries(ctx context.Context) ([]ComputeContainerImageregistry, error) {
-	resp, err := c.doJWTRequest(http.MethodGet, fmt.Sprintf("%s/v2/user/namespaces/default/container-registries", c.apiUrl), nil)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/mc/registries", c.apiUrl), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -92,14 +101,18 @@ func (c *Client) getAllComputeContainerImageregistries(ctx context.Context) ([]C
 		return nil, err
 	}
 
-	var result []ComputeContainerImageregistry
+	// @TODO handle pagination once API supports it (see MC-1667)
+	var result struct {
+		Items []ComputeContainerImageregistry `json:"items"`
+	}
+
 	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return result.Items, nil
 }
 
 func (c *Client) GetComputeContainerImageregistry(ctx context.Context, id int64) (ComputeContainerImageregistry, error) {
@@ -108,9 +121,8 @@ func (c *Client) GetComputeContainerImageregistry(ctx context.Context, id int64)
 		return ComputeContainerImageregistry{}, err
 	}
 
-	idStr := fmt.Sprintf("%d", id)
 	for _, item := range result {
-		if item.Id == idStr {
+		if id == item.Id {
 			return item, nil
 		}
 	}
@@ -148,16 +160,10 @@ func (c *Client) FindComputeContainerImageregistry(ctx context.Context, registry
 }
 
 func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
-	idStr := data.Id
 	token := data.Token
 
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return ComputeContainerImageregistry{}, err
-	}
-
 	body, err := json.Marshal(map[string]interface{}{
-		"id":          idStr,
+		"id":          data.Id,
 		"displayName": data.DisplayName,
 		"type":        data.DisplayName,
 		"passwordCredentials": map[string]string{
@@ -170,32 +176,21 @@ func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data C
 		return ComputeContainerImageregistry{}, err
 	}
 
-	resp, err := c.doJWTRequest(http.MethodPut, fmt.Sprintf("%s/v2/user/namespaces/default/container-registries/%s", c.apiUrl, idStr), bytes.NewReader(body))
+	resp, err := c.doRequest(http.MethodPut, fmt.Sprintf("%s/mc/registries/%d", c.apiUrl, data.Id), bytes.NewReader(body))
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err := utils.ExtractMCErrorMessage(resp)
 		if err != nil {
 			return ComputeContainerImageregistry{}, err
+		} else {
+			return ComputeContainerImageregistry{}, fmt.Errorf("Error: HTTP Status: %s", resp.Status)
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Title  string `json:"title"`
-			Detail string `json:"detail"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return ComputeContainerImageregistry{}, err
-		}
-
-		return ComputeContainerImageregistry{}, errors.New(obj.Title + ": " + obj.Detail)
 	}
 
-	dataApiResult, err := c.GetComputeContainerImageregistry(ctx, id)
+	dataApiResult, err := c.GetComputeContainerImageregistry(ctx, data.Id)
 	if err != nil {
 		return dataApiResult, err
 	}
@@ -206,7 +201,7 @@ func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data C
 }
 
 func (c *Client) DeleteComputeContainerImageregistry(id int64) error {
-	resp, err := c.doJWTRequest(http.MethodDelete, fmt.Sprintf("%s/v2/user/namespaces/default/container-registries/%d", c.apiUrl, id), nil)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/mc/registries/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}

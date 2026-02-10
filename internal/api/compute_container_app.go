@@ -14,6 +14,7 @@ import (
 	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type ComputeContainerAppContainerEndpointPortMapping struct {
@@ -199,7 +200,7 @@ type ComputeContainerApp struct {
 }
 
 func (c *Client) GetComputeContainerApp(ctx context.Context, id string) (ComputeContainerApp, error) {
-	resp, err := c.doJWTRequest(http.MethodGet, fmt.Sprintf("%s/v1/namespaces/default/applications/%s", c.containerApiUrl, id), nil)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/mc/apps/%s", c.apiUrl, id), nil)
 	if err != nil {
 		return ComputeContainerApp{}, err
 	}
@@ -214,7 +215,7 @@ func (c *Client) GetComputeContainerApp(ctx context.Context, id string) (Compute
 	}
 	var result ComputeContainerApp
 
-	tflog.Debug(ctx, fmt.Sprintf("GET /v1/namespaces/default/applications/%s: %s", id, string(bodyResp)))
+	tflog.Debug(ctx, fmt.Sprintf("GET /mc/apps/%s: %s", id, string(bodyResp)))
 
 	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
@@ -274,14 +275,22 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, err
 	}
 
-	tflog.Debug(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
+	method := http.MethodPost
+	url := fmt.Sprintf("%s/mc/apps", c.apiUrl)
 
-	resp, err := c.doJWTRequest(http.MethodPut, fmt.Sprintf("%s/v1/namespaces/default/applications", c.containerApiUrl), bytes.NewReader(body))
+	if data.Id != "" {
+		method = http.MethodPut
+		url = fmt.Sprintf("%s/mc/apps/%s", c.apiUrl, data.Id)
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("%s %s: %s", method, url, string(body)))
+
+	resp, err := c.doRequest(method, url, bytes.NewReader(body))
 	if err != nil {
 		return ComputeContainerApp{}, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		err := utils.ExtractMCErrorMessage(resp)
 		if err != nil {
 			return ComputeContainerApp{}, err
@@ -296,7 +305,7 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		_ = resp.Body.Close()
 	}()
 
-	tflog.Debug(ctx, "PUT /v1/namespaces/default/applications response: "+string(bodyStr))
+	tflog.Debug(ctx, fmt.Sprintf("%s %s response: %s", method, url, string(bodyStr)))
 
 	var result struct {
 		Id string `json:"id"`
@@ -372,7 +381,7 @@ func convertEndpointToSaveRequest(e ComputeContainerAppContainerEndpoint) (compu
 }
 
 func (c *Client) DeleteComputeContainerApp(id string) error {
-	resp, err := c.doJWTRequest(http.MethodDelete, fmt.Sprintf("%s/v1/namespaces/default/applications/%s", c.containerApiUrl, id), nil)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/mc/apps/%s", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}
@@ -397,7 +406,25 @@ func computeContainerAppSort(app *ComputeContainerApp) {
 		return 1
 	})
 
-	for _, container := range app.ContainerTemplates {
+	for i, container := range app.ContainerTemplates {
+		switch strings.ToLower(container.ImagePullPolicy) {
+		case "always":
+			app.ContainerTemplates[i].ImagePullPolicy = "Always"
+		case "ifnotpresent":
+			app.ContainerTemplates[i].ImagePullPolicy = "IfNotPresent"
+		}
+
+		for j, endpoint := range container.Endpoints {
+			switch strings.ToLower(endpoint.Type) {
+			case "anycast":
+				app.ContainerTemplates[i].Endpoints[j].Type = "Anycast"
+			case "cdn":
+				app.ContainerTemplates[i].Endpoints[j].Type = "CDN"
+			case "publicip":
+				app.ContainerTemplates[i].Endpoints[j].Type = "PublicIp"
+			}
+		}
+
 		slices.SortFunc(container.Endpoints, func(a, b ComputeContainerAppContainerEndpoint) int {
 			if a.DisplayName == b.DisplayName {
 				return 0

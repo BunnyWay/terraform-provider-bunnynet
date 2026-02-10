@@ -19,12 +19,11 @@ var httpClient = &http.Client{
 }
 
 type Client struct {
-	apiKey          string
-	jwtToken        string
-	apiUrl          string
-	containerApiUrl string
-	streamApiUrl    string
-	userAgent       string
+	apiKey       string
+	jwtToken     string
+	apiUrl       string
+	streamApiUrl string
+	userAgent    string
 }
 
 func (c *Client) doRequest(method string, url string, body io.Reader) (*http.Response, error) {
@@ -127,13 +126,12 @@ func (c *Client) getJWTToken() (string, error) {
 	return "", errors.New("Invalid JWT token received")
 }
 
-func NewClient(apiKey string, apiUrl string, containerApiUrl string, streamApiUrl string, userAgent string) *Client {
+func NewClient(apiKey string, apiUrl string, streamApiUrl string, userAgent string) *Client {
 	return &Client{
-		apiKey:          apiKey,
-		apiUrl:          apiUrl,
-		containerApiUrl: containerApiUrl,
-		streamApiUrl:    streamApiUrl,
-		userAgent:       userAgent,
-		jwtToken:        "",
+		apiKey:       apiKey,
+		apiUrl:       apiUrl,
+		streamApiUrl: streamApiUrl,
+		userAgent:    userAgent,
+		jwtToken:     "",
 	}
 }

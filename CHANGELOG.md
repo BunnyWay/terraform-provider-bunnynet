@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Backwards compatibility break
+
+The provider's `container_api_url` configuration has been removed, as the compute container (Magic Containers) resources and datasources now use the official [Public API](https://docs.bunny.net/api-reference/magic-containers/overview).
+
 ### Added
 - resource `dns_record`: support `SVCB`, `HTTPS` and `TLSA` types;
 

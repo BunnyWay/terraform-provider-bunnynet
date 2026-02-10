@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strconv"
 )
 
 var _ datasource.DataSource = &ComputeContainerImageRegistryDataSource{}
@@ -92,13 +91,7 @@ func (d *ComputeContainerImageRegistryDataSource) Read(ctx context.Context, req 
 		return
 	}
 
-	id, err := strconv.ParseInt(dataApi.Id, 10, 64)
-	if err != nil {
-		resp.Diagnostics.AddError("Error converting ID to integer", err.Error())
-		return
-	}
-
-	data.Id = types.Int64Value(id)
+	data.Id = types.Int64Value(dataApi.Id)
 	data.Registry = types.StringValue(dataApi.DisplayName)
 	data.Username = types.StringValue(dataApi.UserName)
 
