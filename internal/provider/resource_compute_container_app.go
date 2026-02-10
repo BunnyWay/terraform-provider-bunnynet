@@ -502,7 +502,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 						"id": schema.StringAttribute{
 							Computed: true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 							Description: "The unique identifier for the container.",
 						},
@@ -648,7 +648,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 													Computed:    true,
 													Description: "The ID of the pullzone associated with the endpoint.",
 													PlanModifiers: []planmodifier.Int64{
-														int64planmodifier.UseStateForUnknown(),
+														int64planmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -970,7 +970,7 @@ func (r *ComputeContainerAppResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	dataApi, err := r.client.GetComputeContainerApp(data.Id.ValueString())
+	dataApi, err := r.client.GetComputeContainerApp(ctx, data.Id.ValueString())
 	if err != nil {
 		if errors.Is(err, api.ErrNotFound) {
 			resp.State.RemoveResource(ctx)
@@ -1032,7 +1032,7 @@ func (r *ComputeContainerAppResource) Delete(ctx context.Context, req resource.D
 }
 
 func (r *ComputeContainerAppResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	dataApi, err := r.client.GetComputeContainerApp(req.ID)
+	dataApi, err := r.client.GetComputeContainerApp(ctx, req.ID)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container app", err.Error()))
 		return

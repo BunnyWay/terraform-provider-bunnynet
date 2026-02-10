@@ -424,7 +424,7 @@ func (r *DnsRecordResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("created dns record %s %s", mapKeyToValue(dnsRecordTypeMap, dataApi.Type), dataApi.Name))
-	dataTf, diags = dnsRecordApiToTf(dataApi)
+	dataTf, diags = dnsRecordApiToTf(ctx, dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -452,7 +452,7 @@ func (r *DnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	dataTf, diags := dnsRecordApiToTf(dataApi)
+	dataTf, diags := dnsRecordApiToTf(ctx, dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -480,7 +480,7 @@ func (r *DnsRecordResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dataTf, diags := dnsRecordApiToTf(dataApi)
+	dataTf, diags := dnsRecordApiToTf(ctx, dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -527,7 +527,7 @@ func (r *DnsRecordResource) ImportState(ctx context.Context, req resource.Import
 		return
 	}
 
-	dataTf, diags := dnsRecordApiToTf(dataApi)
+	dataTf, diags := dnsRecordApiToTf(ctx, dataApi)
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -576,7 +576,7 @@ func (r *DnsRecordResource) convertModelToApi(ctx context.Context, dataTf DnsRec
 	return dataApi, nil
 }
 
-func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagnostics) {
+func dnsRecordApiToTf(ctx context.Context, dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagnostics) {
 	dataTf := DnsRecordResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Zone = types.Int64Value(dataApi.Zone)
@@ -606,15 +606,20 @@ func dnsRecordApiToTf(dataApi api.DnsRecord) (DnsRecordResourceModel, diag.Diagn
 	}
 
 	if dataApi.Type == api.DnsRecordTypePZ {
-		pullzoneId, err := strconv.ParseInt(dataApi.LinkName, 10, 64)
-		if err != nil {
-			diags := diag.Diagnostics{}
-			diags.AddAttributeError(path.Root("pullzone_id"), "Invalid attribute value", err.Error())
+		if dataApi.LinkName == "" {
+			tflog.Warn(ctx, "Unexpected empty LinkName for DNS record type PZ")
+			dataTf.PullzoneId = types.Int64Null()
+		} else {
+			pullzoneId, err := strconv.ParseInt(dataApi.LinkName, 10, 64)
+			if err != nil {
+				diags := diag.Diagnostics{}
+				diags.AddAttributeError(path.Root("pullzone_id"), "Invalid attribute value", err.Error())
 
-			return DnsRecordResourceModel{}, diags
+				return DnsRecordResourceModel{}, diags
+			}
+
+			dataTf.PullzoneId = types.Int64Value(pullzoneId)
 		}
-
-		dataTf.PullzoneId = types.Int64Value(pullzoneId)
 	}
 
 	return dataTf, nil

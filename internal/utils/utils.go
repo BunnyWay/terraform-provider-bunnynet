@@ -77,8 +77,7 @@ func ExtractMCErrorMessage(response *http.Response) error {
 	_ = response.Body.Close()
 
 	var responseObj []struct {
-		Message   string `json:"message"`
-		FieldName string `json:"fieldName"`
+		Message string `json:"message"`
 	}
 
 	err = json.Unmarshal(bodyBytes, &responseObj)

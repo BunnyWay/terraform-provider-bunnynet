@@ -118,7 +118,7 @@ func (r *ComputeContainerImageregistryResource) Create(ctx context.Context, req 
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	token := dataApi.Token
 
-	dataApi, err := r.client.CreateComputeContainerImageregistry(dataApi)
+	dataApi, err := r.client.CreateComputeContainerImageregistry(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create container image registry", err.Error())
 		return
@@ -227,7 +227,7 @@ func (r *ComputeContainerImageregistryResource) ImportState(ctx context.Context,
 
 func (r *ComputeContainerImageregistryResource) convertModelToApi(ctx context.Context, dataTf ComputeContainerImageregistryResourceModel) api.ComputeContainerImageregistry {
 	dataApi := api.ComputeContainerImageregistry{}
-	dataApi.Id = fmt.Sprintf("%d", dataTf.Id.ValueInt64())
+	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.DisplayName = dataTf.Registry.ValueString()
 	dataApi.UserName = dataTf.Username.ValueString()
 	dataApi.Token = dataTf.Token.ValueString()
@@ -237,15 +237,7 @@ func (r *ComputeContainerImageregistryResource) convertModelToApi(ctx context.Co
 
 func (r *ComputeContainerImageregistryResource) convertApiToModel(dataApi api.ComputeContainerImageregistry) (ComputeContainerImageregistryResourceModel, diag.Diagnostics) {
 	dataTf := ComputeContainerImageregistryResourceModel{}
-
-	id, err := strconv.ParseInt(dataApi.Id, 10, 64)
-	if err != nil {
-		diags := diag.Diagnostics{}
-		diags.AddError("Error converting ID to integer", err.Error())
-		return dataTf, diags
-	}
-
-	dataTf.Id = types.Int64Value(id)
+	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.Registry = types.StringValue(dataApi.DisplayName)
 	dataTf.Username = types.StringValue(dataApi.UserName)
 	dataTf.Token = types.StringValue(dataApi.Token)
