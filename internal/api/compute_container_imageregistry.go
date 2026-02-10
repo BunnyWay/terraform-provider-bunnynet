@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 	"strconv"
@@ -24,7 +25,7 @@ type ComputeContainerImageregistry struct {
 	IsPublic    bool   `json:"isPublic,omitempty"`
 }
 
-func (c *Client) CreateComputeContainerImageregistry(data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
+func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
 	body, err := json.Marshal(map[string]interface{}{
 		"displayName": data.DisplayName,
 		"type":        data.DisplayName,
@@ -37,6 +38,8 @@ func (c *Client) CreateComputeContainerImageregistry(data ComputeContainerImager
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /v2/user/namespaces/default/container-registries: %s", string(body)))
 
 	resp, err := c.doJWTRequest(http.MethodPost, fmt.Sprintf("%s/v2/user/namespaces/default/container-registries", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
@@ -56,6 +59,8 @@ func (c *Client) CreateComputeContainerImageregistry(data ComputeContainerImager
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /v2/user/namespaces/default/container-registries response: %s", string(bodyResp)))
 
 	var result struct {
 		Id string `json:"id"`

@@ -167,7 +167,7 @@ func (d *DnsRecordDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 
 		record.Zone = zone.Id
-		dataResult, diags := dnsRecordApiToTf(record)
+		dataResult, diags := dnsRecordApiToTf(ctx, record)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
 			return

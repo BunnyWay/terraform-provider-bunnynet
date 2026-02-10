@@ -198,7 +198,7 @@ type ComputeContainerApp struct {
 	AutoScaling        ComputeContainerAppAutoscaling `json:"autoScaling"`
 }
 
-func (c *Client) GetComputeContainerApp(id string) (ComputeContainerApp, error) {
+func (c *Client) GetComputeContainerApp(ctx context.Context, id string) (ComputeContainerApp, error) {
 	resp, err := c.doJWTRequest(http.MethodGet, fmt.Sprintf("%s/v1/namespaces/default/applications/%s", c.containerApiUrl, id), nil)
 	if err != nil {
 		return ComputeContainerApp{}, err
@@ -213,6 +213,8 @@ func (c *Client) GetComputeContainerApp(id string) (ComputeContainerApp, error) 
 		return ComputeContainerApp{}, err
 	}
 	var result ComputeContainerApp
+
+	tflog.Debug(ctx, fmt.Sprintf("GET /v1/namespaces/default/applications/%s: %s", id, string(bodyResp)))
 
 	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
@@ -272,7 +274,7 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, err
 	}
 
-	tflog.Info(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
+	tflog.Debug(ctx, "PUT /v1/namespaces/default/applications: "+string(body))
 
 	resp, err := c.doJWTRequest(http.MethodPut, fmt.Sprintf("%s/v1/namespaces/default/applications", c.containerApiUrl), bytes.NewReader(body))
 	if err != nil {
@@ -294,6 +296,8 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		_ = resp.Body.Close()
 	}()
 
+	tflog.Debug(ctx, "PUT /v1/namespaces/default/applications response: "+string(bodyStr))
+
 	var result struct {
 		Id string `json:"id"`
 	}
@@ -303,7 +307,7 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, err
 	}
 
-	return c.GetComputeContainerApp(result.Id)
+	return c.GetComputeContainerApp(ctx, result.Id)
 }
 
 func convertEndpointToSaveRequest(e ComputeContainerAppContainerEndpoint) (computeContainerAppSaveApplicationContainerEndpointRequest, error) {

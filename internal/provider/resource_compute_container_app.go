@@ -969,7 +969,7 @@ func (r *ComputeContainerAppResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	dataApi, err := r.client.GetComputeContainerApp(data.Id.ValueString())
+	dataApi, err := r.client.GetComputeContainerApp(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container app", err.Error()))
 		return
@@ -1026,7 +1026,7 @@ func (r *ComputeContainerAppResource) Delete(ctx context.Context, req resource.D
 }
 
 func (r *ComputeContainerAppResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	dataApi, err := r.client.GetComputeContainerApp(req.ID)
+	dataApi, err := r.client.GetComputeContainerApp(ctx, req.ID)
 	if err != nil {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container app", err.Error()))
 		return

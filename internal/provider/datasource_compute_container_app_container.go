@@ -80,7 +80,7 @@ func (d *ComputeContainerAppContainerDataSource) Read(ctx context.Context, req d
 		return
 	}
 
-	app, err := d.client.GetComputeContainerApp(data.App.ValueString())
+	app, err := d.client.GetComputeContainerApp(ctx, data.App.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Could not fetch Compute Container App", err.Error())
 		return

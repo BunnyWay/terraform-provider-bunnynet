@@ -117,7 +117,7 @@ func (r *ComputeContainerImageregistryResource) Create(ctx context.Context, req 
 	dataApi := r.convertModelToApi(ctx, dataTf)
 	token := dataApi.Token
 
-	dataApi, err := r.client.CreateComputeContainerImageregistry(dataApi)
+	dataApi, err := r.client.CreateComputeContainerImageregistry(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create container image registry", err.Error())
 		return
