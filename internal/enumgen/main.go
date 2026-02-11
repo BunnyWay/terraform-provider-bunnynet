@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/format"
-	"golang.org/x/exp/maps"
 	"io"
 	"net/http"
 	"os"
@@ -14,10 +13,6 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		panic(fmt.Sprintf("Usage: %s -o output_file.go", os.Args[0]))
-	}
-
 	if os.Getenv("BUNNYNET_API_KEY") == "" {
 		_, err := fmt.Fprintln(os.Stderr, "[WARN] enumgen: BUNNYNET_API_KEY environment variable not set, skipping")
 		if err != nil {
@@ -28,25 +23,218 @@ func main() {
 		os.Exit(0)
 	}
 
-	contents := "// This file was generated via \"go generate\". DO NOT EDIT.\npackage provider\n\n"
-	contents += generatePullzoneShield()
-	contents += "\n"
-	contents += generatePullzoneShieldAccessList()
+	var result []GenResult
+	result = append(result, generateFromOpenApiSchema()...)
+	result = append(result, generatePullzoneShield()...)
+	result = append(result, generatePullzoneShieldAccessList()...)
 
-	contentsFmt, err := format.Source([]byte(contents))
-	if err != nil {
-		panic(err)
+	slices.SortStableFunc(result, func(a, b GenResult) int {
+		fileCmp := strings.Compare(a.File.File, b.File.File)
+		if fileCmp != 0 {
+			return fileCmp
+		}
+
+		return strings.Compare(a.Variable, b.Variable)
+	})
+
+	files := map[*Fileinfo]string{}
+	for _, r := range result {
+		files[r.File] += r.Contents + "\n\n"
 	}
 
-	err = os.WriteFile(os.Args[2], contentsFmt, 0o644)
-	if err != nil {
-		panic(err)
+	for fileinfo, content := range files {
+		prefix := "// This file was generated via \"go generate\". DO NOT EDIT.\npackage " + fileinfo.Package + "\n\n"
+		contentsFmt, err := format.Source([]byte(prefix + content))
+		if err != nil {
+			panic(err)
+		}
+
+		err = os.WriteFile(fileinfo.File, contentsFmt, 0o644)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	os.Exit(0)
 }
 
-func generatePullzoneShield() string {
+type Fileinfo struct {
+	File    string
+	Package string
+}
+
+type GenResult struct {
+	File     *Fileinfo
+	Variable string
+	Contents string
+}
+
+var FileinfoProvider = &Fileinfo{File: "internal/provider/enums.go", Package: "provider"}
+var FileinfoEdgeruleValidator = &Fileinfo{File: "internal/pullzoneedgeruleresourcevalidator/types.go", Package: "pullzoneedgeruleresourcevalidator"}
+
+func generateFromOpenApiSchema() []GenResult {
+	resp, err := http.Get("https://core-api-public-docs.b-cdn.net/docs/v3/public.json")
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic(resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	_ = resp.Body.Close()
+
+	var schema struct {
+		Components struct {
+			Schemas map[string]struct {
+				Type       string        `json:"type"`
+				EnumValues []interface{} `json:"enum"`
+				EnumNames  []string      `json:"x-enumNames"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+
+	err = json.Unmarshal(body, &schema)
+	if err != nil {
+		panic(err)
+	}
+
+	var variableMap = []struct {
+		File      *Fileinfo
+		Variable  string
+		SchemaKey string
+		Type      string
+	}{
+		{
+			File:      FileinfoProvider,
+			Variable:  "dnsRecordMonitorTypeMap",
+			SchemaKey: "DnsMonitoringType",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "dnsRecordSmartRoutingTypeMap",
+			SchemaKey: "DnsSmartRoutingType",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "dnsRecordTypeMap",
+			SchemaKey: "DnsRecordTypes",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "dnsZoneLogAnonymizedStyleMap",
+			SchemaKey: "LogAnonymizationType",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "pullzoneLogAnonymizedStyleMap",
+			SchemaKey: "LogAnonymizationType",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "pullzoneLogForwardFormatMap",
+			SchemaKey: "PullZoneLogFormat",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "pullzoneLogForwardProtocolMap",
+			SchemaKey: "PullZoneLogForwarderProtocolType",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "pullzoneOptimizerWatermarkPositionMap",
+			SchemaKey: "OptimizerWatermarkPosition",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "storageZoneTierMap",
+			SchemaKey: "StorageZoneTier",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoProvider,
+			Variable:  "streamLibraryEncodingTierMap",
+			SchemaKey: "EncodingTier",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoEdgeruleValidator,
+			Variable:  "ActionMap",
+			SchemaKey: "EdgeRuleActionType",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoEdgeruleValidator,
+			Variable:  "TriggerTypeMap",
+			SchemaKey: "TriggerTypes",
+			Type:      "map[uint8]string",
+		},
+		{
+			File:      FileinfoEdgeruleValidator,
+			Variable:  "TriggerMatchTypeMap",
+			SchemaKey: "PatternMatchingTypes",
+			Type:      "map[uint8]string",
+		},
+	}
+
+	result := []GenResult{}
+
+	for _, v := range variableMap {
+		s, ok := schema.Components.Schemas[v.SchemaKey]
+		if !ok {
+			continue
+		}
+
+		contents := fmt.Sprintf("var %s = %s{\n", v.Variable, v.Type)
+
+		for enumIdx, enumValue := range s.EnumValues {
+			switch v.Type {
+			case "map[int64]string":
+				fallthrough
+			case "map[uint64]string":
+				fallthrough
+			case "map[int8]string":
+				fallthrough
+			case "map[uint8]string":
+				contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumNames[enumIdx])
+
+			case "[]int8":
+				fallthrough
+			case "[]uint8":
+				fallthrough
+			case "[]int64":
+				fallthrough
+			case "[]uint64":
+				contents += fmt.Sprintf("\t%d,\n", enumValue)
+			}
+		}
+
+		contents += "}"
+
+		result = append(result, GenResult{
+			File:     v.File,
+			Variable: v.Variable,
+			Contents: contents,
+		})
+	}
+
+	return result
+}
+
+func generatePullzoneShield() []GenResult {
 	req, err := http.NewRequest(http.MethodGet, "https://api.bunny.net/shield/waf/enums", nil)
 	if err != nil {
 		panic(err)
@@ -83,7 +271,7 @@ func generatePullzoneShield() string {
 		panic(err)
 	}
 
-	var result struct {
+	var data struct {
 		Data []struct {
 			Name   string `json:"enumName"`
 			Values []struct {
@@ -93,33 +281,35 @@ func generatePullzoneShield() string {
 		} `json:"data"`
 	}
 
-	err = json.Unmarshal(bodyResp, &result)
+	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		panic(err)
 	}
 
 	var variableMap = map[string]struct {
+		File     *Fileinfo
 		Variable string
 		Type     string
 	}{
-		"WafRuleOperatorType":       {Variable: "pullzoneShieldRuleConditionOperationMap", Type: "map[int64]string"},
-		"WafRuleTransformationType": {Variable: "pullzoneShieldRuleTransformationMap", Type: "map[int64]string"},
-		"WafRuleVariableType":       {Variable: "pullzoneShieldRuleConditionVariableMap", Type: "map[uint8]string"},
-		"WafRateLimitTimeframeType": {Variable: "pullzoneShieldRatelimitRuleLimitTimeframeOptions", Type: "[]int64"},
-		"WafRatelimitBlockType":     {Variable: "pullzoneShieldRatelimitRuleResponseTimeframeOptions", Type: "[]int64"},
-		"WAFPayloadLimitAction":     {Variable: "pullzoneShieldWafBodyLimitMap", Type: "map[uint8]string"},
-		"WafRuleActionType":         {Variable: "pullzoneShieldWafRuleResponseActionMap", Type: "map[uint8]string"},
+		"WafRuleOperatorType":       {File: FileinfoProvider, Variable: "pullzoneShieldRuleConditionOperationMap", Type: "map[int64]string"},
+		"WafRuleTransformationType": {File: FileinfoProvider, Variable: "pullzoneShieldRuleTransformationMap", Type: "map[int64]string"},
+		"WafRuleVariableType":       {File: FileinfoProvider, Variable: "pullzoneShieldRuleConditionVariableMap", Type: "map[uint8]string"},
+		"WafRateLimitTimeframeType": {File: FileinfoProvider, Variable: "pullzoneShieldRatelimitRuleLimitTimeframeOptions", Type: "[]int64"},
+		"WafRatelimitBlockType":     {File: FileinfoProvider, Variable: "pullzoneShieldRatelimitRuleResponseTimeframeOptions", Type: "[]int64"},
+		"WAFPayloadLimitAction":     {File: FileinfoProvider, Variable: "pullzoneShieldWafBodyLimitMap", Type: "map[uint8]string"},
+		"WafRuleActionType":         {File: FileinfoProvider, Variable: "pullzoneShieldWafRuleResponseActionMap", Type: "map[uint8]string"},
 	}
 
-	contents := map[string]string{}
+	result := []GenResult{}
 
-	for _, value := range result.Data {
+	for _, value := range data.Data {
 		variable, ok := variableMap[value.Name]
 		if !ok {
 			continue
 		}
 
-		contents[variable.Variable] = fmt.Sprintf("var %s = %s{\n", variable.Variable, variable.Type)
+		contents := fmt.Sprintf("var %s = %s{\n", variable.Variable, variable.Type)
+
 		for _, value := range value.Values {
 			switch variable.Type {
 			case "map[int64]string":
@@ -129,7 +319,7 @@ func generatePullzoneShield() string {
 			case "map[int8]string":
 				fallthrough
 			case "map[uint8]string":
-				contents[variable.Variable] += fmt.Sprintf("\t%d: \"%s\",\n", value.Value, value.Name)
+				contents += fmt.Sprintf("\t%d: \"%s\",\n", value.Value, value.Name)
 
 			case "[]int8":
 				fallthrough
@@ -138,30 +328,23 @@ func generatePullzoneShield() string {
 			case "[]int64":
 				fallthrough
 			case "[]uint64":
-				contents[variable.Variable] += fmt.Sprintf("\t%d,\n", value.Value)
+				contents += fmt.Sprintf("\t%d,\n", value.Value)
 			}
 		}
 
-		contents[variable.Variable] += "}\n"
+		contents += "}"
+
+		result = append(result, GenResult{
+			File:     variable.File,
+			Variable: variable.Variable,
+			Contents: contents,
+		})
 	}
 
-	keys := maps.Keys(contents)
-	slices.Sort(keys)
-
-	contentStr := []string{}
-	for _, key := range keys {
-		value, ok := contents[key]
-		if !ok {
-			panic(fmt.Sprintf("Missing value for %s", key))
-		}
-
-		contentStr = append(contentStr, value)
-	}
-
-	return strings.Join(contentStr, "\n")
+	return result
 }
 
-func generatePullzoneShieldAccessList() string {
+func generatePullzoneShieldAccessList() []GenResult {
 	// @TODO url must be dynamic
 	req, err := http.NewRequest(http.MethodGet, "https://api.bunny.net/shield/shield-zone/13939/access-lists/enums", nil)
 	if err != nil {
@@ -199,30 +382,31 @@ func generatePullzoneShieldAccessList() string {
 		panic(err)
 	}
 
-	var result map[string]map[string]string
+	var data map[string]map[string]string
 
-	err = json.Unmarshal(bodyResp, &result)
+	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		panic(err)
 	}
 
 	var variableMap = map[string]struct {
+		File     *Fileinfo
 		Variable string
 		Type     string
 	}{
-		"AccessListType":   {Variable: "pullzoneAccessListTypeMap", Type: "map[uint8]string"},
-		"AccessListAction": {Variable: "pullzoneAccessListActionMap", Type: "map[uint8]string"},
+		"AccessListType":   {File: FileinfoProvider, Variable: "pullzoneAccessListTypeMap", Type: "map[uint8]string"},
+		"AccessListAction": {File: FileinfoProvider, Variable: "pullzoneAccessListActionMap", Type: "map[uint8]string"},
 	}
 
-	contents := map[string]string{}
+	result := []GenResult{}
 
 	for mapKey, variable := range variableMap {
-		mapValue, ok := result[mapKey]
+		mapValue, ok := data[mapKey]
 		if !ok {
 			panic(fmt.Sprintf("Missing value for %s", mapKey))
 		}
 
-		contents[variable.Variable] = fmt.Sprintf("var %s = %s{\n", variable.Variable, variable.Type)
+		contents := fmt.Sprintf("var %s = %s{\n", variable.Variable, variable.Type)
 		contentsVars := []string{}
 
 		for k, v := range mapValue {
@@ -244,21 +428,14 @@ func generatePullzoneShieldAccessList() string {
 		}
 
 		slices.Sort(contentsVars)
-		contents[variable.Variable] += strings.Join(contentsVars, "\n") + "\n}\n"
+		contents += strings.Join(contentsVars, "\n") + "\n}"
+
+		result = append(result, GenResult{
+			File:     variable.File,
+			Variable: variable.Variable,
+			Contents: contents,
+		})
 	}
 
-	keys := maps.Keys(contents)
-	slices.Sort(keys)
-
-	contentStr := []string{}
-	for _, key := range keys {
-		value, ok := contents[key]
-		if !ok {
-			panic(fmt.Sprintf("Missing value for %s", key))
-		}
-
-		contentStr = append(contentStr, value)
-	}
-
-	return strings.Join(contentStr, "\n")
+	return result
 }

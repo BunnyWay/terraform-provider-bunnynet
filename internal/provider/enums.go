@@ -1,6 +1,84 @@
 // This file was generated via "go generate". DO NOT EDIT.
 package provider
 
+var dnsRecordMonitorTypeMap = map[uint8]string{
+	0: "None",
+	1: "Ping",
+	2: "Http",
+	3: "Monitor",
+}
+
+var dnsRecordSmartRoutingTypeMap = map[uint8]string{
+	0: "None",
+	1: "Latency",
+	2: "Geolocation",
+}
+
+var dnsRecordTypeMap = map[uint8]string{
+	0:  "A",
+	1:  "AAAA",
+	2:  "CNAME",
+	3:  "TXT",
+	4:  "MX",
+	5:  "Redirect",
+	6:  "Flatten",
+	7:  "PullZone",
+	8:  "SRV",
+	9:  "CAA",
+	10: "PTR",
+	11: "Script",
+	12: "NS",
+	13: "SVCB",
+	14: "HTTPS",
+	15: "TLSA",
+}
+
+var dnsZoneLogAnonymizedStyleMap = map[uint8]string{
+	0: "OneDigit",
+	1: "Drop",
+}
+
+var pullzoneAccessListActionMap = map[uint8]string{
+	1: "Allow",
+	2: "Block",
+	3: "Challenge",
+	4: "Log",
+	5: "Bypass",
+}
+
+var pullzoneAccessListTypeMap = map[uint8]string{
+	0: "IP",
+	1: "CIDR",
+	2: "ASN",
+	3: "Country",
+}
+
+var pullzoneLogAnonymizedStyleMap = map[uint8]string{
+	0: "OneDigit",
+	1: "Drop",
+}
+
+var pullzoneLogForwardFormatMap = map[uint8]string{
+	0: "Plain",
+	1: "JSON",
+}
+
+var pullzoneLogForwardProtocolMap = map[uint8]string{
+	0: "UDP",
+	1: "TCP",
+	2: "TCPEncrypted",
+	3: "DataDog",
+}
+
+var pullzoneOptimizerWatermarkPositionMap = map[uint8]string{
+	0: "BottomLeft",
+	1: "BottomRight",
+	2: "TopLeft",
+	3: "TopRight",
+	4: "Center",
+	5: "CenterStretch",
+}
+
 var pullzoneShieldRatelimitRuleLimitTimeframeOptions = []int64{
 	1,
 	10,
@@ -99,17 +177,12 @@ var pullzoneShieldWafRuleResponseActionMap = map[uint8]string{
 	5: "Bypass",
 }
 
-var pullzoneAccessListActionMap = map[uint8]string{
-	1: "Allow",
-	2: "Block",
-	3: "Challenge",
-	4: "Log",
-	5: "Bypass",
+var storageZoneTierMap = map[uint8]string{
+	0: "Standard",
+	1: "Edge",
 }
 
-var pullzoneAccessListTypeMap = map[uint8]string{
-	0: "IP",
-	1: "CIDR",
-	2: "ASN",
-	3: "Country",
+var streamLibraryEncodingTierMap = map[uint8]string{
+	0: "Free",
+	1: "Premium",
 }

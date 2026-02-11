@@ -71,38 +71,6 @@ type DnsRecordResourceModel struct {
 	Comment               types.String  `tfsdk:"comment"`
 }
 
-var dnsRecordTypeMap = map[uint8]string{
-	0:  "A",
-	1:  "AAAA",
-	2:  "CNAME",
-	3:  "TXT",
-	4:  "MX",
-	5:  "Redirect",
-	6:  "Flatten",
-	7:  "PullZone",
-	8:  "SRV",
-	9:  "CAA",
-	10: "PTR",
-	11: "Script",
-	12: "NS",
-	13: "SVCB",
-	14: "HTTPS",
-	15: "TLSA",
-}
-
-var dnsRecordMonitorTypeMap = map[uint8]string{
-	0: "None",
-	1: "Ping",
-	2: "Http",
-	3: "Monitor",
-}
-
-var dnsRecordSmartRoutingTypeMap = map[uint8]string{
-	0: "None",
-	1: "Latency",
-	2: "Geolocation",
-}
-
 func (r *DnsRecordResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_dns_record"
 }

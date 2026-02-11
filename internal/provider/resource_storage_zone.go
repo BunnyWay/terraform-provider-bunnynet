@@ -53,11 +53,6 @@ type StorageZoneResourceModel struct {
 	DateModified       types.String `tfsdk:"date_modified"`
 }
 
-var storageZoneTierMap = map[uint8]string{
-	0: "Standard",
-	1: "Edge",
-}
-
 func (r *StorageZoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_storage_zone"
 }

@@ -1,3 +1,4 @@
+// This file was generated via "go generate". DO NOT EDIT.
 package pullzoneedgeruleresourcevalidator
 
 var ActionMap = map[uint8]string{
@@ -36,6 +37,12 @@ var ActionMap = map[uint8]string{
 	32: "DisableShieldRateLimiting",
 }
 
+var TriggerMatchTypeMap = map[uint8]string{
+	0: "MatchAny",
+	1: "MatchAll",
+	2: "MatchNone",
+}
+
 var TriggerTypeMap = map[uint8]string{
 	0:  "Url",
 	1:  "RequestHeader",
@@ -51,10 +58,4 @@ var TriggerTypeMap = map[uint8]string{
 	11: "CountryStateCode",
 	12: "OriginRetryAttemptCount",
 	13: "OriginConnectionError",
-}
-
-var TriggerMatchTypeMap = map[uint8]string{
-	0: "MatchAny",
-	1: "MatchAll",
-	2: "MatchNone",
 }

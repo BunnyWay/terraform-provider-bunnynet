@@ -199,32 +199,6 @@ var pullzoneRoutingFiltersOptions = []string{"all", "eu", "scripting"}
 var pullzoneCorsExtensionsDefault = []string{"css", "eot", "gif", "jpeg", "jpg", "js", "mp3", "mp4", "mpeg", "png", "svg", "ttf", "webm", "webp", "woff", "woff2"}
 var pullzoneOriginShieldZoneOptions = []string{"IL", "FR"}
 
-var pullzoneLogAnonymizedStyleMap = map[uint8]string{
-	0: "OneDigit",
-	1: "Drop",
-}
-
-var pullzoneLogForwardProtocolMap = map[uint8]string{
-	0: "UDP",
-	1: "TCP",
-	2: "TCPEncrypted",
-	3: "DataDog",
-}
-
-var pullzoneLogForwardFormatMap = map[uint8]string{
-	0: "Plain",
-	1: "JSON",
-}
-
-var pullzoneOptimizerWatermarkPositionMap = map[uint8]string{
-	0: "BottomLeft",
-	1: "BottomRight",
-	2: "TopLeft",
-	3: "TopRight",
-	4: "Center",
-	5: "CenterStretch",
-}
-
 func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone"
 }
