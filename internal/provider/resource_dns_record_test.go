@@ -4,11 +4,14 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"regexp"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -254,6 +257,49 @@ func TestAccDnsRecordResourceWeightTXT(t *testing.T) {
 			{
 				Config:      configError,
 				ExpectError: regexp.MustCompile(`The weight attribute is only available for SRV, A and AAAA records`),
+			},
+		},
+	})
+}
+
+func TestAccDnsRecordDeletedOutOfBand(t *testing.T) {
+	testKey := generateRandomString(12)
+	config := fmt.Sprintf(configDnsRecordPZTest, testKey)
+	pzName := fmt.Sprintf("test-acceptance-%s", testKey)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("bunnynet_pullzone.pullzone", "name", pzName),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "type", "PullZone"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "value", pzName),
+				),
+			},
+			{
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					func(state *terraform.State) error {
+						zoneIdStr := state.RootModule().Resources["data.bunnynet_dns_zone.domain"].Primary.ID
+						zoneId, err := strconv.ParseInt(zoneIdStr, 10, 64)
+						if err != nil {
+							return err
+						}
+
+						recordIdStr := state.RootModule().Resources["bunnynet_dns_record.record"].Primary.ID
+						recordId, err := strconv.ParseInt(recordIdStr, 10, 64)
+						if err != nil {
+							return err
+						}
+
+						c := newApiClient()
+						return c.DeleteDnsRecord(context.Background(), zoneId, int64(recordId))
+					},
+				),
 			},
 		},
 	})
