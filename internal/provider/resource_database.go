@@ -204,7 +204,7 @@ func (r *DatabaseResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 
 	err := r.client.DeleteDatabase(data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting database", err.Error()))
 	}
 }

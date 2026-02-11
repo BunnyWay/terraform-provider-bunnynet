@@ -160,6 +160,10 @@ func (c *Client) DeleteStorageZone(ctx context.Context, id int64) error {
 		"status": resp.Status,
 	})
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)
 	}

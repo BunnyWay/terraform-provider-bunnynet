@@ -318,7 +318,7 @@ func (r *PullzoneEdgeruleResource) Delete(ctx context.Context, req resource.Dele
 	pzMutex.Lock(pullzoneId)
 	err := r.client.DeletePullzoneEdgerule(data.PullzoneId.ValueInt64(), data.Id.ValueString())
 	pzMutex.Unlock(pullzoneId)
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting edgerule", err.Error()))
 	}
 }

@@ -110,6 +110,10 @@ func (c *Client) DeletePullzoneEdgerule(pullzoneId int64, guid string) error {
 		return err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)
 	}

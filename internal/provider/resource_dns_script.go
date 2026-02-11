@@ -204,7 +204,7 @@ func (r *DnsScriptResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	err := r.client.DeleteComputeScript(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting DNS script", err.Error()))
 	}
 }

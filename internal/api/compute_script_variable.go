@@ -182,6 +182,10 @@ func (c *Client) DeleteComputeScriptVariable(scriptId int64, id int64) error {
 		return err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)
 	}

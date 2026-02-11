@@ -307,7 +307,7 @@ func (r *StorageFileResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err := r.client.DeleteStorageFile(ctx, data.Zone.ValueInt64(), data.Path.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting storage file", err.Error()))
 	}
 }

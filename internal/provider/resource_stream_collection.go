@@ -180,7 +180,7 @@ func (r *StreamCollectionResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	err := r.client.DeleteStreamCollection(data.Library.ValueInt64(), data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting stream collection", err.Error()))
 	}
 }

@@ -166,6 +166,10 @@ func (c *Client) DeletePullzoneWafRule(ctx context.Context, ruleId int64) error 
 		return err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {

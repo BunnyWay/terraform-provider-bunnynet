@@ -1543,7 +1543,7 @@ func (r *PullzoneResource) Delete(ctx context.Context, req resource.DeleteReques
 	err := r.client.DeletePullzone(pullzoneId)
 	pzMutex.Unlock(pullzoneId)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting pullzone", err.Error()))
 	}
 }

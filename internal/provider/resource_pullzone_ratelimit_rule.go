@@ -358,7 +358,7 @@ func (r *PullzoneRatelimitRuleResource) Delete(ctx context.Context, req resource
 	}
 
 	err := r.client.DeletePullzoneRatelimitRule(ctx, data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting ratelimit rule", err.Error()))
 	}
 }

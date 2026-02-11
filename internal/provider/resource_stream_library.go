@@ -746,7 +746,7 @@ func (r *StreamLibraryResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	err := r.client.DeleteStreamLibrary(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting stream library", err.Error()))
 	}
 }

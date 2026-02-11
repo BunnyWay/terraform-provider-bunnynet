@@ -215,7 +215,7 @@ func (r *ComputeScriptResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	err := r.client.DeleteComputeScript(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting compute script", err.Error()))
 	}
 }

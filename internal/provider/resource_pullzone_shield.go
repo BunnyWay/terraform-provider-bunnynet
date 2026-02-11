@@ -584,7 +584,7 @@ func (r *PullzoneShieldResource) Delete(ctx context.Context, req resource.Delete
 	}
 
 	err := r.client.DeletePullzoneShield(ctx, data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting pullzone shield", err.Error()))
 	}
 }

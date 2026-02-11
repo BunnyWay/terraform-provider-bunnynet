@@ -198,7 +198,7 @@ func (r *ComputeContainerImageregistryResource) Delete(ctx context.Context, req 
 	}
 
 	err := r.client.DeleteComputeContainerImageregistry(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting container image registry", err.Error()))
 	}
 }

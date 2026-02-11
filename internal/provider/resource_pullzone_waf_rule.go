@@ -334,7 +334,7 @@ func (r *PullzoneWafRuleResource) Delete(ctx context.Context, req resource.Delet
 
 	pzWafRuleMutex.Unlock(pullzoneId)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting waf rule", err.Error()))
 	}
 }

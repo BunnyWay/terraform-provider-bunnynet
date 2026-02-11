@@ -275,7 +275,7 @@ func (r *StorageZoneResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err := r.client.DeleteStorageZone(ctx, data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting storage zone", err.Error()))
 	}
 }

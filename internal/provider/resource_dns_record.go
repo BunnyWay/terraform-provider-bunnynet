@@ -497,7 +497,7 @@ func (r *DnsRecordResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	err := r.client.DeleteDnsRecord(ctx, data.Zone.ValueInt64(), data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting dns record", err.Error()))
 	}
 }

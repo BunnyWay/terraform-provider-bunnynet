@@ -259,6 +259,10 @@ func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error
 		return err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusNoContent {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {

@@ -147,6 +147,10 @@ func (c *Client) DeleteDnsRecord(ctx context.Context, zoneId int64, id int64) er
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d/records/%d: %s", zoneId, id, resp.Status))
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)
 	}

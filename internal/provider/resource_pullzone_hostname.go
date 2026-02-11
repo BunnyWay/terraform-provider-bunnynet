@@ -300,7 +300,7 @@ func (r *PullzoneHostnameResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	err := r.client.DeletePullzoneHostname(data.PullzoneId.ValueInt64(), data.Name.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting hostname", err.Error()))
 	}
 }

@@ -206,6 +206,10 @@ func (c *Client) DeleteComputeContainerImageregistry(id int64) error {
 		return err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return errors.New(resp.Status)
 	}

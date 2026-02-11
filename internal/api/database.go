@@ -141,6 +141,10 @@ func (c *Client) DeleteDatabase(id string) error {
 		return err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return errors.New(resp.Status)
 	}

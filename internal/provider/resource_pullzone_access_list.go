@@ -229,7 +229,7 @@ func (r *PullzoneAccessListResource) Delete(ctx context.Context, req resource.De
 	}
 
 	err := r.client.DeletePullzoneAccessList(ctx, data.Pullzone.ValueInt64(), data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting access list", err.Error()))
 	}
 }

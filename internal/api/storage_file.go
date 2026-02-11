@@ -118,6 +118,10 @@ func (c *Client) DeleteStorageFile(ctx context.Context, zoneId int64, path strin
 		"status": resp.Status,
 	})
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return errors.New(resp.Status)
 	}

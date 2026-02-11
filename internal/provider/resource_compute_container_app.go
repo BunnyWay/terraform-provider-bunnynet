@@ -1026,7 +1026,7 @@ func (r *ComputeContainerAppResource) Delete(ctx context.Context, req resource.D
 	}
 
 	err := r.client.DeleteComputeContainerApp(data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting container app", err.Error()))
 	}
 }

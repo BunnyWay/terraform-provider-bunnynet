@@ -350,7 +350,7 @@ func (r *PullzoneOptimizerClassResource) Delete(ctx context.Context, req resourc
 	err := r.client.DeletePullzoneOptimizerClass(pullzoneId, data.Name.ValueString())
 	pzMutex.Unlock(pullzoneId)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting Optimizer Image Class", err.Error()))
 	}
 }

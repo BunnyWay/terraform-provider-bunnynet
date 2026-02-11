@@ -233,7 +233,7 @@ func (r *StreamVideoResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err := r.client.DeleteStreamVideo(data.Library.ValueInt64(), data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting stream video", err.Error()))
 	}
 }
