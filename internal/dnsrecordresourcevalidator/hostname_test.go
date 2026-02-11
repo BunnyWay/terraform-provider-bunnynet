@@ -44,6 +44,20 @@ func TestHostname(t *testing.T) {
 				"value": tftypes.NewValue(tftypes.String, "some-value."),
 			},
 		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"type":  tftypes.NewValue(tftypes.String, "MX"),
+				"value": tftypes.NewValue(tftypes.String, "."),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"type":  tftypes.NewValue(tftypes.String, "MX"),
+				"value": tftypes.NewValue(tftypes.String, "mail.example.com."),
+			},
+		},
 	}
 
 	configSchema := schema.Schema{
