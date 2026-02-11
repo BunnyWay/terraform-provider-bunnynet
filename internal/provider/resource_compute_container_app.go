@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/computecontainerappresourcevalidator"
@@ -971,6 +972,11 @@ func (r *ComputeContainerAppResource) Read(ctx context.Context, req resource.Rea
 
 	dataApi, err := r.client.GetComputeContainerApp(ctx, data.Id.ValueString())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container app", err.Error()))
 		return
 	}
@@ -1020,7 +1026,7 @@ func (r *ComputeContainerAppResource) Delete(ctx context.Context, req resource.D
 	}
 
 	err := r.client.DeleteComputeContainerApp(data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting container app", err.Error()))
 	}
 }

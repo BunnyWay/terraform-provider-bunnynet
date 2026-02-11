@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/streamlibraryresourcevalidator"
@@ -693,6 +694,11 @@ func (r *StreamLibraryResource) Read(ctx context.Context, req resource.ReadReque
 
 	dataApi, err := r.client.GetStreamLibrary(data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching stream library", err.Error()))
 		return
 	}
@@ -740,7 +746,7 @@ func (r *StreamLibraryResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	err := r.client.DeleteStreamLibrary(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting stream library", err.Error()))
 	}
 }

@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -153,6 +154,11 @@ func (r *DatabaseResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	dataApi, err := r.client.GetDatabase(ctx, data.Id.ValueString())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching database", err.Error()))
 		return
 	}
@@ -198,7 +204,7 @@ func (r *DatabaseResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 
 	err := r.client.DeleteDatabase(data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting database", err.Error()))
 	}
 }

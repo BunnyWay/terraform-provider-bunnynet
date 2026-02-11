@@ -54,6 +54,10 @@ func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -214,7 +218,7 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 		tflog.Debug(ctx, fmt.Sprintf("POST /dnszone/%d/dnssec: %+v", dataApi.Id, info))
 	} else {
 		err = c.deleteDnssec(ctx, dataApi.Id)
-		if err != nil {
+		if err != nil && !errors.Is(err, ErrNotFound) {
 			return DnsZone{}, err
 		}
 	}
@@ -234,6 +238,10 @@ func (c *Client) DeleteDnsZone(ctx context.Context, id int64) error {
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d: %s", id, resp.Status))
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)
@@ -274,6 +282,10 @@ func (c *Client) deleteDnssec(ctx context.Context, zoneId int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d/dnssec", c.apiUrl, zoneId), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

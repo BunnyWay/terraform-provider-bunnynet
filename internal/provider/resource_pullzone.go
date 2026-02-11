@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/customtype"
@@ -1441,6 +1442,11 @@ func (r *PullzoneResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	dataApi, err := r.client.GetPullzone(data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching pullzone", err.Error()))
 		return
 	}
@@ -1537,7 +1543,7 @@ func (r *PullzoneResource) Delete(ctx context.Context, req resource.DeleteReques
 	err := r.client.DeletePullzone(pullzoneId)
 	pzMutex.Unlock(pullzoneId)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting pullzone", err.Error()))
 	}
 }

@@ -51,6 +51,10 @@ func (c *Client) GetPullzoneWafRule(ctx context.Context, pullzoneId int64, ruleI
 		return PullzoneWafRule{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return PullzoneWafRule{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
@@ -160,6 +164,10 @@ func (c *Client) DeletePullzoneWafRule(ctx context.Context, ruleId int64) error 
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/shield/waf/custom-rule/%d", c.apiUrl, ruleId), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

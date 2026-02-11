@@ -127,7 +127,7 @@ func (c *Client) GetComputeContainerImageregistry(ctx context.Context, id int64)
 		}
 	}
 
-	return ComputeContainerImageregistry{}, errors.New("Could not get compute container imageregistry")
+	return ComputeContainerImageregistry{}, ErrNotFound
 }
 
 func (c *Client) FindComputeContainerImageregistry(ctx context.Context, registry string, username string) (ComputeContainerImageregistry, error) {
@@ -204,6 +204,10 @@ func (c *Client) DeleteComputeContainerImageregistry(id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/mc/registries/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

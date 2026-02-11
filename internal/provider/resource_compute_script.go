@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -156,6 +157,11 @@ func (r *ComputeScriptResource) Read(ctx context.Context, req resource.ReadReque
 
 	dataApi, err := r.client.GetComputeScript(ctx, data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching compute script", err.Error()))
 		return
 	}
@@ -209,7 +215,7 @@ func (r *ComputeScriptResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	err := r.client.DeleteComputeScript(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting compute script", err.Error()))
 	}
 }

@@ -4,6 +4,9 @@
 package provider
 
 import (
+	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -22,4 +25,27 @@ func testAccPreCheck(t *testing.T) {
 	// You can add code here to run prior to any test case execution, for example assertions
 	// about the appropriate environment variables being set are common to see in a pre-check
 	// function.
+}
+
+func newApiClient() *api.Client {
+	apiKey := os.Getenv("BUNNYNET_API_KEY")
+	apiUrl := "https://api.bunny.net"
+	streamApiUrl := "https://video.bunnycdn.com"
+
+	envApiUrl := os.Getenv("BUNNYNET_API_URL")
+	if envApiUrl != "" {
+		apiUrl = envApiUrl
+	}
+
+	envStreamApiUrl := os.Getenv("BUNNYNET_STREAM_API_URL")
+	if envStreamApiUrl != "" {
+		streamApiUrl = envStreamApiUrl
+	}
+
+	return api.NewClient(
+		apiKey,
+		apiUrl,
+		streamApiUrl,
+		fmt.Sprintf("Terraform/%s BunnynetProvider/%s", "test", "test"),
+	)
 }

@@ -36,6 +36,10 @@ func (c *Client) GetStorageZone(ctx context.Context, id int64) (StorageZone, err
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -155,6 +159,10 @@ func (c *Client) DeleteStorageZone(ctx context.Context, id int64) error {
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /storagezone/%d", id), map[string]interface{}{
 		"status": resp.Status,
 	})
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)

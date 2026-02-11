@@ -226,7 +226,7 @@ func (c *Client) GetPullzoneHostname(pullzoneId int64, id int64) (PullzoneHostna
 		}
 	}
 
-	return PullzoneHostname{}, errors.New("Hostname not found")
+	return PullzoneHostname{}, ErrNotFound
 }
 
 func (c *Client) GetPullzoneHostnameByName(pullzoneId int64, hostname string) (PullzoneHostname, error) {
@@ -257,6 +257,10 @@ func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d/removeHostname", c.apiUrl, pullzoneId), bytes.NewReader(body))
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusNoContent {

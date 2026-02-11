@@ -18,8 +18,6 @@ type ComputeScriptRelease struct {
 	Code string `json:"Code"`
 }
 
-var ErrComputeScriptReleaseNotFound = errors.New("compute script release not found")
-
 func (c *Client) GetComputeScriptActiveRelease(scriptId int64) (ComputeScriptRelease, error) {
 	var response ComputeScriptRelease
 
@@ -29,7 +27,7 @@ func (c *Client) GetComputeScriptActiveRelease(scriptId int64) (ComputeScriptRel
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		return response, ErrComputeScriptReleaseNotFound
+		return response, ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

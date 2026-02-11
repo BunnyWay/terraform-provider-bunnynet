@@ -205,6 +205,10 @@ func (c *Client) GetComputeContainerApp(ctx context.Context, id string) (Compute
 		return ComputeContainerApp{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return ComputeContainerApp{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return ComputeContainerApp{}, errors.New(resp.Status)
 	}
@@ -384,6 +388,10 @@ func (c *Client) DeleteComputeContainerApp(id string) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/mc/apps/%s", c.apiUrl, id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

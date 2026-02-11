@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -145,6 +146,11 @@ func (r *ComputeContainerImageregistryResource) Read(ctx context.Context, req re
 
 	dataApi, err := r.client.GetComputeContainerImageregistry(ctx, data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching container image registry", err.Error()))
 		return
 	}
@@ -192,7 +198,7 @@ func (r *ComputeContainerImageregistryResource) Delete(ctx context.Context, req 
 	}
 
 	err := r.client.DeleteComputeContainerImageregistry(data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting container image registry", err.Error()))
 	}
 }

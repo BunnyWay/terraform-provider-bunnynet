@@ -27,6 +27,10 @@ func (c *Client) GetComputeScriptSecretByName(scriptId int64, name string) (Comp
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -146,6 +150,10 @@ func (c *Client) DeleteComputeScriptSecret(scriptId int64, id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/compute/script/%d/secrets/%d", c.apiUrl, scriptId, id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusNoContent {

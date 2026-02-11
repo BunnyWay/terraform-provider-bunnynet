@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -162,6 +163,11 @@ func (r *StreamVideoResource) Read(ctx context.Context, req resource.ReadRequest
 
 	dataApi, err := r.client.GetStreamVideo(data.Library.ValueInt64(), data.Id.ValueString())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching stream video", err.Error()))
 		return
 	}
@@ -227,7 +233,7 @@ func (r *StreamVideoResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err := r.client.DeleteStreamVideo(data.Library.ValueInt64(), data.Id.ValueString())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting stream video", err.Error()))
 	}
 }

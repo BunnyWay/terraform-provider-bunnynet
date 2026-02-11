@@ -169,6 +169,10 @@ func (c *Client) GetPullzone(id int64) (Pullzone, error) {
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -298,6 +302,10 @@ func (c *Client) DeletePullzone(id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusNoContent {

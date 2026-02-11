@@ -52,6 +52,10 @@ func (c *Client) GetStreamVideo(libraryId int64, id string) (StreamVideo, error)
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -114,6 +118,10 @@ func (c *Client) DeleteStreamVideo(libraryId int64, id string) error {
 	resp, err := c.doStreamRequest(library, http.MethodDelete, fmt.Sprintf("videos/%s", id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

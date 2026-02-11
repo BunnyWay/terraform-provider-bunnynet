@@ -101,13 +101,17 @@ func (c *Client) GetPullzoneEdgerule(pullzoneId int64, guid string) (PullzoneEdg
 		}
 	}
 
-	return PullzoneEdgerule{}, errors.New("Edgerule not found")
+	return PullzoneEdgerule{}, ErrNotFound
 }
 
 func (c *Client) DeletePullzoneEdgerule(pullzoneId int64, guid string) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d/edgerules/%s", c.apiUrl, pullzoneId, guid), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusNoContent {

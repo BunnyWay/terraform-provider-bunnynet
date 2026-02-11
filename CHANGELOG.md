@@ -9,9 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
-### Backwards compatibility break
+### Backwards compatibility breaks
 
-The provider's `container_api_url` configuration has been removed, as the compute container (Magic Containers) resources and datasources now use the official [Public API](https://docs.bunny.net/api-reference/magic-containers/overview).
+1. All resources are now being [marked as removed](https://github.com/hashicorp/terraform-plugin-framework/blob/v1.17.0/tfsdk/state.go#L100-L106) when the API reports them as not existing;
+
+2. The provider's `container_api_url` configuration has been removed, as the compute container (Magic Containers) resources and datasources now use the official [Public API](https://docs.bunny.net/api-reference/magic-containers/overview);
 
 ### Added
 - resource `dns_record`: support `SVCB`, `HTTPS` and `TLSA` types;

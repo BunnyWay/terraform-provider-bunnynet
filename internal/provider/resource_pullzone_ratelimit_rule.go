@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/resourcestateupgrader"
@@ -308,6 +309,11 @@ func (r *PullzoneRatelimitRuleResource) Read(ctx context.Context, req resource.R
 
 	dataApi, err := r.client.GetPullzoneRatelimitRule(ctx, data.PullzoneId.ValueInt64(), data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching ratelimit rule", err.Error()))
 		return
 	}
@@ -352,7 +358,7 @@ func (r *PullzoneRatelimitRuleResource) Delete(ctx context.Context, req resource
 	}
 
 	err := r.client.DeletePullzoneRatelimitRule(ctx, data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting ratelimit rule", err.Error()))
 	}
 }

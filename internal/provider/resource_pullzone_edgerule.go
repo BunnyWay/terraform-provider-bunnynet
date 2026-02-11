@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneedgeruleresourcevalidator"
@@ -262,6 +263,11 @@ func (r *PullzoneEdgeruleResource) Read(ctx context.Context, req resource.ReadRe
 	dataApi, err := r.client.GetPullzoneEdgerule(data.PullzoneId.ValueInt64(), data.Id.ValueString())
 	pzMutex.Unlock(pullzoneId)
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching edgerule", err.Error()))
 		return
 	}
@@ -312,7 +318,7 @@ func (r *PullzoneEdgeruleResource) Delete(ctx context.Context, req resource.Dele
 	pzMutex.Lock(pullzoneId)
 	err := r.client.DeletePullzoneEdgerule(data.PullzoneId.ValueInt64(), data.Id.ValueString())
 	pzMutex.Unlock(pullzoneId)
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting edgerule", err.Error()))
 	}
 }

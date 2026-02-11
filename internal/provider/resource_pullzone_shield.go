@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneshieldresourcevalidator"
@@ -534,6 +535,11 @@ func (r *PullzoneShieldResource) Read(ctx context.Context, req resource.ReadRequ
 
 	dataApi, err := r.client.GetPullzoneShield(ctx, data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching pullzone shield", err.Error()))
 		return
 	}
@@ -578,7 +584,7 @@ func (r *PullzoneShieldResource) Delete(ctx context.Context, req resource.Delete
 	}
 
 	err := r.client.DeletePullzoneShield(ctx, data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting pullzone shield", err.Error()))
 	}
 }

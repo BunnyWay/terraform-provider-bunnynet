@@ -36,6 +36,10 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 		return data, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -85,7 +89,7 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 	if data.CurrentReleaseId > 0 {
 		release, err := c.GetComputeScriptActiveRelease(data.Id)
 		if err != nil {
-			if !errors.Is(err, ErrComputeScriptReleaseNotFound) {
+			if !errors.Is(err, ErrNotFound) {
 				return data, err
 			}
 		} else {
@@ -276,6 +280,10 @@ func (c *Client) DeleteComputeScript(id int64) error {
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/compute/script/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusNoContent {

@@ -59,8 +59,7 @@ func (c *Client) GetDnsRecord(ctx context.Context, zoneId int64, id int64) (DnsR
 		}
 	}
 
-	return DnsRecord{}, errors.New("DNS record not found")
-
+	return DnsRecord{}, ErrNotFound
 }
 
 func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord, error) {
@@ -147,6 +146,10 @@ func (c *Client) DeleteDnsRecord(ctx context.Context, zoneId int64, id int64) er
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d/records/%d: %s", zoneId, id, resp.Status))
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)

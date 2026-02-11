@@ -56,6 +56,10 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 		return result, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return result, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
@@ -217,6 +221,10 @@ func (c *Client) DeletePullzoneAccessList(ctx context.Context, pullzoneId int64,
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/shield/shield-zone/%d/access-lists/%d", c.apiUrl, shieldZoneId, listId), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

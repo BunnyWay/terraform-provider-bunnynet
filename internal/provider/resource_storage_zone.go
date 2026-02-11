@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/storagezoneresourcevalidator"
@@ -209,6 +210,11 @@ func (r *StorageZoneResource) Read(ctx context.Context, req resource.ReadRequest
 
 	dataApi, err := r.client.GetStorageZone(ctx, data.Id.ValueInt64())
 	if err != nil {
+		if errors.Is(err, api.ErrNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error fetching storage zone", err.Error()))
 		return
 	}
@@ -269,7 +275,7 @@ func (r *StorageZoneResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	err := r.client.DeleteStorageZone(ctx, data.Id.ValueInt64())
-	if err != nil {
+	if err != nil && !errors.Is(err, api.ErrNotFound) {
 		resp.Diagnostics.Append(diag.NewErrorDiagnostic("Error deleting storage zone", err.Error()))
 	}
 }

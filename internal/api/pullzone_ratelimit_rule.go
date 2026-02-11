@@ -51,6 +51,10 @@ func (c *Client) GetPullzoneRatelimitRule(ctx context.Context, pullzoneId int64,
 		return PullzoneRatelimitRule{}, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return PullzoneRatelimitRule{}, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
@@ -160,6 +164,10 @@ func (c *Client) DeletePullzoneRatelimitRule(ctx context.Context, ruleId int64) 
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/shield/rate-limit/%d", c.apiUrl, ruleId), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {

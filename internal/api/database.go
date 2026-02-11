@@ -40,6 +40,10 @@ func (c *Client) GetDatabase(ctx context.Context, id string) (Database, error) {
 
 	tflog.Info(ctx, fmt.Sprintf("GET /edgedb/v2/databases/%s: %s", id, resp.Status))
 
+	if resp.StatusCode == http.StatusNotFound {
+		return data.Database, ErrNotFound
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return data.Database, errors.New(resp.Status)
 	}
@@ -135,6 +139,10 @@ func (c *Client) DeleteDatabase(id string) error {
 	resp, err := c.doJWTRequest(http.MethodDelete, fmt.Sprintf("%s/edgedb/v2/databases/%s", c.apiUrl, id), nil)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusOK {
