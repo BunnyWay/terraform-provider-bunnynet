@@ -48,7 +48,7 @@ func TestHostname(t *testing.T) {
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
 				"type":  tftypes.NewValue(tftypes.String, "MX"),
-				"value": tftypes.NewValue(tftypes.String, "."),
+				"value": tftypes.NewValue(tftypes.String, "mail.example.com"),
 			},
 		},
 		{
@@ -56,6 +56,27 @@ func TestHostname(t *testing.T) {
 			PlanValues: map[string]tftypes.Value{
 				"type":  tftypes.NewValue(tftypes.String, "MX"),
 				"value": tftypes.NewValue(tftypes.String, "mail.example.com."),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"type":  tftypes.NewValue(tftypes.String, "MX"),
+				"value": tftypes.NewValue(tftypes.String, "."),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"type":  tftypes.NewValue(tftypes.String, "TXT"),
+				"value": tftypes.NewValue(tftypes.String, "."),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"type":  tftypes.NewValue(tftypes.String, "CNAME"),
+				"value": tftypes.NewValue(tftypes.String, "."),
 			},
 		},
 	}

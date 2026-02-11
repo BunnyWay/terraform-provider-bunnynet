@@ -38,13 +38,13 @@ func (v hostnameValidator) ValidateResource(ctx context.Context, req resource.Va
 
 	rType := planType.ValueString()
 	value := planValue.ValueString()
-	isNullMXRecord := rType == "MX" && value == "."
 
 	if len(value) == 0 {
 		resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(valueAttr, "Invalid attribute configuration", "Attribute cannot be empty"))
 		return
 	}
 
+	isNullMXRecord := rType == "MX" && value == "."
 	valueIsHostname := rType == "CNAME" || rType == "MX" || rType == "NS" || rType == "PTR" || rType == "SRV"
 	if valueIsHostname && !isNullMXRecord && value[len(value)-1] == '.' {
 		resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(valueAttr, "Invalid attribute configuration", v.Description(ctx)))
