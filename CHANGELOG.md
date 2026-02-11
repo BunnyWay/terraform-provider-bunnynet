@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - resource `dns_record`: support `SVCB`, `HTTPS` and `TLSA` types;
+- resource `dns_record`: support [Null MX](https://www.rfc-editor.org/rfc/rfc7505.html) ([#74](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/74));
 
 ### Fixed
 - resource `compute_container_app`: fix flaky "attribute was null" error;
