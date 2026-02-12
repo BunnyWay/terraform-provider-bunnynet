@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.13.0 - 2026-02-12
+
 ### Backwards compatibility breaks
 
 1. All resources are now being [marked as removed](https://github.com/hashicorp/terraform-plugin-framework/blob/v1.17.0/tfsdk/state.go#L100-L106) when the API reports them as not existing;
