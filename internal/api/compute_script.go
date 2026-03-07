@@ -186,6 +186,43 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 		_ = resp.Body.Close()
 	}
 
+	// publish script
+	{
+		publishBody, err := json.Marshal(map[string]string{
+			"Note": "",
+		})
+
+		if err != nil {
+			return ComputeScript{}, err
+		}
+
+		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/publish", c.apiUrl, dataApiResult.Id), bytes.NewReader(publishBody))
+		if err != nil {
+			return ComputeScript{}, err
+		}
+
+		if resp.StatusCode != http.StatusNoContent {
+			bodyResp, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return ComputeScript{}, err
+			}
+
+			_ = resp.Body.Close()
+			var obj struct {
+				Message string `json:"Message"`
+			}
+
+			err = json.Unmarshal(bodyResp, &obj)
+			if err != nil {
+				return ComputeScript{}, err
+			}
+
+			return ComputeScript{}, errors.New(obj.Message)
+		}
+
+		_ = resp.Body.Close()
+	}
+
 	return c.GetComputeScript(ctx, dataApiResult.Id)
 }
 
@@ -270,6 +307,43 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 			}
 
 			return ComputeScript{}, errors.New(obj.Message)
+		}
+
+		// publish script
+		{
+			publishBody, err := json.Marshal(map[string]string{
+				"Note": "",
+			})
+
+			if err != nil {
+				return ComputeScript{}, err
+			}
+
+			resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/publish", c.apiUrl, id), bytes.NewReader(publishBody))
+			if err != nil {
+				return ComputeScript{}, err
+			}
+
+			if resp.StatusCode != http.StatusNoContent {
+				bodyResp, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return ComputeScript{}, err
+				}
+
+				_ = resp.Body.Close()
+				var obj struct {
+					Message string `json:"Message"`
+				}
+
+				err = json.Unmarshal(bodyResp, &obj)
+				if err != nil {
+					return ComputeScript{}, err
+				}
+
+				return ComputeScript{}, errors.New(obj.Message)
+			}
+
+			_ = resp.Body.Close()
 		}
 	}
 
