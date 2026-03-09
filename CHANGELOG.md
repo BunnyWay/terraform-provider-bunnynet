@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Changed
+- resource `compute_script`: publish after code changes ([#77](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/77));
+
 ## 0.13.1 - 2026-03-05
 
 ### Changed

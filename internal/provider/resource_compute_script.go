@@ -10,6 +10,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -24,6 +25,7 @@ import (
 
 var _ resource.Resource = &ComputeScriptResource{}
 var _ resource.ResourceWithImportState = &ComputeScriptResource{}
+var _ resource.ResourceWithModifyPlan = &ComputeScriptResource{}
 
 func NewComputeScriptResource() resource.Resource {
 	return &ComputeScriptResource{}
@@ -121,6 +123,20 @@ func (r *ComputeScriptResource) Configure(ctx context.Context, req resource.Conf
 	}
 
 	r.client = client
+}
+
+func (r *ComputeScriptResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var contentState string
+	var contentPlan string
+
+	req.State.GetAttribute(ctx, path.Root("content"), &contentState)
+	req.Plan.GetAttribute(ctx, path.Root("content"), &contentPlan)
+
+	if contentState == "" || contentPlan == "" || contentState == contentPlan {
+		return
+	}
+
+	resp.Plan.SetAttribute(ctx, path.Root("release"), types.StringUnknown())
 }
 
 func (r *ComputeScriptResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

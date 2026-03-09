@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -186,42 +187,7 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 		_ = resp.Body.Close()
 	}
 
-	// publish script
-	{
-		publishBody, err := json.Marshal(map[string]string{
-			"Note": "",
-		})
-
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/publish", c.apiUrl, dataApiResult.Id), bytes.NewReader(publishBody))
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		if resp.StatusCode != http.StatusNoContent {
-			bodyResp, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			_ = resp.Body.Close()
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			return ComputeScript{}, errors.New(obj.Message)
-		}
-
-		_ = resp.Body.Close()
-	}
+	// @TODO should we publish the script on creation?
 
 	return c.GetComputeScript(ctx, dataApiResult.Id)
 }
@@ -310,40 +276,11 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 		}
 
 		// publish script
-		{
-			publishBody, err := json.Marshal(map[string]string{
-				"Note": "",
-			})
-
+		if previousData.CurrentReleaseId > 0 {
+			err = c.publishComputeScript(data)
 			if err != nil {
-				return ComputeScript{}, err
+				return data, err
 			}
-
-			resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/publish", c.apiUrl, id), bytes.NewReader(publishBody))
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			if resp.StatusCode != http.StatusNoContent {
-				bodyResp, err := io.ReadAll(resp.Body)
-				if err != nil {
-					return ComputeScript{}, err
-				}
-
-				_ = resp.Body.Close()
-				var obj struct {
-					Message string `json:"Message"`
-				}
-
-				err = json.Unmarshal(bodyResp, &obj)
-				if err != nil {
-					return ComputeScript{}, err
-				}
-
-				return ComputeScript{}, errors.New(obj.Message)
-			}
-
-			_ = resp.Body.Close()
 		}
 	}
 
@@ -362,6 +299,31 @@ func (c *Client) DeleteComputeScript(id int64) error {
 
 	if resp.StatusCode != http.StatusNoContent {
 		return errors.New(resp.Status)
+	}
+
+	return nil
+}
+
+func (c *Client) publishComputeScript(data ComputeScript) error {
+	body, err := json.Marshal(map[string]string{
+		"Note": "",
+	})
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/publish", c.apiUrl, data.Id), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return utils.ExtractErrorMessage(resp)
 	}
 
 	return nil

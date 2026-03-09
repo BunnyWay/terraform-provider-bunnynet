@@ -120,7 +120,7 @@ func (r *DnsScriptResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	dataApi := r.convertModelToApi(ctx, dataTf)
-	dataApi, err := r.client.CreateComputeScript(ctx, dataApi)
+	dataApi, err := r.client.CreateDnsScript(ctx, dataApi)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create DNS script", err.Error())
 		return
