@@ -27,8 +27,8 @@ func (v containerVolumeMounts) ValidateResource(ctx context.Context, request res
 	containerAttr := path.Root("container")
 	var containerList types.List
 	request.Config.GetAttribute(ctx, containerAttr, &containerList)
-	volumeMounts := map[string]uint8{}
-	pathMounts := map[string]uint8{}
+	volumeMounts := map[string]map[string]uint8{}
+	pathMounts := map[string]map[string]uint8{}
 
 	if len(containerList.Elements()) == 0 {
 		response.Diagnostics.AddError("No containers found", "No containers found")
@@ -36,18 +36,39 @@ func (v containerVolumeMounts) ValidateResource(ctx context.Context, request res
 	}
 
 	for _, c := range containerList.Elements() {
-		for _, e := range c.(types.Object).Attributes()["volumemount"].(types.List).Elements() {
-			mountName := e.(types.Object).Attributes()["name"].(types.String).ValueString()
-			if _, ok := volumeMounts[mountName]; !ok {
-				volumeMounts[mountName] = 0
-			}
-			volumeMounts[mountName]++
+		cAttrs := c.(types.Object).Attributes()
+		cName := cAttrs["name"].(types.String).ValueString()
 
-			mountPath := e.(types.Object).Attributes()["path"].(types.String).ValueString()
-			if _, ok := pathMounts[mountPath]; !ok {
-				pathMounts[mountPath] = 0
+		for _, e := range cAttrs["volumemount"].(types.List).Elements() {
+			// name
+			{
+				mountName := e.(types.Object).Attributes()["name"].(types.String).ValueString()
+
+				if _, ok := volumeMounts[mountName]; !ok {
+					volumeMounts[mountName] = map[string]uint8{}
+				}
+
+				if _, ok := volumeMounts[mountName][cName]; !ok {
+					volumeMounts[mountName][cName] = 0
+				}
+
+				volumeMounts[mountName][cName]++
 			}
-			pathMounts[mountPath]++
+
+			// path
+			{
+				mountPath := e.(types.Object).Attributes()["path"].(types.String).ValueString()
+
+				if _, ok := pathMounts[cName]; !ok {
+					pathMounts[cName] = map[string]uint8{}
+				}
+
+				if _, ok := pathMounts[cName][mountPath]; !ok {
+					pathMounts[cName][mountPath] = 0
+				}
+
+				pathMounts[cName][mountPath]++
+			}
 		}
 	}
 
@@ -61,22 +82,26 @@ func (v containerVolumeMounts) ValidateResource(ctx context.Context, request res
 		volumes[name] = struct{}{}
 	}
 
-	for name, count := range volumeMounts {
+	for name, containerMounts := range volumeMounts {
 		if _, ok := volumes[name]; !ok {
 			response.Diagnostics.AddError("Invalid endpoint configuration", fmt.Sprintf("The volume \"%s\" does not exist", name))
 			continue
 		}
 
-		if count > 1 {
-			response.Diagnostics.AddError("Invalid endpoint configuration", fmt.Sprintf("The volume \"%s\" can only be mounted once", name))
-			continue
+		for containerName, count := range containerMounts {
+			if count > 1 {
+				response.Diagnostics.AddError("Invalid endpoint configuration", fmt.Sprintf("The volume \"%s\" can only be mounted once on container \"%s\"", name, containerName))
+				continue
+			}
 		}
 	}
 
-	for pathMount, count := range pathMounts {
-		if count > 1 {
-			response.Diagnostics.AddError("Invalid endpoint configuration", fmt.Sprintf("There are multiple volumes mounted at the path \"%s\"", pathMount))
-			continue
+	for containerName, containerMounts := range pathMounts {
+		for pathMount, count := range containerMounts {
+			if count > 1 {
+				response.Diagnostics.AddError("Invalid endpoint configuration", fmt.Sprintf("There are multiple volumes mounted at the path \"%s\" on container \"%s\"", pathMount, containerName))
+				continue
+			}
 		}
 	}
 }
