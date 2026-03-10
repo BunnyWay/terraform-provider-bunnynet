@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.13.2 - 2026-03-10
+
 ### Changed
 - resource `compute_container_app`: allow a volume to be mounted in multiple containers at once;
 - resource `compute_script`: publish after code changes ([#77](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/77));
