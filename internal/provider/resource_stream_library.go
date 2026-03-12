@@ -173,7 +173,7 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 			"player_version": schema.Int64Attribute{
 				Optional: true,
 				Computed: true,
-				Default:  int64default.StaticInt64(1),
+				Default:  int64default.StaticInt64(2),
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
