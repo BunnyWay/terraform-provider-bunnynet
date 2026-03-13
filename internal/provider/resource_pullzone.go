@@ -54,6 +54,7 @@ type PullzoneResource struct {
 
 type PullzoneResourceModel struct {
 	Id                                 types.Int64   `tfsdk:"id"`
+	ExistingId                         types.Int64   `tfsdk:"existing_id"`
 	Name                               types.String  `tfsdk:"name"`
 	CdnDomain                          types.String  `tfsdk:"cdn_domain"`
 	DisableLetsEncrypt                 types.Bool    `tfsdk:"disable_letsencrypt"`
@@ -265,10 +266,28 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Description: "The unique ID of the pull zone.",
 			},
+			"existing_id": schema.Int64Attribute{
+				Optional: true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.RequiresReplace(),
+					int64planmodifier.UseStateForUnknown(),
+				},
+				Description: "Adopt an existing pull zone by ID instead of creating a new one. Useful for managing auto-created pull zones from accelerated DNS records. When set, the resource will update the existing pull zone's settings instead of creating a new one, and will not delete it on destroy.",
+			},
 			"name": schema.StringAttribute{
-				Required: true,
+				Optional: true,
+				Computed: true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.RequiresReplaceIf(
+						func(ctx context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
+							var existingId types.Int64
+							req.Plan.GetAttribute(ctx, path.Root("existing_id"), &existingId)
+							resp.RequiresReplace = existingId.IsNull() || existingId.IsUnknown()
+						},
+						"Name changes require replacement only when not adopting an existing pull zone.",
+						"Name changes require replacement only when not adopting an existing pull zone.",
+					),
+					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
@@ -1222,6 +1241,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					"url": schema.StringAttribute{
 						CustomType:  customtype.PullzoneOriginUrlType{},
 						Optional:    true,
+						Computed:    true,
 						Description: "The origin URL from where the files are fetched.",
 					},
 					"storagezone": schema.Int64Attribute{
@@ -1357,6 +1377,7 @@ func (r *PullzoneResource) ConfigValidators(ctx context.Context) []resource.Conf
 		pullzoneresourcevalidator.Origin(),
 		pullzoneresourcevalidator.PermacacheCacheExpirationTime(),
 		pullzoneresourcevalidator.CacheStaleBackgroundUpdate(),
+		pullzoneresourcevalidator.NameOrExistingId(),
 	}
 }
 
@@ -1382,6 +1403,44 @@ func (r *PullzoneResource) Create(ctx context.Context, req resource.CreateReques
 	var dataTf PullzoneResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &dataTf)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !dataTf.ExistingId.IsNull() && !dataTf.ExistingId.IsUnknown() {
+		// Adopt an existing pull zone instead of creating a new one.
+		existingId := dataTf.ExistingId.ValueInt64()
+
+		existing, err := r.client.GetPullzone(existingId)
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to find existing pullzone", fmt.Sprintf("Pull zone %d not found: %s", existingId, err.Error()))
+			return
+		}
+
+		// Use the existing pull zone's ID and name.
+		dataTf.Id = types.Int64Value(existing.Id)
+		if dataTf.Name.IsNull() || dataTf.Name.IsUnknown() {
+			dataTf.Name = types.StringValue(existing.Name)
+		}
+
+		// Update the existing pull zone with the desired settings.
+		dataApi := r.convertModelToApi(ctx, dataTf)
+		pzMutex.Lock(existingId)
+		dataApi, err = r.client.UpdatePullzone(dataApi)
+		pzMutex.Unlock(existingId)
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to update adopted pullzone", err.Error())
+			return
+		}
+
+		tflog.Trace(ctx, fmt.Sprintf("adopted pullzone %d (%s)", dataApi.Id, dataApi.Name))
+		dataTf, diags := r.convertApiToModel(dataApi)
+		if diags != nil {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+
+		dataTf.ExistingId = types.Int64Value(existingId)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 		return
 	}
 
@@ -1429,6 +1488,9 @@ func (r *PullzoneResource) Read(ctx context.Context, req resource.ReadRequest, r
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
+	// Preserve existing_id from state since it is not part of the API model.
+	dataTf.ExistingId = data.ExistingId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
@@ -1501,6 +1563,9 @@ func (r *PullzoneResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	// Preserve existing_id from plan since it is not part of the API model.
+	dataTf.ExistingId = data.ExistingId
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
 }
 
@@ -1508,6 +1573,12 @@ func (r *PullzoneResource) Delete(ctx context.Context, req resource.DeleteReques
 	var data PullzoneResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.ExistingId.IsNull() {
+		// Adopted pull zone — the DNS record owns its lifecycle, so skip deletion.
+		tflog.Info(ctx, fmt.Sprintf("Skipping deletion of adopted pull zone %d", data.Id.ValueInt64()))
 		return
 	}
 
