@@ -23,9 +23,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
+	"os"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 var _ resource.Resource = &StorageZoneResource{}
@@ -190,6 +193,12 @@ func (r *StorageZoneResource) Create(ctx context.Context, req resource.CreateReq
 	if diags != nil {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	// @TODO inject via r.Configure()
+	if os.Getenv("TF_ACC") == "1" {
+		tflog.Warn(ctx, "Added artificial delay to allow for backend processing")
+		time.Sleep(5 * time.Second)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &dataTf)...)
