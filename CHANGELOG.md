@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - resource `stream_library`: update default player version;
+- resource `compute_container_app`: standardize volume name validation;
 
 ## 0.13.2 - 2026-03-10
 
