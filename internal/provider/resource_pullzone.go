@@ -1354,8 +1354,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 
 func (r *PullzoneResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
-		pullzoneresourcevalidator.OriginComputeScript(),
-		pullzoneresourcevalidator.MiddlewareScript(),
+		pullzoneresourcevalidator.Origin(),
 		pullzoneresourcevalidator.PermacacheCacheExpirationTime(),
 		pullzoneresourcevalidator.CacheStaleBackgroundUpdate(),
 	}
