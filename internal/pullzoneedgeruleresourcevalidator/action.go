@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+	"strings"
 )
 
 func ActionParameters() resource.ConfigValidator {
@@ -76,6 +78,12 @@ func (v actionParameters) ValidateResource(ctx context.Context, request resource
 }
 
 func (v actionParameters) validateAction(action string, parameter1 string, parameter2 string, parameter3 string) error {
+	actionTypes := maps.Values(ActionMap)
+
+	if !slices.Contains(actionTypes, action) {
+		return fmt.Errorf("invalid action type \"%s\". Should be one of \"%s\"", action, strings.Join(actionTypes, "\", "))
+	}
+
 	switch action {
 	case "Redirect":
 		if len(parameter1) == 0 {
