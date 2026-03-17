@@ -45,47 +45,44 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 		return
 	}
 
-	hasStorageZone := false
-	{
-		originStorageZone := origin.(types.Object).Attributes()["storagezone"].(types.Int64)
-		if !originStorageZone.IsUnknown() {
-			hasStorageZone = originStorageZone.ValueInt64() > 0
-		}
+	originStorageZone := origin.(types.Object).Attributes()["storagezone"].(types.Int64)
+	if originStorageZone.IsUnknown() {
+		return
 	}
 
-	hasScript := false
-	{
-		originScript := origin.(types.Object).Attributes()["script"].(types.Int64)
-		if !originScript.IsUnknown() {
-			hasScript = originScript.ValueInt64() > 0
-		}
+	originScript := origin.(types.Object).Attributes()["script"].(types.Int64)
+	if originScript.IsUnknown() {
+		return
 	}
 
+	originMiddlewareScript := origin.(types.Object).Attributes()["middleware_script"].(types.Int64)
+	if originMiddlewareScript.IsUnknown() {
+		return
+	}
+
+	var routing attr.Value
+	req.Config.GetAttribute(ctx, path.Root("routing"), &routing)
+
+	if routing.IsUnknown() {
+		return
+	}
+
+	hasStorageZone := originStorageZone.ValueInt64() > 0
+	hasScript := originScript.ValueInt64() > 0
+	hasMiddlewareScript := originMiddlewareScript.ValueInt64() > 0
 	hasScriptingRoutingFilter := false
-	{
-		var routing attr.Value
-		req.Config.GetAttribute(ctx, path.Root("routing"), &routing)
 
-		if !routing.IsNull() {
-			routingFilters := routing.(types.Object).Attributes()["filters"]
-			filterElements := routingFilters.(types.Set).Elements()
+	if !routing.IsNull() {
+		routingFilters := routing.(types.Object).Attributes()["filters"]
+		filterElements := routingFilters.(types.Set).Elements()
 
-			var filters []string
-			for _, filter := range filterElements {
-				filters = append(filters, filter.(types.String).ValueString())
-			}
-
-			if slices.Contains(filters, "scripting") {
-				hasScriptingRoutingFilter = true
-			}
+		var filters []string
+		for _, filter := range filterElements {
+			filters = append(filters, filter.(types.String).ValueString())
 		}
-	}
 
-	hasMiddlewareScript := false
-	{
-		originMiddlewareScript := origin.(types.Object).Attributes()["middleware_script"].(types.Int64)
-		if !originMiddlewareScript.IsUnknown() {
-			hasMiddlewareScript = originMiddlewareScript.ValueInt64() > 0
+		if slices.Contains(filters, "scripting") {
+			hasScriptingRoutingFilter = true
 		}
 	}
 
