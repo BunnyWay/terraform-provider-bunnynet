@@ -513,7 +513,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 							},
 							Validators: []validator.String{
 								stringvalidator.LengthAtLeast(1),
-								stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9-]+$"), "name should only contain letters, numbers and dash"),
+								stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9- ]+$"), "name should only contain letters, numbers and dash"),
 							},
 							Description: "The name of the container.",
 						},
@@ -609,7 +609,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 										},
 										Validators: []validator.String{
 											stringvalidator.LengthAtLeast(1),
-											stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9-]+$"), "endpoint.name should only contain letters, numbers and dash"),
+											stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9- ]+$"), "endpoint.name should only contain letters, numbers and dash"),
 										},
 										Description: "The name of the endpoint.",
 									},

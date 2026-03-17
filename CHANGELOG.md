@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resource `compute_container_app`: standardize volume name validation;
 - resource `pullzone`: improve `origin` block validation;
 - resource `pullzone_edgerule`: validate action type;
+- resource `compute_container_app`: allow spaces in container/endpoint names;
 
 ## 0.13.2 - 2026-03-10
 
