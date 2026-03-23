@@ -25,6 +25,8 @@ func TestOrigin(t *testing.T) {
 			"storagezone":       tftypes.Number,
 			"script":            tftypes.Number,
 			"middleware_script": tftypes.Number,
+			"dns_port":          tftypes.Number,
+			"dns_scheme":        tftypes.String,
 		},
 	}
 
@@ -49,6 +51,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, nil),
@@ -64,6 +68,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -81,6 +87,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -98,6 +106,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, 12345),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, nil),
@@ -113,6 +123,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, 12345),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -130,6 +142,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, 12345),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -147,10 +161,42 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, 12345),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, nil),
 				}),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "OriginUrl"),
+					"url":               tftypes.NewValue(tftypes.String, "https://192.0.2.13:443/"),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, 443),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "OriginUrl"),
+					"url":               tftypes.NewValue(tftypes.String, "https://192.0.2.13:443/"),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, "https"),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
 			},
 		},
 
@@ -164,6 +210,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, 12345),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -181,6 +229,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, 12345),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -199,6 +249,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, 12345),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -216,6 +268,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -233,6 +287,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, 12345),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -252,6 +308,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, nil),
 			},
@@ -265,6 +323,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, nil),
 			},
@@ -278,6 +338,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, 12345),
 					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, nil),
 			},
@@ -291,6 +353,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, 12345),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -308,6 +372,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, 12345),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
 				}),
 				"routing": tftypes.NewValue(routingType, map[string]tftypes.Value{
 					"filters": tftypes.NewValue(routingFiltersElementType, []tftypes.Value{
@@ -325,6 +391,85 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       tftypes.NewValue(tftypes.Number, 12345),
 					"script":            tftypes.NewValue(tftypes.Number, nil),
 					"middleware_script": tftypes.NewValue(tftypes.Number, 12345),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
+			},
+		},
+
+		// DnsAccelerate
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "DnsAccelerate"),
+					"url":               tftypes.NewValue(tftypes.String, nil),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, 443),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, "https"),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "DnsAccelerate"),
+					"url":               tftypes.NewValue(tftypes.String, "https://192.0.2.13:443/"),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "DnsAccelerate"),
+					"url":               tftypes.NewValue(tftypes.String, nil),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "DnsAccelerate"),
+					"url":               tftypes.NewValue(tftypes.String, nil),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, nil),
+				}),
+				"routing": tftypes.NewValue(routingType, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"origin": tftypes.NewValue(originType, map[string]tftypes.Value{
+					"type":              tftypes.NewValue(tftypes.String, "DnsAccelerate"),
+					"url":               tftypes.NewValue(tftypes.String, nil),
+					"storagezone":       tftypes.NewValue(tftypes.Number, nil),
+					"script":            tftypes.NewValue(tftypes.Number, nil),
+					"middleware_script": tftypes.NewValue(tftypes.Number, nil),
+					"dns_port":          tftypes.NewValue(tftypes.Number, nil),
+					"dns_scheme":        tftypes.NewValue(tftypes.String, "https"),
 				}),
 				"routing": tftypes.NewValue(routingType, nil),
 			},
@@ -342,6 +487,8 @@ func TestOrigin(t *testing.T) {
 					"storagezone":       schema.Int64Attribute{},
 					"script":            schema.Int64Attribute{},
 					"middleware_script": schema.Int64Attribute{},
+					"dns_port":          schema.Int64Attribute{},
+					"dns_scheme":        schema.StringAttribute{},
 				},
 			},
 			"routing": schema.SingleNestedBlock{

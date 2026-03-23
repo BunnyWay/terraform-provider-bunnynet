@@ -37,6 +37,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+	"net/url"
 	"strconv"
 )
 
@@ -159,6 +160,8 @@ var pullzoneOriginTypes = map[string]attr.Type{
 	"middleware_script":     types.Int64Type,
 	"container_app_id":      types.StringType,
 	"container_endpoint_id": types.StringType,
+	"dns_port":              types.Int64Type,
+	"dns_scheme":            types.StringType,
 }
 
 var pullzoneRoutingTypes = map[string]attr.Type{
@@ -1222,6 +1225,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					"url": schema.StringAttribute{
 						CustomType:  customtype.PullzoneOriginUrlType{},
 						Optional:    true,
+						Computed:    true,
 						Description: "The origin URL from where the files are fetched.",
 					},
 					"storagezone": schema.Int64Attribute{
@@ -1276,6 +1280,24 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Computed:    true,
 						Default:     stringdefault.StaticString(""),
 						Description: "The ID if the compute container app endpoint.",
+					},
+					"dns_port": schema.Int64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     int64default.StaticInt64(0),
+						Description: "The port for DNS Accelerated endpoints.",
+						Validators: []validator.Int64{
+							int64validator.Between(1, 65535),
+						},
+					},
+					"dns_scheme": schema.StringAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(""),
+						Description: "The scheme for DNS Accelerated endpoints.",
+						Validators: []validator.String{
+							stringvalidator.OneOf("http", "https"),
+						},
 					},
 				},
 			},
@@ -1705,6 +1727,8 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.MiddlewareScriptId = origin["middleware_script"].(types.Int64).ValueInt64()
 	dataApi.MagicContainersAppId = origin["container_app_id"].(types.String).ValueString()
 	dataApi.MagicContainersEndpointId = origin["container_endpoint_id"].(types.String).ValueString()
+	dataApi.DnsOriginPort = uint16(origin["dns_port"].(types.Int64).ValueInt64())
+	dataApi.DnsOriginScheme = origin["dns_scheme"].(types.String).ValueString()
 
 	// websockets
 	dataApi.EnableWebSockets = dataTf.WebsocketsEnabled.ValueBool()
@@ -1973,8 +1997,10 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 	// origin
 	{
 		originValues := map[string]attr.Value{
-			"type": types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
-			"url":  customtype.PullzoneOriginUrlValue{StringValue: typeStringOrNull(dataApi.OriginUrl)},
+			"type":       types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
+			"url":        customtype.PullzoneOriginUrlValue{StringValue: typeStringOrNull(dataApi.OriginUrl)},
+			"dns_port":   types.Int64Value(0),
+			"dns_scheme": types.StringValue(""),
 		}
 
 		if dataApi.StorageZoneId == 0 || dataApi.StorageZoneId == -1 {
@@ -1996,6 +2022,35 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 		originValues["verify_ssl"] = types.BoolValue(dataApi.VerifyOriginSSL)
 		originValues["container_app_id"] = types.StringValue(dataApi.MagicContainersAppId)
 		originValues["container_endpoint_id"] = types.StringValue(dataApi.MagicContainersEndpointId)
+
+		if dataApi.OriginType == api.PullzoneOriginTypeDnsAccelerate {
+			diags := diag.Diagnostics{}
+			u, err := url.Parse(dataApi.OriginUrl)
+			if err != nil {
+				diags.AddError("Invalid origin URL", err.Error())
+				return dataTf, diags
+			}
+
+			var port int64
+
+			if v := u.Port(); v == "" {
+				switch u.Scheme {
+				case "http":
+					port = 80
+				case "https":
+					port = 443
+				}
+			} else {
+				port, err = strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					diags.AddError("Invalid origin URL", err.Error())
+					return dataTf, diags
+				}
+			}
+
+			originValues["dns_port"] = types.Int64Value(port)
+			originValues["dns_scheme"] = types.StringValue(u.Scheme)
+		}
 
 		origin, diags := types.ObjectValue(pullzoneOriginTypes, originValues)
 		if diags != nil {

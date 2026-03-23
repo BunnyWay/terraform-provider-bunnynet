@@ -15,6 +15,12 @@ import (
 	"net/http"
 )
 
+const PullzoneOriginTypeOriginUrl = 0
+const PullzoneOriginTypeDnsAccelerate = 1
+const PullzoneOriginTypeStorageZone = 2
+const PullzoneOriginTypeComputeScript = 4
+const PullzoneOriginTypeComputeContainer = 5
+
 type Pullzone struct {
 	Id                  int64  `json:"Id,omitempty"`
 	Name                string `json:"Name,omitempty"`
@@ -117,6 +123,8 @@ type Pullzone struct {
 	MiddlewareScriptId        int64  `json:"MiddlewareScriptId"`
 	MagicContainersAppId      string `json:"MagicContainersAppId,omitempty"`
 	MagicContainersEndpointId string `json:"MagicContainersEndpointId,omitempty"`
+	DnsOriginPort             uint16 `json:"DnsOriginPort,omitempty"`
+	DnsOriginScheme           string `json:"DnsOriginScheme,omitempty"`
 
 	// websockets
 	EnableWebSockets        bool   `json:"EnableWebSockets"`

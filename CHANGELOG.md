@@ -9,6 +9,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Backwards compatibility breaks
+
+Pullzones using the `DnsAccelerate` origin type now have to be configured via the new [`dns_port`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_port-1) and [`dns_scheme`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_scheme-1) attributes:
+
+```terraform
+resource "bunnynet_pullzone" "example" {
+  # ...
+
+  origin {
+    type       = "DnsAccelerate"
+    dns_scheme = "https"
+    dns_port   = 443
+  }
+
+  routing {
+    tier = "Standard"
+  }
+}
+```
+
+### Added
+- resource `pullzone`: origin `dns_port` and `dns_scheme` for DnsAccelerate origin types;
+
 ## 0.13.4 - 2026-03-17
 
 ### Changed

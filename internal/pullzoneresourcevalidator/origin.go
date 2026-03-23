@@ -60,6 +60,16 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 		return
 	}
 
+	originDnsPort := origin.(types.Object).Attributes()["dns_port"].(types.Int64)
+	if originDnsPort.IsUnknown() {
+		return
+	}
+
+	originDnsScheme := origin.(types.Object).Attributes()["dns_scheme"].(types.String)
+	if originDnsScheme.IsUnknown() {
+		return
+	}
+
 	var routing attr.Value
 	req.Config.GetAttribute(ctx, path.Root("routing"), &routing)
 
@@ -92,6 +102,14 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 
 	if originType.ValueString() != "ComputeScript" && hasScript {
 		resp.Diagnostics.AddError("Invalid origin.script value", "origin.script is only applicable for ComputeScript origins.")
+	}
+
+	if originType.ValueString() != "DnsAccelerate" && originDnsPort.ValueInt64() > 0 {
+		resp.Diagnostics.AddError("Invalid origin.dns_port value", "origin.dns_port is only applicable for DnsAccelerate origins.")
+	}
+
+	if originType.ValueString() != "DnsAccelerate" && originDnsScheme.ValueString() != "" {
+		resp.Diagnostics.AddError("Invalid origin.dns_scheme value", "origin.dns_scheme is only applicable for DnsAccelerate origins.")
 	}
 
 	if hasMiddlewareScript && !hasScriptingRoutingFilter {
@@ -128,6 +146,19 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 
 		if !hasScriptingRoutingFilter {
 			resp.Diagnostics.AddError("Invalid routing.filters value", "ComputeScript requires routing.filters to contain the \"scripting\" element.")
+		}
+
+	case "DnsAccelerate":
+		if !originUrl.IsNull() && !originUrl.IsUnknown() {
+			resp.Diagnostics.AddError("Invalid origin.url value", "DnsAccelerate requires origin.url to be empty.")
+		}
+
+		if originDnsPort.ValueInt64() == 0 {
+			resp.Diagnostics.AddError("Invalid origin.dns_port value", "DnsAccelerate requires origin.dns_port to be defined.")
+		}
+
+		if originDnsScheme.ValueString() == "" {
+			resp.Diagnostics.AddError("Invalid origin.dns_scheme value", "DnsAccelerate requires origin.dns_scheme to be defined.")
 		}
 	}
 }
