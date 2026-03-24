@@ -22,6 +22,7 @@ const PullzoneOriginTypeComputeScript = 4
 const PullzoneOriginTypeComputeContainer = 5
 
 const PullzoneOriginUrlForComputeScript = "https://bunnycdn.com"
+const PullzoneOriginUrlForComputeContainer = "https://bunny.net"
 
 type Pullzone struct {
 	Id                  int64  `json:"Id,omitempty"`
@@ -240,8 +241,11 @@ func (c *Client) GetPullzoneByName(ctx context.Context, name string) (Pullzone, 
 }
 
 func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
-	if data.OriginType == PullzoneOriginTypeComputeScript {
+	switch data.OriginType {
+	case PullzoneOriginTypeComputeScript:
 		data.OriginUrl = PullzoneOriginUrlForComputeScript
+	case PullzoneOriginTypeComputeContainer:
+		data.OriginUrl = PullzoneOriginUrlForComputeContainer
 	}
 
 	body, err := json.Marshal(data)
@@ -281,8 +285,11 @@ func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
 func (c *Client) UpdatePullzone(dataApi Pullzone) (Pullzone, error) {
 	id := dataApi.Id
 
-	if dataApi.OriginType == PullzoneOriginTypeComputeScript {
+	switch dataApi.OriginType {
+	case PullzoneOriginTypeComputeScript:
 		dataApi.OriginUrl = PullzoneOriginUrlForComputeScript
+	case PullzoneOriginTypeComputeContainer:
+		dataApi.OriginUrl = PullzoneOriginUrlForComputeContainer
 	}
 
 	body, err := json.Marshal(dataApi)

@@ -15,7 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 2. The `ComputeScript` type does not require the `url = "https://bunnycdn.com"` configuration anymore;
 
-3. Pullzones using the `DnsAccelerate` origin type now have to be configured via the new [`dns_port`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_port-1) and [`dns_scheme`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_scheme-1) attributes:
+3. The `ComputeContainer` type does not require the `url = "https://bunny.net"` configuration anymore;
+
+4. Pullzones using the `DnsAccelerate` origin type now have to be configured via the new [`dns_port`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_port-1) and [`dns_scheme`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_scheme-1) attributes:
 
 ```terraform
 resource "bunnynet_pullzone" "example" {
@@ -39,6 +41,9 @@ resource "bunnynet_pullzone" "example" {
 ### Changed
 - Bumped minimum Go version to 1.25;
 - resource `pullzone`: validate all `origin` attributes respective to the `type`;
+
+### Fixed
+- resource `pullzone`: the origin `host_header` attribute can now be removed;
 
 ## 0.13.4 - 2026-03-17
 
