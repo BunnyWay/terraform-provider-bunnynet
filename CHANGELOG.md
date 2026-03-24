@@ -37,6 +37,8 @@ resource "bunnynet_pullzone" "example" {
 
 ### Added
 - resource `pullzone`: origin `dns_port` and `dns_scheme` for DnsAccelerate origin types;
+- resource `pullzone_access_list`: support `JA4` and `Organization` list types;
+- resource `pullzone_edgerule`: support `EnableRequestCoalescing` and `DisableRequestCoalescing` actions;
 
 ### Changed
 - Bumped minimum Go version to 1.25;

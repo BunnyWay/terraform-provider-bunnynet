@@ -51,6 +51,8 @@ var pullzoneAccessListTypeMap = map[uint8]string{
 	1: "CIDR",
 	2: "ASN",
 	3: "Country",
+	4: "Organization",
+	5: "JA4",
 }
 
 var pullzoneLogAnonymizedStyleMap = map[uint8]string{
@@ -82,6 +84,10 @@ var pullzoneOptimizerWatermarkPositionMap = map[uint8]string{
 var pullzoneShieldRatelimitRuleLimitTimeframeOptions = []int64{
 	1,
 	10,
+	60,
+	300,
+	900,
+	3600,
 }
 
 var pullzoneShieldRatelimitRuleResponseTimeframeOptions = []int64{
@@ -137,6 +143,7 @@ var pullzoneShieldRuleConditionVariableMap = map[uint8]string{
 	22: "RESPONSE_BODY",
 	23: "RESPONSE_HEADERS",
 	24: "RESPONSE_STATUS",
+	25: "FINGERPRINT",
 }
 
 var pullzoneShieldRuleTransformationMap = map[int64]string{

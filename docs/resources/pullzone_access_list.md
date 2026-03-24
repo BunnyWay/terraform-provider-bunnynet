@@ -34,7 +34,7 @@ resource "bunnynet_pullzone_access_list" "hetzner" {
 - `entries` (Set of String) The Access List entries.
 - `name` (String) The Access List name.
 - `pullzone` (Number) The ID of the linked pullzone.
-- `type` (String) Options: `ASN`, `CIDR`, `Country`, `IP`
+- `type` (String) Options: `ASN`, `CIDR`, `Country`, `IP`, `JA4`, `Organization`
 
 ### Optional
 

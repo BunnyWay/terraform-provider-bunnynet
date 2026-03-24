@@ -35,6 +35,8 @@ var ActionMap = map[uint8]string{
 	30: "BypassAwsS3Authentication",
 	31: "DisableShieldAccessLists",
 	32: "DisableShieldRateLimiting",
+	33: "EnableRequestCoalescing",
+	34: "DisableRequestCoalescing",
 }
 
 var TriggerMatchTypeMap = map[uint8]string{
