@@ -1225,7 +1225,6 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					"url": schema.StringAttribute{
 						CustomType:  customtype.PullzoneOriginUrlType{},
 						Optional:    true,
-						Computed:    true,
 						Description: "The origin URL from where the files are fetched.",
 					},
 					"storagezone": schema.Int64Attribute{
@@ -1271,20 +1270,14 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					},
 					"container_app_id": schema.StringAttribute{
 						Optional:    true,
-						Computed:    true,
 						Description: "The ID if the compute container app.",
-						Default:     stringdefault.StaticString(""),
 					},
 					"container_endpoint_id": schema.StringAttribute{
 						Optional:    true,
-						Computed:    true,
-						Default:     stringdefault.StaticString(""),
 						Description: "The ID if the compute container app endpoint.",
 					},
 					"dns_port": schema.Int64Attribute{
 						Optional:    true,
-						Computed:    true,
-						Default:     int64default.StaticInt64(0),
 						Description: "The port for DNS Accelerated endpoints.",
 						Validators: []validator.Int64{
 							int64validator.Between(1, 65535),
@@ -1292,8 +1285,6 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					},
 					"dns_scheme": schema.StringAttribute{
 						Optional:    true,
-						Computed:    true,
-						Default:     stringdefault.StaticString(""),
 						Description: "The scheme for DNS Accelerated endpoints.",
 						Validators: []validator.String{
 							stringvalidator.OneOf("http", "https"),
@@ -1717,18 +1708,30 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 
 	// origin
 	dataApi.OriginType = mapValueToKey(pullzoneOriginTypeMap, origin["type"].(types.String).ValueString())
-	dataApi.OriginUrl = origin["url"].(customtype.PullzoneOriginUrlValue).ValueString()
-	dataApi.StorageZoneId = origin["storagezone"].(types.Int64).ValueInt64()
-	dataApi.OriginHostHeader = origin["host_header"].(types.String).ValueString()
 	dataApi.AddHostHeader = origin["forward_host_header"].(types.Bool).ValueBool()
 	dataApi.VerifyOriginSSL = origin["verify_ssl"].(types.Bool).ValueBool()
 	dataApi.FollowRedirects = origin["follow_redirects"].(types.Bool).ValueBool()
-	dataApi.EdgeScriptId = origin["script"].(types.Int64).ValueInt64()
 	dataApi.MiddlewareScriptId = origin["middleware_script"].(types.Int64).ValueInt64()
-	dataApi.MagicContainersAppId = origin["container_app_id"].(types.String).ValueString()
-	dataApi.MagicContainersEndpointId = origin["container_endpoint_id"].(types.String).ValueString()
-	dataApi.DnsOriginPort = uint16(origin["dns_port"].(types.Int64).ValueInt64())
-	dataApi.DnsOriginScheme = origin["dns_scheme"].(types.String).ValueString()
+
+	switch dataApi.OriginType {
+	case api.PullzoneOriginTypeOriginUrl:
+		dataApi.OriginUrl = origin["url"].(customtype.PullzoneOriginUrlValue).ValueString()
+		dataApi.OriginHostHeader = origin["host_header"].(types.String).ValueString()
+
+	case api.PullzoneOriginTypeDnsAccelerate:
+		dataApi.DnsOriginPort = uint16(origin["dns_port"].(types.Int64).ValueInt64())
+		dataApi.DnsOriginScheme = origin["dns_scheme"].(types.String).ValueString()
+
+	case api.PullzoneOriginTypeStorageZone:
+		dataApi.StorageZoneId = origin["storagezone"].(types.Int64).ValueInt64()
+
+	case api.PullzoneOriginTypeComputeScript:
+		dataApi.EdgeScriptId = origin["script"].(types.Int64).ValueInt64()
+
+	case api.PullzoneOriginTypeComputeContainer:
+		dataApi.MagicContainersAppId = origin["container_app_id"].(types.String).ValueString()
+		dataApi.MagicContainersEndpointId = origin["container_endpoint_id"].(types.String).ValueString()
+	}
 
 	// websockets
 	dataApi.EnableWebSockets = dataTf.WebsocketsEnabled.ValueBool()
@@ -1997,33 +2000,27 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 	// origin
 	{
 		originValues := map[string]attr.Value{
-			"type":       types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
-			"url":        customtype.PullzoneOriginUrlValue{StringValue: typeStringOrNull(dataApi.OriginUrl)},
-			"dns_port":   types.Int64Value(0),
-			"dns_scheme": types.StringValue(""),
+			"type":                  types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
+			"middleware_script":     types.Int64Value(dataApi.MiddlewareScriptId),
+			"follow_redirects":      types.BoolValue(dataApi.FollowRedirects),
+			"forward_host_header":   types.BoolValue(dataApi.AddHostHeader),
+			"verify_ssl":            types.BoolValue(dataApi.VerifyOriginSSL),
+			"url":                   customtype.PullzoneOriginUrlValue{StringValue: types.StringNull()},
+			"host_header":           types.StringValue(""),
+			"storagezone":           types.Int64Null(),
+			"script":                types.Int64Null(),
+			"container_app_id":      types.StringNull(),
+			"container_endpoint_id": types.StringNull(),
+			"dns_port":              types.Int64Null(),
+			"dns_scheme":            types.StringNull(),
 		}
 
-		if dataApi.StorageZoneId == 0 || dataApi.StorageZoneId == -1 {
-			originValues["storagezone"] = types.Int64Null()
-		} else {
-			originValues["storagezone"] = types.Int64Value(dataApi.StorageZoneId)
-		}
+		switch dataApi.OriginType {
+		case api.PullzoneOriginTypeOriginUrl:
+			originValues["url"] = customtype.PullzoneOriginUrlValue{StringValue: types.StringValue(dataApi.OriginUrl)}
+			originValues["host_header"] = types.StringValue(dataApi.OriginHostHeader)
 
-		if dataApi.EdgeScriptId <= 0 {
-			originValues["script"] = types.Int64Null()
-		} else {
-			originValues["script"] = types.Int64Value(dataApi.EdgeScriptId)
-		}
-
-		originValues["middleware_script"] = types.Int64Value(dataApi.MiddlewareScriptId)
-		originValues["follow_redirects"] = types.BoolValue(dataApi.FollowRedirects)
-		originValues["host_header"] = types.StringValue(dataApi.OriginHostHeader)
-		originValues["forward_host_header"] = types.BoolValue(dataApi.AddHostHeader)
-		originValues["verify_ssl"] = types.BoolValue(dataApi.VerifyOriginSSL)
-		originValues["container_app_id"] = types.StringValue(dataApi.MagicContainersAppId)
-		originValues["container_endpoint_id"] = types.StringValue(dataApi.MagicContainersEndpointId)
-
-		if dataApi.OriginType == api.PullzoneOriginTypeDnsAccelerate {
+		case api.PullzoneOriginTypeDnsAccelerate:
 			diags := diag.Diagnostics{}
 			u, err := url.Parse(dataApi.OriginUrl)
 			if err != nil {
@@ -2050,6 +2047,18 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 
 			originValues["dns_port"] = types.Int64Value(port)
 			originValues["dns_scheme"] = types.StringValue(u.Scheme)
+
+		case api.PullzoneOriginTypeStorageZone:
+			if dataApi.StorageZoneId > 0 {
+				originValues["storagezone"] = types.Int64Value(dataApi.StorageZoneId)
+			}
+
+		case api.PullzoneOriginTypeComputeScript:
+			originValues["script"] = types.Int64Value(dataApi.EdgeScriptId)
+
+		case api.PullzoneOriginTypeComputeContainer:
+			originValues["container_app_id"] = types.StringValue(dataApi.MagicContainersAppId)
+			originValues["container_endpoint_id"] = types.StringValue(dataApi.MagicContainersEndpointId)
 		}
 
 		origin, diags := types.ObjectValue(pullzoneOriginTypes, originValues)

@@ -11,7 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Backwards compatibility breaks
 
-Pullzones using the `DnsAccelerate` origin type now have to be configured via the new [`dns_port`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_port-1) and [`dns_scheme`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_scheme-1) attributes:
+1. All attributes under `origin` are now validated with regard to the origin `type`, which can cause errors in some configurations. Just remove the attributes as the validation suggests;
+
+2. The `ComputeScript` type does not require the `url = "https://bunnycdn.com"` configuration anymore;
+
+3. Pullzones using the `DnsAccelerate` origin type now have to be configured via the new [`dns_port`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_port-1) and [`dns_scheme`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone#dns_scheme-1) attributes:
 
 ```terraform
 resource "bunnynet_pullzone" "example" {
@@ -31,6 +35,9 @@ resource "bunnynet_pullzone" "example" {
 
 ### Added
 - resource `pullzone`: origin `dns_port` and `dns_scheme` for DnsAccelerate origin types;
+
+### Changed
+- resource `pullzone`: validate all `origin` attributes respective to the `type`;
 
 ## 0.13.4 - 2026-03-17
 

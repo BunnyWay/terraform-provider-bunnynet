@@ -21,6 +21,8 @@ const PullzoneOriginTypeStorageZone = 2
 const PullzoneOriginTypeComputeScript = 4
 const PullzoneOriginTypeComputeContainer = 5
 
+const PullzoneOriginUrlForComputeScript = "https://bunnycdn.com"
+
 type Pullzone struct {
 	Id                  int64  `json:"Id,omitempty"`
 	Name                string `json:"Name,omitempty"`
@@ -115,7 +117,7 @@ type Pullzone struct {
 	OriginType                uint8  `json:"OriginType"`
 	OriginUrl                 string `json:"OriginUrl,omitempty"`
 	StorageZoneId             int64  `json:"StorageZoneId,omitempty"`
-	OriginHostHeader          string `json:"OriginHostHeader,omitempty"`
+	OriginHostHeader          string `json:"OriginHostHeader"`
 	AddHostHeader             bool   `json:"AddHostHeader"`
 	VerifyOriginSSL           bool   `json:"VerifyOriginSSL"`
 	FollowRedirects           bool   `json:"FollowRedirects"`
@@ -238,6 +240,10 @@ func (c *Client) GetPullzoneByName(ctx context.Context, name string) (Pullzone, 
 }
 
 func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
+	if data.OriginType == PullzoneOriginTypeComputeScript {
+		data.OriginUrl = PullzoneOriginUrlForComputeScript
+	}
+
 	body, err := json.Marshal(data)
 	if err != nil {
 		return Pullzone{}, err
@@ -274,6 +280,10 @@ func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
 
 func (c *Client) UpdatePullzone(dataApi Pullzone) (Pullzone, error) {
 	id := dataApi.Id
+
+	if dataApi.OriginType == PullzoneOriginTypeComputeScript {
+		dataApi.OriginUrl = PullzoneOriginUrlForComputeScript
+	}
 
 	body, err := json.Marshal(dataApi)
 	if err != nil {
