@@ -37,6 +37,7 @@ resource "bunnynet_pullzone" "example" {
 - resource `pullzone`: origin `dns_port` and `dns_scheme` for DnsAccelerate origin types;
 
 ### Changed
+- Bumped minimum Go version to 1.25;
 - resource `pullzone`: validate all `origin` attributes respective to the `type`;
 
 ## 0.13.4 - 2026-03-17
