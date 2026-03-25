@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.14.0 - 2026-03-25
+
 ### Backwards compatibility breaks
 
 1. All attributes under `origin` are now validated with regard to the origin `type`, which can cause errors in some configurations. Just remove the attributes as the validation suggests;
