@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 )
 
 func SliceDiff[T comparable](s1 []T, s2 []T) []T {
@@ -124,6 +125,14 @@ func MapInvert[k comparable, v comparable](m map[k]v) map[v]k {
 	result := make(map[v]k, len(m))
 	for key, value := range m {
 		result[value] = key
+	}
+	return result
+}
+
+func MapLowerKey[v comparable](m map[string]v) map[string]v {
+	result := make(map[string]v, len(m))
+	for key, value := range m {
+		result[strings.ToLower(key)] = value
 	}
 	return result
 }

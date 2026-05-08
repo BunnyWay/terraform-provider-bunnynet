@@ -35,6 +35,7 @@ import (
 	"golang.org/x/exp/maps"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var _ resource.Resource = &ComputeContainerAppResource{}
@@ -74,8 +75,9 @@ var computeContainerAppContainerEndpointTypeMap = map[string]string{
 
 // format: key: terraform, value: api
 var computeContainerAppContainerEndpointProtocolMap = map[string]string{
-	"TCP": "Tcp",
-	"UDP": "Udp",
+	"TCP":  "Tcp",
+	"UDP":  "Udp",
+	"SCTP": "Sctp",
 }
 
 func (r *ComputeContainerAppResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -722,7 +724,7 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 															stringvalidator.OneOf(maps.Keys(computeContainerAppContainerEndpointProtocolMap)...),
 														),
 													},
-													Description: generateMarkdownMapOptions(computeContainerAppContainerEndpointProtocolMap),
+													Description: generateMarkdownSliceOptions(maps.Keys(computeContainerAppContainerEndpointProtocolMap)),
 												},
 											},
 											PlanModifiers: []planmodifier.Object{
@@ -1305,6 +1307,7 @@ func (r *ComputeContainerAppResource) convertModelContainerProbeToApi(dataTf typ
 
 func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dataApi api.ComputeContainerApp) (ComputeContainerAppResourceModel, diag.Diagnostics) {
 	endpointProtocolMap := utils.MapInvert(computeContainerAppContainerEndpointProtocolMap)
+	endpointProtocolMap = utils.MapLowerKey(endpointProtocolMap)
 	endpointTypeMap := utils.MapInvert(computeContainerAppContainerEndpointTypeMap)
 
 	var diags diag.Diagnostics
@@ -1376,6 +1379,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 					if endpoint.Type != "CDN" {
 						protocolsValues := make([]attr.Value, 0, len(port.Protocols))
 						for _, protocol := range port.Protocols {
+							protocol = strings.ToLower(protocol)
 							protocolsValues = append(protocolsValues, types.StringValue(endpointProtocolMap[protocol]))
 						}
 

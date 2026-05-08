@@ -173,7 +173,7 @@ Required:
 Optional:
 
 - `exposed` (Number) The exposed port number.
-- `protocols` (Set of String) Options: `Tcp`, `Udp`
+- `protocols` (Set of String) Options: `SCTP`, `TCP`, `UDP`
 
 
 

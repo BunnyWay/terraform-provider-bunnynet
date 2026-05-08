@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- resource `compute_container_app`: normalize endpoint protocol casing;
+
 ## 0.14.0 - 2026-03-25
 
 ### Backwards compatibility breaks
