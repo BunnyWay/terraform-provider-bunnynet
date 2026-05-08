@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -30,6 +31,12 @@ import (
 	"strconv"
 	"time"
 )
+
+// @TODO use enumgen
+var storageZoneTypeMap = map[uint8]string{
+	0: "Standard",
+	1: "S3",
+}
 
 var _ resource.Resource = &StorageZoneResource{}
 var _ resource.ResourceWithImportState = &StorageZoneResource{}
@@ -50,6 +57,7 @@ type StorageZoneResourceModel struct {
 	Region             types.String `tfsdk:"region"`
 	ReplicationRegions types.Set    `tfsdk:"replication_regions"`
 	StorageHostname    types.String `tfsdk:"hostname"`
+	Type               types.String `tfsdk:"type"`
 	ZoneTier           types.String `tfsdk:"zone_tier"`
 	Custom404FilePath  types.String `tfsdk:"custom_404_file_path"`
 	Rewrite404To200    types.Bool   `tfsdk:"rewrite_404_to_200"`
@@ -99,6 +107,18 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				Computed:    true,
 				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 				Description: "A set of regions for data replication.",
+			},
+			"type": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("Standard"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(storageZoneTypeMap)...),
+				},
+				MarkdownDescription: generateMarkdownMapOptions(storageZoneTypeMap),
 			},
 			"zone_tier": schema.StringAttribute{
 				Required: true,
@@ -316,6 +336,7 @@ func (r *StorageZoneResource) convertModelToApi(ctx context.Context, dataTf Stor
 	dataApi.Name = dataTf.Name.ValueString()
 	dataApi.Password = dataTf.Password.ValueString()
 	dataApi.ReadOnlyPassword = dataTf.ReadOnlyPassword.ValueString()
+	dataApi.StorageZoneType = mapValueToKey(storageZoneTypeMap, dataTf.Type.ValueString())
 	dataApi.ZoneTier = mapValueToKey(storageZoneTierMap, dataTf.ZoneTier.ValueString())
 	dataApi.Region = dataTf.Region.ValueString()
 	dataApi.Rewrite404To200 = dataTf.Rewrite404To200.ValueBool()
@@ -338,6 +359,7 @@ func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (Storag
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.Password = types.StringValue(dataApi.Password)
 	dataTf.ReadOnlyPassword = types.StringValue(dataApi.ReadOnlyPassword)
+	dataTf.Type = types.StringValue(mapKeyToValue(storageZoneTypeMap, dataApi.StorageZoneType))
 	dataTf.ZoneTier = types.StringValue(mapKeyToValue(storageZoneTierMap, dataApi.ZoneTier))
 	dataTf.Region = types.StringValue(dataApi.Region)
 	dataTf.Rewrite404To200 = types.BoolValue(dataApi.Rewrite404To200)

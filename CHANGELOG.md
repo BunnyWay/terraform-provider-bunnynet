@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- resource `storage_zone`: S3 support;
 ### Fixed
 - resource `compute_container_app`: normalize endpoint protocol casing;
 

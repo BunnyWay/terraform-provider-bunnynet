@@ -23,6 +23,7 @@ type StorageZone struct {
 	Region             string   `json:"Region,omitempty"`
 	ReplicationRegions []string `json:"ReplicationRegions,omitempty"`
 	StorageHostname    string   `json:"StorageHostname,omitempty"`
+	StorageZoneType    uint8    `json:"StorageZoneType,omitempty"`
 	ZoneTier           uint8    `json:"ZoneTier,omitempty"`
 	Custom404FilePath  string   `json:"Custom404FilePath,omitempty"`
 	Rewrite404To200    bool     `json:"Rewrite404To200"`
@@ -69,7 +70,9 @@ func (c *Client) CreateStorageZone(ctx context.Context, data StorageZone) (Stora
 		"ZoneTier":           data.ZoneTier,
 		"Region":             data.Region,
 		"ReplicationRegions": data.ReplicationRegions,
+		"StorageZoneType":    data.StorageZoneType,
 	})
+
 	if err != nil {
 		return StorageZone{}, err
 	}

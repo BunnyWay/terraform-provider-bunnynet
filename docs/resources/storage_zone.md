@@ -34,6 +34,7 @@ resource "bunnynet_storage_zone" "example" {
 - `custom_404_file_path` (String) The file path for a custom 404 error page.
 - `replication_regions` (Set of String) A set of regions for data replication.
 - `rewrite_404_to_200` (Boolean) Indicates whether to rewrite 404 errors to 200 status.
+- `type` (String) Options: `S3`, `Standard`
 
 ### Read-Only
 
