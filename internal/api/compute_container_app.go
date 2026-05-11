@@ -121,6 +121,7 @@ type ComputeContainerAppContainer struct {
 	ImageNamespace       string                                    `json:"imageNamespace"`
 	ImageName            string                                    `json:"imageName"`
 	ImageTag             string                                    `json:"imageTag"`
+	ImageDigest          string                                    `json:"imageDigest"`
 	ImageRegistryId      string                                    `json:"imageRegistryId"`
 	ImagePullPolicy      string                                    `json:"imagePullPolicy"`
 	EntryPoint           ComputeContainerAppContainerEntrypoint    `json:"entryPoint"`
@@ -170,6 +171,7 @@ type computeContainerAppSaveApplicationContainerRequest struct {
 	ImageNamespace       string                                                       `json:"imageNamespace"`
 	ImageName            string                                                       `json:"imageName"`
 	ImageTag             string                                                       `json:"imageTag"`
+	ImageDigest          string                                                       `json:"imageDigest,omitempty"`
 	ImageRegistryId      string                                                       `json:"imageRegistryId"`
 	ImagePullPolicy      string                                                       `json:"imagePullPolicy"`
 	EntryPoint           ComputeContainerAppContainerEntrypoint                       `json:"entryPoint"`
@@ -263,6 +265,7 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 			ImageNamespace:       b.ImageNamespace,
 			ImageName:            b.ImageName,
 			ImageTag:             b.ImageTag,
+			ImageDigest:          b.ImageDigest,
 			ImagePullPolicy:      b.ImagePullPolicy,
 			EntryPoint:           b.EntryPoint,
 			Probes:               b.Probes,

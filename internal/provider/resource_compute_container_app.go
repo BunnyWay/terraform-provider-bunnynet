@@ -244,6 +244,7 @@ var computeContainerAppContainerType = types.ObjectType{
 		"image_namespace":   types.StringType,
 		"image_name":        types.StringType,
 		"image_tag":         types.StringType,
+		"image_digest":      types.StringType,
 		"image_pull_policy": types.StringType,
 		"command":           types.StringType,
 		"arguments":         types.StringType,
@@ -546,6 +547,14 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 								stringplanmodifier.UseStateForUnknown(),
 							},
 							MarkdownDescription: "The image tag (i.e.: `2.9-alpine`).",
+						},
+						"image_digest": schema.StringAttribute{
+							Computed: true,
+							Optional: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							MarkdownDescription: "The image digest.",
 						},
 						"image_pull_policy": schema.StringAttribute{
 							Optional: true,
@@ -1178,6 +1187,7 @@ func (r *ComputeContainerAppResource) convertModelToApi(ctx context.Context, dat
 			ImageNamespace:  cAttr["image_namespace"].(types.String).ValueString(),
 			ImageName:       cAttr["image_name"].(types.String).ValueString(),
 			ImageTag:        cAttr["image_tag"].(types.String).ValueString(),
+			ImageDigest:     cAttr["image_digest"].(types.String).ValueString(),
 			ImagePullPolicy: cAttr["image_pull_policy"].(types.String).ValueString(),
 			EntryPoint: api.ComputeContainerAppContainerEntrypoint{
 				Command:          cAttr["command"].(types.String).ValueString(),
@@ -1491,6 +1501,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 				"image_namespace":   types.StringValue(c.ImageNamespace),
 				"image_name":        types.StringValue(c.ImageName),
 				"image_tag":         types.StringValue(c.ImageTag),
+				"image_digest":      types.StringValue(c.ImageDigest),
 				"image_pull_policy": types.StringValue(c.ImagePullPolicy),
 				"command":           typeStringOrNull(c.EntryPoint.Command),
 				"arguments":         typeStringOrNull(c.EntryPoint.Arguments),

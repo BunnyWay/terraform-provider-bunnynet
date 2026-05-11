@@ -118,6 +118,7 @@ Optional:
 - `command` (String) A custom startup command that will execute once the container is launched.
 - `endpoint` (Block List) Defines a public endpoint for the application. (see [below for nested schema](#nestedblock--container--endpoint))
 - `env` (Block List) Defines an environment variable for the container (see [below for nested schema](#nestedblock--container--env))
+- `image_digest` (String) The image digest.
 - `image_pull_policy` (String) Options: `Always`, `IfNotPresent`
 - `liveness_probe` (Block List) Checks that the application is actively running without issues. It the check fails, the container will be automatically restarted (see [below for nested schema](#nestedblock--container--liveness_probe))
 - `readiness_probe` (Block List) Checks if the application is fully prepared to handle incoming requests. No requests will be routed to the application until this check is successful. (see [below for nested schema](#nestedblock--container--readiness_probe))
