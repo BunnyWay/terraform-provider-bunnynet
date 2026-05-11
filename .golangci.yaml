@@ -1,6 +1,9 @@
 version: "2"
 linters:
   settings:
+    govet:
+      disable:
+        - inline
     staticcheck:
       checks:
         - all
