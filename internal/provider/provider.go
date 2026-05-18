@@ -51,6 +51,7 @@ You can either set the API key directly on the <code>api_key</code> attribute fo
 			"api_key": schema.StringAttribute{
 				MarkdownDescription: "API key. Can also be set using the `BUNNYNET_API_KEY` environment variable.",
 				Optional:            true,
+				Sensitive:           true,
 			},
 			"api_url": schema.StringAttribute{
 				MarkdownDescription: "Optional. The API URL. Defaults to `https://api.bunny.net`.",
