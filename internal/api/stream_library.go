@@ -67,7 +67,7 @@ type StreamLibrary struct {
 
 func (c *Client) GetStreamLibrary(id int64) (StreamLibrary, error) {
 	var data StreamLibrary
-	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/videoLibrary/%d", c.apiUrl, id), nil)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/videolibrary/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return data, err
 	}
@@ -110,7 +110,7 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 		return StreamLibrary{}, err
 	}
 
-	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videoLibrary", c.apiUrl), bytes.NewReader(body))
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videolibrary", c.apiUrl), bytes.NewReader(body))
 	if err != nil {
 		return StreamLibrary{}, err
 	}
@@ -148,7 +148,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 		return StreamLibrary{}, err
 	}
 
-	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videoLibrary/%d", c.apiUrl, id), bytes.NewReader(body))
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videolibrary/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
 		return StreamLibrary{}, err
 	}
@@ -171,7 +171,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 			return StreamLibrary{}, err
 		}
 
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videoLibrary/%d", c.apiUrl, id), bytes.NewReader(body))
+		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videolibrary/%d", c.apiUrl, id), bytes.NewReader(body))
 		if err != nil {
 			return StreamLibrary{}, err
 		}
@@ -255,7 +255,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 }
 
 func (c *Client) DeleteStreamLibrary(id int64) error {
-	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/videoLibrary/%d", c.apiUrl, id), nil)
+	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/videolibrary/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
 	}
@@ -280,7 +280,7 @@ func (c *Client) streamLibraryRefererAddRemove(id int64, hostname string, refTyp
 		return err
 	}
 
-	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videoLibrary/%d/%s%sReferrer", c.apiUrl, id, method, refType), bytes.NewReader(body))
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videolibrary/%d/%s%sReferrer", c.apiUrl, id, method, refType), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
