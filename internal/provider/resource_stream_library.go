@@ -164,7 +164,8 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 				Description: "The ID of the linked storage zone.",
 			},
 			"api_key": schema.StringAttribute{
-				Computed: true,
+				Computed:  true,
+				Sensitive: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
