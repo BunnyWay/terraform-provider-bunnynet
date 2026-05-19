@@ -144,6 +144,7 @@ var pullzoneShieldRuleConditionVariableMap = map[uint8]string{
 	23: "RESPONSE_HEADERS",
 	24: "RESPONSE_STATUS",
 	25: "FINGERPRINT",
+	26: "VERIFIED_BOT_CATEGORY",
 }
 
 var pullzoneShieldRuleTransformationMap = map[int64]string{
