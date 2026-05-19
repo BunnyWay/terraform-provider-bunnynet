@@ -82,7 +82,7 @@ resource "bunnynet_stream_library" "example" {
 
 ### Read-Only
 
-- `api_key` (String) The API key for accessing the stream library.
+- `api_key` (String, Sensitive) The API key for accessing the stream library.
 - `id` (Number) The ID of this resource.
 - `pullzone` (Number) The ID of the linked pullzone.
 - `storage_zone` (Number) The ID of the linked storage zone.

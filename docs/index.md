@@ -55,6 +55,6 @@ resource "bunnynet_pullzone" "example" {
 
 ### Optional
 
-- `api_key` (String) API key. Can also be set using the `BUNNYNET_API_KEY` environment variable.
+- `api_key` (String, Sensitive) API key. Can also be set using the `BUNNYNET_API_KEY` environment variable.
 - `api_url` (String) Optional. The API URL. Defaults to `https://api.bunny.net`.
 - `stream_api_url` (String) Optional. The Stream API URL. Defaults to `https://video.bunnycdn.com`.
