@@ -9,6 +9,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.14.2 - 2026-05-19
+
+### Fixed
+- resource `stream_library`: videolibrary API URL change ([#81](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/81));
+- resource `stream_library`: mark `api_key` as sensitive ([#82](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/82));
+- provider config: mark `api_key` as sensitive ([#82](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/82));
+
+### Changed
+- resource `pullzone_ratelimit_rule`: update enums;
+- resource `pullzone_waf_rule`: update enums;
+
 ## 0.14.1 - 2026-05-11
 
 ### Added
