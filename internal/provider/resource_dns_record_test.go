@@ -37,7 +37,7 @@ data "bunnynet_dns_zone" "domain" {
 
 resource "bunnynet_dns_record" "record" {
   zone        = data.bunnynet_dns_zone.domain.id
-  name        = "test22"
+  name        = "test-%s"
   type        = "PullZone"
   value       = bunnynet_pullzone.pullzone.name
   pullzone_id = bunnynet_pullzone.pullzone.id
@@ -46,8 +46,11 @@ resource "bunnynet_dns_record" "record" {
 
 func TestAccDnsRecordResourcePZ(t *testing.T) {
 	testKey := generateRandomString(12)
-	config := fmt.Sprintf(configDnsRecordPZTest, testKey)
+	recordKey := generateRandomString(4)
+
+	config := fmt.Sprintf(configDnsRecordPZTest, testKey, recordKey)
 	pzName := fmt.Sprintf("test-acceptance-%s", testKey)
+	recordName := fmt.Sprintf("test-%s", recordKey)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -58,6 +61,7 @@ func TestAccDnsRecordResourcePZ(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("bunnynet_pullzone.pullzone", "name", pzName),
 					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "type", "PullZone"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "name", recordName),
 					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "value", pzName),
 				),
 			},
@@ -264,8 +268,11 @@ func TestAccDnsRecordResourceWeightTXT(t *testing.T) {
 
 func TestAccDnsRecordDeletedOutOfBand(t *testing.T) {
 	testKey := generateRandomString(12)
-	config := fmt.Sprintf(configDnsRecordPZTest, testKey)
+	recordKey := generateRandomString(4)
+
+	config := fmt.Sprintf(configDnsRecordPZTest, testKey, recordKey)
 	pzName := fmt.Sprintf("test-acceptance-%s", testKey)
+	recordName := fmt.Sprintf("test-%s", recordKey)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -276,6 +283,7 @@ func TestAccDnsRecordDeletedOutOfBand(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("bunnynet_pullzone.pullzone", "name", pzName),
 					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "type", "PullZone"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "name", recordName),
 					resource.TestCheckResourceAttr("bunnynet_dns_record.record", "value", pzName),
 				),
 			},
