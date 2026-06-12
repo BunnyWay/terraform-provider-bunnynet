@@ -51,6 +51,7 @@ resource "bunnynet_pullzone" "example" {
 - `cache_stale` (Set of String) Options: `offline`, `updating`
 - `cache_vary` (Set of String) Options: `avif`, `cookie`, `country`, `hostname`, `mobile`, `querystring`, `state`, `webp`
 - `cache_vary_cookie` (Set of String) Contains the list of vary parameters that will be used for vary cache by cookie string. If empty, cookie vary will not be used.
+- `cache_vary_headers` (Set of String) Contains the list of request headers will be used for vary cache. If empty, it will not be used.
 - `cache_vary_querystring` (Set of String) Contains the list of vary parameters that will be used for vary cache by query string. If empty, all parameters will be used to construct the key
 - `cors_enabled` (Boolean) Indicates whether CORS (Cross-Origin Resource Sharing) is enabled.
 - `cors_extensions` (Set of String) A list of file extensions for which CORS is enabled.

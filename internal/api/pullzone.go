@@ -52,6 +52,7 @@ type Pullzone struct {
 	EnableCookieVary                   bool     `json:"EnableCookieVary"`
 	QueryStringVaryParameters          []string `json:"QueryStringVaryParameters"`
 	CookieVaryParameters               []string `json:"CookieVaryParameters"`
+	CacheKeyHeaders                    string   `json:"CacheKeyHeaders"`
 	DisableCookies                     bool     `json:"DisableCookies"`
 	EnableCacheSlice                   bool     `json:"EnableCacheSlice"`
 	UseStaleWhileUpdating              bool     `json:"UseStaleWhileUpdating"`

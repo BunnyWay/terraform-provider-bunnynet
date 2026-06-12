@@ -39,6 +39,7 @@ import (
 	"golang.org/x/exp/slices"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 var _ resource.Resource = &PullzoneResource{}
@@ -67,6 +68,7 @@ type PullzoneResourceModel struct {
 	CacheVary                          types.Set     `tfsdk:"cache_vary"`
 	CacheVaryQueryStringValues         types.Set     `tfsdk:"cache_vary_querystring"`
 	CacheVaryCookieValues              types.Set     `tfsdk:"cache_vary_cookie"`
+	CacheVaryHeaders                   types.Set     `tfsdk:"cache_vary_headers"`
 	StripCookies                       types.Bool    `tfsdk:"strip_cookies"`
 	CacheChunked                       types.Bool    `tfsdk:"cache_chunked"`
 	CacheStale                         types.Set     `tfsdk:"cache_stale"`
@@ -393,6 +395,21 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					),
 				},
 				Description: "Contains the list of vary parameters that will be used for vary cache by cookie string. If empty, cookie vary will not be used.",
+			},
+			"cache_vary_headers": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.LengthAtLeast(1),
+					),
+				},
+				Description: "Contains the list of request headers will be used for vary cache. If empty, it will not be used.",
 			},
 			"strip_cookies": schema.BoolAttribute{
 				Computed: true,
@@ -1614,6 +1631,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.CacheErrorResponses = dataTf.CacheErrors.ValueBool()
 		dataApi.QueryStringVaryParameters = utils.ConvertSetToStringSlice(dataTf.CacheVaryQueryStringValues)
 		dataApi.CookieVaryParameters = utils.ConvertSetToStringSlice(dataTf.CacheVaryCookieValues)
+		dataApi.CacheKeyHeaders = strings.Join(utils.ConvertSetToStringSlice(dataTf.CacheVaryHeaders), ",")
 		dataApi.DisableCookies = dataTf.StripCookies.ValueBool()
 		dataApi.EnableCacheSlice = dataTf.CacheChunked.ValueBool()
 		dataApi.PermaCacheStorageZoneId = uint64(dataTf.PermacacheStoragezone.ValueInt64())
@@ -1853,6 +1871,17 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 			return dataTf, diags
 		}
 
+		// CacheVaryHeaders
+		var varyHeadersElements []string
+		if dataApi.CacheKeyHeaders != "" {
+			varyHeadersElements = strings.Split(dataApi.CacheKeyHeaders, ",")
+		}
+
+		varyHeaders, diags := utils.ConvertStringSliceToSet(varyHeadersElements)
+		if diags != nil {
+			return dataTf, diags
+		}
+
 		// CacheStale
 		var staleValues []attr.Value
 		if dataApi.UseStaleWhileOffline {
@@ -1876,6 +1905,7 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 		dataTf.CacheVary = vary
 		dataTf.CacheVaryQueryStringValues = varyQueryString
 		dataTf.CacheVaryCookieValues = varyCookie
+		dataTf.CacheVaryHeaders = varyHeaders
 		dataTf.StripCookies = types.BoolValue(dataApi.DisableCookies)
 		dataTf.CacheChunked = types.BoolValue(dataApi.EnableCacheSlice)
 		dataTf.CacheStale = stale
