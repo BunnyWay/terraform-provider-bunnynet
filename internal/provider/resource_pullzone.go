@@ -1204,7 +1204,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					int64planmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.Int64{
-					int64validator.OneOf(500, 1000, 2500, 5000, 10000, 25000),
+					pullzoneresourcevalidator.WebsocketsMaxConnections(),
 				},
 				Description: "The maximum allowed concurrent WebSocket connections.",
 			},
