@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.14.3 - 2026-06-15
+
 ### Added
 - resource `pullzone`: vary cache by request headers;
 
