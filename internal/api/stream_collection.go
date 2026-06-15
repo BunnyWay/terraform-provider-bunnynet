@@ -74,9 +74,9 @@ func (c *Client) CreateStreamCollection(dataApi StreamCollection) (StreamCollect
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamCollection{}, err
-		} else {
-			return StreamCollection{}, errors.New("create stream collection failed with " + resp.Status)
 		}
+
+		return StreamCollection{}, errors.New("create stream collection failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -116,9 +116,9 @@ func (c *Client) UpdateStreamCollection(dataApi StreamCollection) (StreamCollect
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamCollection{}, err
-		} else {
-			return StreamCollection{}, errors.New("update stream collection failed with " + resp.Status)
 		}
+
+		return StreamCollection{}, errors.New("update stream collection failed with " + resp.Status)
 	}
 
 	dataApiResult, err := c.GetStreamCollection(dataApi.LibraryId, id)

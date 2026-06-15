@@ -66,9 +66,9 @@ func (c *Client) CreatePullzoneEdgerule(ctx context.Context, data PullzoneEdgeru
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneEdgerule{}, err
-		} else {
-			return PullzoneEdgerule{}, errors.New(resp.Status)
 		}
+
+		return PullzoneEdgerule{}, errors.New(resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)

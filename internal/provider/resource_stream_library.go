@@ -97,40 +97,14 @@ type StreamLibraryResourceModel struct {
 	OutputCodecs                        types.Set    `tfsdk:"output_codecs"`
 }
 
-var streamLibraryFontFamilyOptions = []string{"arial", "inter", "lato", "oswald", "raleway", "roboto", "rubik", "ubuntu"}
-var streamLibraryPlayerControlsOptions = []string{"airplay", "captions", "chromecast", "current-time", "duration", "fast-forward", "fullscreen", "mute", "pip", "play", "play-large", "progress", "rewind", "settings", "volume"}
-var streamLibraryOutputCodecsOptions = []string{"x264", "vp9", "hevc", "av1"}
-
 func (r *StreamLibraryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_stream_library"
 }
 
 func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	streamLibraryPlayerControlsDefault := types.SetValueMust(types.StringType, []attr.Value{
-		types.StringValue("play-large"),
-		types.StringValue("play"),
-		types.StringValue("progress"),
-		types.StringValue("current-time"),
-		types.StringValue("mute"),
-		types.StringValue("volume"),
-		types.StringValue("captions"),
-		types.StringValue("settings"),
-		types.StringValue("airplay"),
-		types.StringValue("pip"),
-		types.StringValue("fullscreen"),
-	})
-
-	streamLibraryResolutionsDefault := types.SetValueMust(types.StringType, []attr.Value{
-		types.StringValue("240p"),
-		types.StringValue("360p"),
-		types.StringValue("480p"),
-		types.StringValue("720p"),
-		types.StringValue("1080p"),
-	})
-
-	streamLibraryOutputCodecsDefault := types.SetValueMust(types.StringType, []attr.Value{
-		types.StringValue("x264"),
-	})
+	streamLibraryPlayerControlsDefault := utils.ConvertStringSliceToSetMust([]string{"play-large", "play", "progress", "current-time", "mute", "volume", "captions", "settings", "airplay", "pip", "fullscreen"})
+	streamLibraryResolutionsDefault := utils.ConvertStringSliceToSetMust([]string{"240p", "360p", "480p", "720p", "1080p"})
+	streamLibraryOutputCodecsDefault := utils.ConvertStringSliceToSetMust([]string{"x264"})
 
 	resp.Schema = schema.Schema{
 		Description: "This resource manages libraries in bunny.net Stream.",

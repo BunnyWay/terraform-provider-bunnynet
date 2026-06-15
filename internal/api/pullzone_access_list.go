@@ -64,9 +64,9 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return result, err
-		} else {
-			return result, errors.New("get access list failed with " + resp.Status)
 		}
+
+		return result, errors.New("get access list failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -130,9 +130,9 @@ func (c *Client) CreatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
-		} else {
-			return result, errors.New("create access list failed with " + resp.Status)
 		}
+
+		return result, errors.New("create access list failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -185,9 +185,9 @@ func (c *Client) UpdatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return result, err
-		} else {
-			return result, errors.New("create access list failed with " + resp.Status)
 		}
+
+		return result, errors.New("create access list failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -231,9 +231,9 @@ func (c *Client) DeletePullzoneAccessList(ctx context.Context, pullzoneId int64,
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return err
-		} else {
-			return errors.New("delete access list failed with " + resp.Status)
 		}
+
+		return errors.New("delete access list failed with " + resp.Status)
 	}
 
 	return nil
@@ -289,9 +289,9 @@ func (c *Client) getPullzoneAccessLists(ctx context.Context, shieldZoneId int64,
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return result, err
-		} else {
-			return result, errors.New("get access list failed with " + resp.Status)
 		}
+
+		return result, errors.New("get access list failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -374,9 +374,9 @@ func (c *Client) updatePullzoneAccessListConfiguration(ctx context.Context, shie
 		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return err
-		} else {
-			return errors.New("update access list failed with " + resp.Status)
 		}
+
+		return errors.New("update access list failed with " + resp.Status)
 	}
 
 	_ = resp.Body.Close()

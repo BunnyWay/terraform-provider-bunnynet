@@ -91,9 +91,9 @@ func (c *Client) CreateStorageZone(ctx context.Context, data StorageZone) (Stora
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StorageZone{}, err
-		} else {
-			return StorageZone{}, errors.New("create storage zone failed with " + resp.Status)
 		}
+
+		return StorageZone{}, errors.New("create storage zone failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -140,9 +140,9 @@ func (c *Client) UpdateStorageZone(ctx context.Context, dataApi StorageZone) (St
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StorageZone{}, err
-		} else {
-			return StorageZone{}, errors.New("update storage zone failed with " + resp.Status)
 		}
+
+		return StorageZone{}, errors.New("update storage zone failed with " + resp.Status)
 	}
 
 	dataApiResult, err := c.GetStorageZone(ctx, id)

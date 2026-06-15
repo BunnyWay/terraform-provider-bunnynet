@@ -72,6 +72,7 @@ func (c *Client) CreateStorageFile(ctx context.Context, data StorageFile) (Stora
 	}
 
 	resp, err := httpClient.Do(req)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return StorageFile{}, err
 	}
@@ -110,6 +111,7 @@ func (c *Client) DeleteStorageFile(ctx context.Context, zoneId int64, path strin
 	}
 
 	resp, err := client.Do(req)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return err
 	}
@@ -143,6 +145,7 @@ func getStorageFileInfo(ctx context.Context, zone StorageZone, path string) (Sto
 	}
 
 	resp, err := client.Do(req)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return StorageFile{}, err
 	}
@@ -165,7 +168,6 @@ func getStorageFileInfo(ctx context.Context, zone StorageZone, path string) (Sto
 		"response": string(bodyResp),
 	})
 
-	_ = resp.Body.Close()
 	var obj struct {
 		Guid            string `json:"Guid"`
 		StorageZoneName string `json:"StorageZoneName"`

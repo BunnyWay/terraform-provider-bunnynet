@@ -77,24 +77,6 @@ var pullzoneShieldBotDetectionType = map[string]attr.Type{
 	"complex_fingerprinting":  types.BoolType,
 }
 
-var pullzoneShieldDdosLevelMap = map[uint8]string{
-	0: "Asleep",
-	1: "Low",
-	2: "Medium",
-	3: "High",
-	4: "Extreme",
-}
-
-var pullzoneShieldDdosModeMap = map[uint8]string{
-	0: "Log",
-	1: "Block",
-}
-
-var pullzoneShieldBotDetectionModeMap = map[uint8]string{
-	0: "Log",
-	1: "Challenge",
-}
-
 var pullzoneShieldWafType = map[string]attr.Type{
 	"enabled":                       types.BoolType,
 	"mode":                          types.StringType,
@@ -113,60 +95,37 @@ var pullzoneShieldWafType = map[string]attr.Type{
 	"rules_logonly":                 types.SetType{ElemType: types.StringType},
 }
 
-var pullzoneShieldWafModeMap = map[uint8]string{
-	0: "Log",
-	1: "Block",
-}
-
-var pullzoneShieldWafLogHeadersExcludedDefault = utils.ConvertStringSliceToSetMust([]string{
-	"Cookie",
-	"Authorization",
-	"Signature",
-	"Credential",
-	"AccessKey",
-})
-
-var pullzoneShieldWafAllowedHttpVersionsDefault = utils.ConvertStringSliceToSetMust(pullzoneShieldWafAllowedHttpVersionsOptions)
-var pullzoneShieldWafAllowedHttpVersionsOptions = []string{
-	"HTTP/1.0",
-	"HTTP/1.1",
-	"HTTP/2",
-	"HTTP/2.0",
-}
-
-var pullzoneShieldWafAllowedHttpMethodsDefault = utils.ConvertStringSliceToSetMust(pullzoneShieldWafAllowedHttpMethodsOptions)
-var pullzoneShieldWafAllowedHttpMethodsOptions = []string{
-	"GET",
-	"HEAD",
-	"POST",
-	"PUT",
-	"PATCH",
-	"OPTIONS",
-	"DELETE",
-	"CONNECT",
-	"TRACE",
-}
-
-var pullzoneShieldWafAllowedRequestContentTypesDefault = utils.ConvertStringSliceToSetMust([]string{
-	"application/x-www-form-urlencoded",
-	"multipart/form-data",
-	"multipart/related",
-	"text/xml",
-	"application/xml",
-	"application/soap+xml",
-	"application/x-amf",
-	"application/json",
-	"application/octet-stream",
-	"application/csp-report",
-	"application/xss-auditor-report",
-	"text/plain",
-})
-
 func (r *PullzoneShieldResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone_shield"
 }
 
 func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	var pullzoneShieldWafLogHeadersExcludedDefault = utils.ConvertStringSliceToSetMust([]string{
+		"Cookie",
+		"Authorization",
+		"Signature",
+		"Credential",
+		"AccessKey",
+	})
+
+	var pullzoneShieldWafAllowedHttpVersionsDefault = utils.ConvertStringSliceToSetMust(pullzoneShieldWafAllowedHttpVersionsOptions)
+	var pullzoneShieldWafAllowedHttpMethodsDefault = utils.ConvertStringSliceToSetMust(pullzoneShieldWafAllowedHttpMethodsOptions)
+
+	var pullzoneShieldWafAllowedRequestContentTypesDefault = utils.ConvertStringSliceToSetMust([]string{
+		"application/x-www-form-urlencoded",
+		"multipart/form-data",
+		"multipart/related",
+		"text/xml",
+		"application/xml",
+		"application/soap+xml",
+		"application/x-amf",
+		"application/json",
+		"application/octet-stream",
+		"application/csp-report",
+		"application/xss-auditor-report",
+		"text/plain",
+	})
+
 	resp.Schema = schema.Schema{
 		Description: "This resource manages Bunny Shield for a bunny.net pullzone.",
 

@@ -44,11 +44,6 @@ type ComputeScriptResourceModel struct {
 	Release       types.String `tfsdk:"release"`
 }
 
-var computeScriptTypeMap = map[uint8]string{
-	api.ScriptTypeStandalone: "standalone",
-	api.ScriptTypeMiddleware: "middleware",
-}
-
 func (r *ComputeScriptResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_compute_script"
 }

@@ -182,27 +182,7 @@ var pullzoneRoutingTypes = map[string]attr.Type{
 	},
 }
 
-var pullzoneOriginTypeMap = map[uint8]string{
-	0: "OriginUrl",
-	1: "DnsAccelerate",
-	2: "StorageZone",
-	4: "ComputeScript",
-	5: "ComputeContainer",
-}
-
-var pullzoneRoutingTierMap = map[uint8]string{
-	0: "Standard",
-	1: "Volume",
-}
-
-var pullzoneCacheVaryOptions = []string{"querystring", "webp", "country", "state", "hostname", "mobile", "avif", "cookie"}
-var pullzoneCacheStaleOptions = []string{"offline", "updating"}
-var pullzoneTlsSupportOptions = []string{"TLSv1.0", "TLSv1.1"}
-var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxResponse", "responseTimeout"}
-var pullzoneRoutingZonesOptions = []string{"AF", "ASIA", "EU", "SA", "US"}
-var pullzoneRoutingFiltersOptions = []string{"all", "eu", "scripting"}
 var pullzoneCorsExtensionsDefault = []string{"css", "eot", "gif", "jpeg", "jpg", "js", "mp3", "mp4", "mpeg", "png", "svg", "ttf", "webm", "webp", "woff", "woff2"}
-var pullzoneOriginShieldZoneOptions = []string{"IL", "FR"}
 
 func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pullzone"
@@ -210,54 +190,11 @@ func (r *PullzoneResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	emptySetDefault := types.SetValueMust(types.StringType, []attr.Value{})
-
-	pullzoneTlsSupportDefault, diags := types.SetValue(types.StringType, []attr.Value{
-		types.StringValue("TLSv1.0"),
-		types.StringValue("TLSv1.1"),
-	})
-
-	if diags != nil {
-		resp.Diagnostics = append(resp.Diagnostics, diags...)
-		return
-	}
-
-	pullzoneCorsExtensionsSetDefault, diags := utils.ConvertStringSliceToSet(pullzoneCorsExtensionsDefault)
-	if diags != nil {
-		resp.Diagnostics = append(resp.Diagnostics, diags...)
-		return
-	}
-
-	pullzoneRoutingZonesDefault, diags := types.SetValue(types.StringType, []attr.Value{
-		types.StringValue("AF"),
-		types.StringValue("ASIA"),
-		types.StringValue("EU"),
-		types.StringValue("SA"),
-		types.StringValue("US"),
-	})
-
-	if diags != nil {
-		resp.Diagnostics = append(resp.Diagnostics, diags...)
-		return
-	}
-
-	pullzoneRoutingFiltersDefault, diags := types.SetValue(types.StringType, []attr.Value{
-		types.StringValue("all"),
-	})
-
-	if diags != nil {
-		resp.Diagnostics = append(resp.Diagnostics, diags...)
-		return
-	}
-
-	pullzoneSafehopRetryReasonsDefault, diags := types.SetValue(types.StringType, []attr.Value{
-		types.StringValue("connectionTimeout"),
-		types.StringValue("responseTimeout"),
-	})
-
-	if diags != nil {
-		resp.Diagnostics = append(resp.Diagnostics, diags...)
-		return
-	}
+	pullzoneTlsSupportDefault := utils.ConvertStringSliceToSetMust([]string{"TLSv1.0", "TLSv1.1"})
+	pullzoneCorsExtensionsSetDefault := utils.ConvertStringSliceToSetMust(pullzoneCorsExtensionsDefault)
+	pullzoneRoutingZonesDefault := utils.ConvertStringSliceToSetMust([]string{"AF", "ASIA", "EU", "SA", "US"})
+	pullzoneRoutingFiltersDefault := utils.ConvertStringSliceToSetMust([]string{"all"})
+	pullzoneSafehopRetryReasonsDefault := utils.ConvertStringSliceToSetMust([]string{"connectionTimeout", "responseTimeout"})
 
 	resp.Schema = schema.Schema{
 		Description: "This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.",
@@ -1506,12 +1443,7 @@ func (r *PullzoneResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	if data.CorsExtensions.IsNull() {
-		extensions, diags := utils.ConvertStringSliceToSet(pullzoneCorsExtensionsDefault)
-		if diags != nil {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-		data.CorsExtensions = extensions
+		data.CorsExtensions = utils.ConvertStringSliceToSetMust(pullzoneCorsExtensionsDefault)
 	}
 
 	pullzoneId := data.Id.ValueInt64()

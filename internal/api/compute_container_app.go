@@ -301,9 +301,9 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		err := utils.ExtractMCErrorMessage(resp)
 		if err != nil {
 			return ComputeContainerApp{}, err
-		} else {
-			return ComputeContainerApp{}, errors.New(resp.Status)
 		}
+
+		return ComputeContainerApp{}, errors.New(resp.Status)
 	}
 
 	bodyStr, _ := io.ReadAll(resp.Body)

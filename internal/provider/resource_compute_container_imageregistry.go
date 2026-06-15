@@ -43,8 +43,6 @@ func (r *ComputeContainerImageregistryResource) Metadata(ctx context.Context, re
 	resp.TypeName = req.ProviderTypeName + "_compute_container_imageregistry"
 }
 
-var computeContainerImageRegistryRegistryOptions = []string{"GitHub", "DockerHub"}
-
 func (r *ComputeContainerImageregistryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "This resource manages an Image Registry connection for Magic Containers in bunny.net.",

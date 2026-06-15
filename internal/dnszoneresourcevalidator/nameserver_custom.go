@@ -85,7 +85,7 @@ func (v customNameserverValidator) getStringDefault(ctx context.Context, request
 
 		attribute.(schema.StringAttribute).Default.DefaultString(ctx, defaultReq, &defaultResp)
 		return defaultResp.PlanValue.ValueString(), nil
-	} else {
-		return "", fmt.Errorf(`Attribute "%s" not found`, attr.String())
 	}
+
+	return "", fmt.Errorf(`Attribute "%s" not found`, attr.String())
 }

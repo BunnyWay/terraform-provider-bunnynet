@@ -68,9 +68,9 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneHostname{}, errors.New("addHostname failed: " + err.Error())
-		} else {
-			return PullzoneHostname{}, errors.New("addHostname failed with " + resp.Status)
 		}
+
+		return PullzoneHostname{}, errors.New("addHostname failed with " + resp.Status)
 	}
 
 	pullzone, err = c.GetPullzone(pullzoneId)
@@ -134,9 +134,9 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("removeCertificate failed: " + err.Error())
-			} else {
-				return PullzoneHostname{}, errors.New("removeCertificate failed with " + resp.Status)
 			}
+
+			return PullzoneHostname{}, errors.New("removeCertificate failed with " + resp.Status)
 		}
 	}
 
@@ -163,9 +163,9 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("addCertificate failed: " + err.Error())
-			} else {
-				return PullzoneHostname{}, errors.New("addCertificate failed with " + resp.Status)
 			}
+
+			return PullzoneHostname{}, errors.New("addCertificate failed with " + resp.Status)
 		}
 	}
 
@@ -179,9 +179,9 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("loadFreeCertificate failed: " + err.Error())
-			} else {
-				return PullzoneHostname{}, errors.New("loadFreeCertificate failed with " + resp.Status)
 			}
+
+			return PullzoneHostname{}, errors.New("loadFreeCertificate failed with " + resp.Status)
 		}
 	}
 
@@ -204,9 +204,9 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("forceSSL failed: " + err.Error())
-			} else {
-				return PullzoneHostname{}, errors.New("forceSSL failed with " + resp.Status)
 			}
+
+			return PullzoneHostname{}, errors.New("forceSSL failed with " + resp.Status)
 		}
 	}
 
@@ -267,9 +267,9 @@ func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return errors.New("delete failed: " + err.Error())
-		} else {
-			return errors.New("delete failed with " + resp.Status)
 		}
+
+		return errors.New("delete failed with " + resp.Status)
 	}
 
 	return nil

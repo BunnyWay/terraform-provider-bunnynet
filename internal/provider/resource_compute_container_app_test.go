@@ -96,9 +96,9 @@ func TestAccComputeContainerAppResource(t *testing.T) {
 	if mcRegion == "" {
 		if os.Getenv("TF_ACC") == "1" {
 			t.Fatal("TESTACC_MC_REGION is missing")
-		} else {
-			t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
 		}
+
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
 
 		return
 	}
@@ -132,9 +132,9 @@ func TestAccComputeContainerAppWithPersistentVolumeResource(t *testing.T) {
 	if mcRegion == "" {
 		if os.Getenv("TF_ACC") == "1" {
 			t.Fatal("TESTACC_MC_REGION is missing")
-		} else {
-			t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
 		}
+
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
 
 		return
 	}

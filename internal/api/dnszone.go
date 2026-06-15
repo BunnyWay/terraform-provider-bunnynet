@@ -150,9 +150,9 @@ func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, erro
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return DnsZone{}, err
-		} else {
-			return DnsZone{}, errors.New("create DNS zone failed with " + resp.Status)
 		}
+
+		return DnsZone{}, errors.New("create DNS zone failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -204,9 +204,9 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return DnsZone{}, err
-		} else {
-			return DnsZone{}, errors.New("update DNS zone failed with " + resp.Status)
 		}
+
+		return DnsZone{}, errors.New("update DNS zone failed with " + resp.Status)
 	}
 
 	if dataApi.DnssecEnabled {
@@ -260,9 +260,9 @@ func (c *Client) postDnssec(ctx context.Context, zoneId int64) (dnssecInfo, erro
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return dnssecInfo{}, err
-		} else {
-			return dnssecInfo{}, errors.New("DNSSEC endpoint failed with " + resp.Status)
 		}
+
+		return dnssecInfo{}, errors.New("DNSSEC endpoint failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -292,9 +292,9 @@ func (c *Client) deleteDnssec(ctx context.Context, zoneId int64) error {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return err
-		} else {
-			return errors.New("DNSSEC endpoint failed with " + resp.Status)
 		}
+
+		return errors.New("DNSSEC endpoint failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)

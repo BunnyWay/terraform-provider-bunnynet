@@ -96,9 +96,9 @@ func (c *Client) UpdateStreamVideo(dataApi StreamVideo) (StreamVideo, error) {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamVideo{}, err
-		} else {
-			return StreamVideo{}, errors.New("update stream video failed with " + resp.Status)
 		}
+
+		return StreamVideo{}, errors.New("update stream video failed with " + resp.Status)
 	}
 
 	dataApiResult, err := c.GetStreamVideo(dataApi.LibraryId, id)

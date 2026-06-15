@@ -84,9 +84,9 @@ func (c *Client) GetPullzoneShieldDefaultWafEngineConfig() (PullzoneShieldWafEng
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneShieldWafEngineConfig{}, err
-		} else {
-			return PullzoneShieldWafEngineConfig{}, errors.New("get shield engine config failed with " + resp.Status)
 		}
+
+		return PullzoneShieldWafEngineConfig{}, errors.New("get shield engine config failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -166,9 +166,9 @@ func (c *Client) GetPullzoneShieldIdByPullzone(pullzoneId int64) (int64, error) 
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return 0, err
-		} else {
-			return 0, errors.New("get shieldzone for pullzone failed with " + resp.Status)
 		}
+
+		return 0, errors.New("get shieldzone for pullzone failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -211,9 +211,9 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
-			} else {
-				return PullzoneShield{}, errors.New("get shieldzone for pullzone failed with " + resp.Status)
 			}
+
+			return PullzoneShield{}, errors.New("get shieldzone for pullzone failed with " + resp.Status)
 		}
 
 		bodyResp, err := io.ReadAll(resp.Body)
@@ -365,9 +365,9 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return fetchBotDetectionResult{}, err
-		} else {
-			return fetchBotDetectionResult{}, errors.New("get shieldzone/bot-detection for pullzone failed with " + resp.Status)
 		}
+
+		return fetchBotDetectionResult{}, errors.New("get shieldzone/bot-detection for pullzone failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -459,9 +459,9 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneShield{}, err
-		} else {
-			return PullzoneShield{}, errors.New("create pullzone shield failed with " + resp.Status)
 		}
+
+		return PullzoneShield{}, errors.New("create pullzone shield failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -532,9 +532,9 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
-			} else {
-				return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
 			}
+
+			return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
 		}
 	}
 

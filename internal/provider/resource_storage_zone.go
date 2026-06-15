@@ -32,12 +32,6 @@ import (
 	"time"
 )
 
-// @TODO use enumgen
-var storageZoneTypeMap = map[uint8]string{
-	0: "Standard",
-	1: "S3",
-}
-
 var _ resource.Resource = &StorageZoneResource{}
 var _ resource.ResourceWithImportState = &StorageZoneResource{}
 

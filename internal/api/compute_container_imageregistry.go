@@ -185,9 +185,9 @@ func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data C
 		err := utils.ExtractMCErrorMessage(resp)
 		if err != nil {
 			return ComputeContainerImageregistry{}, err
-		} else {
-			return ComputeContainerImageregistry{}, fmt.Errorf("Error: HTTP Status: %s", resp.Status)
 		}
+
+		return ComputeContainerImageregistry{}, fmt.Errorf("Error: HTTP Status: %s", resp.Status)
 	}
 
 	dataApiResult, err := c.GetComputeContainerImageregistry(ctx, data.Id)

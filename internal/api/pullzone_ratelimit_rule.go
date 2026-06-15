@@ -59,9 +59,9 @@ func (c *Client) GetPullzoneRatelimitRule(ctx context.Context, pullzoneId int64,
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneRatelimitRule{}, err
-		} else {
-			return PullzoneRatelimitRule{}, errors.New("get ratelimit rule failed with " + resp.Status)
 		}
+
+		return PullzoneRatelimitRule{}, errors.New("get ratelimit rule failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -103,9 +103,9 @@ func (c *Client) CreatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneRatelimitRule{}, err
-		} else {
-			return PullzoneRatelimitRule{}, errors.New("create ratelimit rule failed with " + resp.Status)
 		}
+
+		return PullzoneRatelimitRule{}, errors.New("create ratelimit rule failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -139,9 +139,9 @@ func (c *Client) UpdatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneRatelimitRule{}, err
-		} else {
-			return PullzoneRatelimitRule{}, errors.New("create ratelimit rule failed with " + resp.Status)
 		}
+
+		return PullzoneRatelimitRule{}, errors.New("create ratelimit rule failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -174,9 +174,9 @@ func (c *Client) DeletePullzoneRatelimitRule(ctx context.Context, ruleId int64) 
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return err
-		} else {
-			return errors.New("delete ratelimit rule failed with " + resp.Status)
 		}
+
+		return errors.New("delete ratelimit rule failed with " + resp.Status)
 	}
 
 	return nil

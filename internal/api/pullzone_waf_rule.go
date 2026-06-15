@@ -59,9 +59,9 @@ func (c *Client) GetPullzoneWafRule(ctx context.Context, pullzoneId int64, ruleI
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneWafRule{}, err
-		} else {
-			return PullzoneWafRule{}, errors.New("get WAF rule failed with " + resp.Status)
 		}
+
+		return PullzoneWafRule{}, errors.New("get WAF rule failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -103,9 +103,9 @@ func (c *Client) CreatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneWafRule{}, err
-		} else {
-			return PullzoneWafRule{}, errors.New("create WAF rule failed with " + resp.Status)
 		}
+
+		return PullzoneWafRule{}, errors.New("create WAF rule failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -139,9 +139,9 @@ func (c *Client) UpdatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return PullzoneWafRule{}, err
-		} else {
-			return PullzoneWafRule{}, errors.New("create WAF rule failed with " + resp.Status)
 		}
+
+		return PullzoneWafRule{}, errors.New("create WAF rule failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -174,9 +174,9 @@ func (c *Client) DeletePullzoneWafRule(ctx context.Context, ruleId int64) error 
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return err
-		} else {
-			return errors.New("delete WAF rule failed with " + resp.Status)
 		}
+
+		return errors.New("delete WAF rule failed with " + resp.Status)
 	}
 
 	return nil

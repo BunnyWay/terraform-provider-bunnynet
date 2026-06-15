@@ -119,9 +119,9 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamLibrary{}, err
-		} else {
-			return StreamLibrary{}, errors.New("create stream library failed with " + resp.Status)
 		}
+
+		return StreamLibrary{}, errors.New("create stream library failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -157,9 +157,9 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return StreamLibrary{}, err
-		} else {
-			return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 		}
+
+		return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 	}
 
 	// update EnableTokenAuthentication
@@ -180,9 +180,9 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 			err := utils.ExtractErrorMessage(resp)
 			if err != nil {
 				return StreamLibrary{}, err
-			} else {
-				return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 			}
+
+			return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 		}
 	}
 

@@ -305,7 +305,7 @@ func TestAccDnsRecordDeletedOutOfBand(t *testing.T) {
 						}
 
 						c := newApiClient()
-						return c.DeleteDnsRecord(context.Background(), zoneId, int64(recordId))
+						return c.DeleteDnsRecord(context.Background(), zoneId, recordId)
 					},
 				),
 			},

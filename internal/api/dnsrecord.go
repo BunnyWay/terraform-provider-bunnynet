@@ -84,9 +84,9 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return DnsRecord{}, err
-		} else {
-			return DnsRecord{}, errors.New("create DNS record failed with " + resp.Status)
 		}
+
+		return DnsRecord{}, errors.New("create DNS record failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)

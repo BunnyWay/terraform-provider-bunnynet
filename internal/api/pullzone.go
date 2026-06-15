@@ -263,9 +263,9 @@ func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return Pullzone{}, err
-		} else {
-			return Pullzone{}, errors.New("create pullzone failed with " + resp.Status)
 		}
+
+		return Pullzone{}, errors.New("create pullzone failed with " + resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
@@ -311,9 +311,9 @@ func (c *Client) UpdatePullzoneWithBody(id int64, body []byte) (Pullzone, error)
 		err := utils.ExtractErrorMessage(resp)
 		if err != nil {
 			return Pullzone{}, err
-		} else {
-			return Pullzone{}, errors.New("update pullzone failed with " + resp.Status)
 		}
+
+		return Pullzone{}, errors.New("update pullzone failed with " + resp.Status)
 	}
 
 	dataApiResult, err := c.GetPullzone(id)
