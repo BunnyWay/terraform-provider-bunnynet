@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- Support to manage team members via the `account_subuser` resource;
+
+### Changed
+- Bumped minimum Terraform version to 1.11;
+
 ## 0.14.3 - 2026-06-15
 
 ### Added

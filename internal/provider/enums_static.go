@@ -2,6 +2,14 @@ package provider
 
 import "github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 
+var accountSubuserPermissionsMap = map[string]string{
+	"zones":   "SubuserManage",
+	"billing": "SubuserBilling",
+	"support": "SubuserSupport",
+	"abuse":   "SubuserAbuse",
+	"users":   "SubuserUsers",
+}
+
 var computeContainerAppImagePullPolicyOptions = []string{"Always", "IfNotPresent"}
 
 // format: key: terraform, value: api
