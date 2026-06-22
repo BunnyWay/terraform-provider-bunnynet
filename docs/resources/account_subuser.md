@@ -42,7 +42,9 @@ resource "bunnynet_account_subuser" "test" {
 
 ### Optional
 
-- `password` (String, Sensitive) The user's password. This is a write-only field: to update it after creation, re-create the resource.
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
+- `password` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The user's password. This is a write-only field: to update it after creation, re-create the resource.
 
 ### Read-Only
 
