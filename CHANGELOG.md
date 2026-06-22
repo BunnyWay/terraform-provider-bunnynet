@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.15.0 - 2026-06-22
+
 ### Added
 - Support to manage team members via the `account_subuser` resource;
 
