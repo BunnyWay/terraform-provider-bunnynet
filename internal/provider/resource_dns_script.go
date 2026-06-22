@@ -21,6 +21,7 @@ import (
 )
 
 var _ resource.Resource = &DnsScriptResource{}
+var _ resource.ResourceWithConfigure = &DnsScriptResource{}
 var _ resource.ResourceWithImportState = &DnsScriptResource{}
 var _ resource.ResourceWithModifyPlan = &DnsScriptResource{}
 

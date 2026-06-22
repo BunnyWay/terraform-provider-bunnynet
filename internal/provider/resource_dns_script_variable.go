@@ -21,6 +21,7 @@ import (
 )
 
 var _ resource.Resource = &DnsScriptVariableResource{}
+var _ resource.ResourceWithConfigure = &DnsScriptVariableResource{}
 var _ resource.ResourceWithImportState = &DnsScriptVariableResource{}
 
 func NewDnsScriptVariableResource() resource.Resource {

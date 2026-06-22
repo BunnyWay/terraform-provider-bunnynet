@@ -29,6 +29,8 @@ import (
 )
 
 var _ resource.Resource = &DnsZoneResource{}
+var _ resource.ResourceWithConfigure = &DnsZoneResource{}
+var _ resource.ResourceWithConfigValidators = &DnsZoneResource{}
 var _ resource.ResourceWithImportState = &DnsZoneResource{}
 var _ resource.ResourceWithModifyPlan = &DnsZoneResource{}
 

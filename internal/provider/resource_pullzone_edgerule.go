@@ -33,6 +33,8 @@ import (
 )
 
 var _ resource.Resource = &PullzoneEdgeruleResource{}
+var _ resource.ResourceWithConfigure = &PullzoneEdgeruleResource{}
+var _ resource.ResourceWithConfigValidators = &PullzoneEdgeruleResource{}
 var _ resource.ResourceWithImportState = &PullzoneEdgeruleResource{}
 
 func NewPullzoneEdgeruleResource() resource.Resource {

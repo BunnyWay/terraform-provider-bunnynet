@@ -39,9 +39,10 @@ import (
 )
 
 var _ resource.Resource = &ComputeContainerAppResource{}
+var _ resource.ResourceWithConfigure = &ComputeContainerAppResource{}
+var _ resource.ResourceWithConfigValidators = &ComputeContainerAppResource{}
 var _ resource.ResourceWithImportState = &ComputeContainerAppResource{}
 var _ resource.ResourceWithModifyPlan = &ComputeContainerAppResource{}
-var _ resource.ResourceWithConfigValidators = &ComputeContainerAppResource{}
 
 func NewComputeContainerAppResource() resource.Resource {
 	return &ComputeContainerAppResource{}

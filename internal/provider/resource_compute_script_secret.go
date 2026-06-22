@@ -21,6 +21,7 @@ import (
 )
 
 var _ resource.Resource = &ComputeScriptSecretResource{}
+var _ resource.ResourceWithConfigure = &ComputeScriptSecretResource{}
 var _ resource.ResourceWithImportState = &ComputeScriptSecretResource{}
 
 func NewComputeScriptSecretResource() resource.Resource {

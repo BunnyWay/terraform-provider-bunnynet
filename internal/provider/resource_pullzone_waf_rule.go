@@ -36,6 +36,7 @@ import (
 )
 
 var _ resource.Resource = &PullzoneWafRuleResource{}
+var _ resource.ResourceWithConfigure = &PullzoneWafRuleResource{}
 var _ resource.ResourceWithImportState = &PullzoneWafRuleResource{}
 var _ resource.ResourceWithUpgradeState = &PullzoneWafRuleResource{}
 
@@ -210,10 +211,6 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 			},
 		},
 	}
-}
-
-func (r *PullzoneWafRuleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	return []resource.ConfigValidator{}
 }
 
 func (r *PullzoneWafRuleResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {

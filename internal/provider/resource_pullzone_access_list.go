@@ -29,6 +29,7 @@ import (
 )
 
 var _ resource.Resource = &PullzoneAccessListResource{}
+var _ resource.ResourceWithConfigure = &PullzoneAccessListResource{}
 var _ resource.ResourceWithImportState = &PullzoneAccessListResource{}
 
 func NewPullzoneAccessList() resource.Resource {
@@ -123,10 +124,6 @@ func (r *PullzoneAccessListResource) Schema(ctx context.Context, req resource.Sc
 			},
 		},
 	}
-}
-
-func (r *PullzoneAccessListResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	return []resource.ConfigValidator{}
 }
 
 func (r *PullzoneAccessListResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

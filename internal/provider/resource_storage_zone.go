@@ -33,6 +33,8 @@ import (
 )
 
 var _ resource.Resource = &StorageZoneResource{}
+var _ resource.ResourceWithConfigure = &StorageZoneResource{}
+var _ resource.ResourceWithConfigValidators = &StorageZoneResource{}
 var _ resource.ResourceWithImportState = &StorageZoneResource{}
 
 func NewStorageZoneResource() resource.Resource {

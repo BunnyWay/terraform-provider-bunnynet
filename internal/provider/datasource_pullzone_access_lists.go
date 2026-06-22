@@ -14,6 +14,7 @@ import (
 )
 
 var _ datasource.DataSource = &PullzoneAccessListsDataSource{}
+var _ datasource.DataSourceWithConfigure = &PullzoneAccessListsDataSource{}
 
 func NewPullzoneAccessListsDataSource() datasource.DataSource {
 	return &PullzoneAccessListsDataSource{}

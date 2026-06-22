@@ -35,8 +35,9 @@ import (
 )
 
 var _ resource.Resource = &PullzoneShieldResource{}
-var _ resource.ResourceWithImportState = &PullzoneShieldResource{}
+var _ resource.ResourceWithConfigure = &PullzoneShieldResource{}
 var _ resource.ResourceWithConfigValidators = &PullzoneShieldResource{}
+var _ resource.ResourceWithImportState = &PullzoneShieldResource{}
 
 func NewPullzoneShield() resource.Resource {
 	return &PullzoneShieldResource{}

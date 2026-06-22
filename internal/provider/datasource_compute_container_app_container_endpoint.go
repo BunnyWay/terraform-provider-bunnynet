@@ -14,6 +14,7 @@ import (
 )
 
 var _ datasource.DataSource = &ComputeContainerAppContainerEndpointDataSource{}
+var _ datasource.DataSourceWithConfigure = &ComputeContainerAppContainerEndpointDataSource{}
 
 func NewComputeContainerAppContainerEndpointDataSource() datasource.DataSource {
 	return &ComputeContainerAppContainerEndpointDataSource{}

@@ -43,6 +43,8 @@ import (
 )
 
 var _ resource.Resource = &PullzoneResource{}
+var _ resource.ResourceWithConfigure = &PullzoneResource{}
+var _ resource.ResourceWithConfigValidators = &PullzoneResource{}
 var _ resource.ResourceWithImportState = &PullzoneResource{}
 var _ resource.ResourceWithModifyPlan = &PullzoneResource{}
 

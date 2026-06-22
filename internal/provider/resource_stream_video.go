@@ -27,6 +27,7 @@ import (
 )
 
 var _ resource.Resource = &StreamVideoResource{}
+var _ resource.ResourceWithConfigure = &StreamVideoResource{}
 var _ resource.ResourceWithImportState = &StreamVideoResource{}
 
 func NewStreamVideoResource() resource.Resource {

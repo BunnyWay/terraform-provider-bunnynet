@@ -35,6 +35,8 @@ import (
 )
 
 var _ resource.Resource = &DnsRecordResource{}
+var _ resource.ResourceWithConfigure = &DnsRecordResource{}
+var _ resource.ResourceWithConfigValidators = &DnsRecordResource{}
 var _ resource.ResourceWithImportState = &DnsRecordResource{}
 var _ resource.ResourceWithModifyPlan = &DnsRecordResource{}
 

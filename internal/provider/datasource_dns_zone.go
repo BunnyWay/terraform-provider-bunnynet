@@ -12,6 +12,7 @@ import (
 )
 
 var _ datasource.DataSource = &DnsZoneDataSource{}
+var _ datasource.DataSourceWithConfigure = &DnsZoneDataSource{}
 
 func NewDnsZoneDataSource() datasource.DataSource {
 	return &DnsZoneDataSource{}

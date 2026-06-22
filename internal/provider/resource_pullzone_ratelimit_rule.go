@@ -36,6 +36,7 @@ import (
 )
 
 var _ resource.Resource = &PullzoneRatelimitRuleResource{}
+var _ resource.ResourceWithConfigure = &PullzoneRatelimitRuleResource{}
 var _ resource.ResourceWithImportState = &PullzoneRatelimitRuleResource{}
 var _ resource.ResourceWithUpgradeState = &PullzoneRatelimitRuleResource{}
 
@@ -246,10 +247,6 @@ func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource
 			},
 		},
 	}
-}
-
-func (r *PullzoneRatelimitRuleResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	return []resource.ConfigValidator{}
 }
 
 func (r *PullzoneRatelimitRuleResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {

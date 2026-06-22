@@ -31,6 +31,8 @@ import (
 )
 
 var _ resource.Resource = &PullzoneHostnameResource{}
+var _ resource.ResourceWithConfigure = &PullzoneHostnameResource{}
+var _ resource.ResourceWithConfigValidators = &PullzoneHostnameResource{}
 var _ resource.ResourceWithImportState = &PullzoneHostnameResource{}
 
 func NewPullzoneHostnameResource() resource.Resource {

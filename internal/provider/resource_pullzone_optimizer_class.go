@@ -25,6 +25,7 @@ import (
 )
 
 var _ resource.Resource = &PullzoneOptimizerClassResource{}
+var _ resource.ResourceWithConfigure = &PullzoneOptimizerClassResource{}
 var _ resource.ResourceWithImportState = &PullzoneOptimizerClassResource{}
 
 func NewPullzoneOptimizerClassResource() resource.Resource {

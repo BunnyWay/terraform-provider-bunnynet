@@ -24,6 +24,7 @@ import (
 )
 
 var _ resource.Resource = &ComputeScriptResource{}
+var _ resource.ResourceWithConfigure = &ComputeScriptResource{}
 var _ resource.ResourceWithImportState = &ComputeScriptResource{}
 var _ resource.ResourceWithModifyPlan = &ComputeScriptResource{}
 

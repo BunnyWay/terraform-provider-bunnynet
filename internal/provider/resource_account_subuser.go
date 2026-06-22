@@ -26,6 +26,7 @@ import (
 )
 
 var _ resource.Resource = &AccountSubuserResource{}
+var _ resource.ResourceWithConfigure = &AccountSubuserResource{}
 var _ resource.ResourceWithImportState = &AccountSubuserResource{}
 
 func NewAccountSubuserResource() resource.Resource {

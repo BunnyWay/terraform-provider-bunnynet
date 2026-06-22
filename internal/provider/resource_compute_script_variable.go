@@ -22,6 +22,7 @@ import (
 )
 
 var _ resource.Resource = &ComputeScriptVariableResource{}
+var _ resource.ResourceWithConfigure = &ComputeScriptVariableResource{}
 var _ resource.ResourceWithImportState = &ComputeScriptVariableResource{}
 
 func NewComputeScriptVariableResource() resource.Resource {

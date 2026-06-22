@@ -15,6 +15,7 @@ import (
 )
 
 var _ datasource.DataSource = &ComputeContainerImageRegistryDataSource{}
+var _ datasource.DataSourceWithConfigure = &ComputeContainerImageRegistryDataSource{}
 
 func NewComputeContainerImageRegistryDataSource() datasource.DataSource {
 	return &ComputeContainerImageRegistryDataSource{}

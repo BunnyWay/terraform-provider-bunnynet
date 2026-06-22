@@ -14,6 +14,7 @@ import (
 )
 
 var _ datasource.DataSource = &RegionDataSource{}
+var _ datasource.DataSourceWithConfigure = &RegionDataSource{}
 
 func NewRegionDataSource() datasource.DataSource {
 	return &RegionDataSource{}

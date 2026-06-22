@@ -23,6 +23,7 @@ import (
 )
 
 var _ resource.Resource = &StreamCollectionResource{}
+var _ resource.ResourceWithConfigure = &StreamCollectionResource{}
 var _ resource.ResourceWithImportState = &StreamCollectionResource{}
 
 func NewStreamCollectionResource() resource.Resource {

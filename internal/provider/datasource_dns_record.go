@@ -14,6 +14,7 @@ import (
 )
 
 var _ datasource.DataSource = &DnsRecordDataSource{}
+var _ datasource.DataSourceWithConfigure = &DnsRecordDataSource{}
 
 func NewDnsRecordDataSource() datasource.DataSource {
 	return &DnsRecordDataSource{}

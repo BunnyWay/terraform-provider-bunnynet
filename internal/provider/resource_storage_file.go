@@ -29,7 +29,10 @@ import (
 )
 
 var _ resource.Resource = &StorageFileResource{}
+var _ resource.ResourceWithConfigure = &StorageFileResource{}
+var _ resource.ResourceWithConfigValidators = &StorageFileResource{}
 var _ resource.ResourceWithImportState = &StorageFileResource{}
+var _ resource.ResourceWithModifyPlan = &StorageFileResource{}
 
 func NewStorageFileResource() resource.Resource {
 	return &StorageFileResource{}

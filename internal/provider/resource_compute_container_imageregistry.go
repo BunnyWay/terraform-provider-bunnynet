@@ -22,6 +22,7 @@ import (
 )
 
 var _ resource.Resource = &ComputeContainerImageregistryResource{}
+var _ resource.ResourceWithConfigure = &ComputeContainerImageregistryResource{}
 var _ resource.ResourceWithImportState = &ComputeContainerImageregistryResource{}
 
 func NewComputeContainerImageregistryResource() resource.Resource {

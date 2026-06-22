@@ -36,6 +36,8 @@ import (
 )
 
 var _ resource.Resource = &StreamLibraryResource{}
+var _ resource.ResourceWithConfigure = &StreamLibraryResource{}
+var _ resource.ResourceWithConfigValidators = &StreamLibraryResource{}
 var _ resource.ResourceWithImportState = &StreamLibraryResource{}
 
 func NewStreamLibraryResource() resource.Resource {

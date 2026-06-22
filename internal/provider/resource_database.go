@@ -23,8 +23,8 @@ import (
 )
 
 var _ resource.Resource = &DatabaseResource{}
+var _ resource.ResourceWithConfigure = &DatabaseResource{}
 var _ resource.ResourceWithImportState = &DatabaseResource{}
-var _ resource.ResourceWithConfigValidators = &DatabaseResource{}
 
 func NewDatabaseResource() resource.Resource {
 	return &DatabaseResource{}
@@ -95,10 +95,6 @@ func (r *DatabaseResource) Schema(ctx context.Context, req resource.SchemaReques
 			},
 		},
 	}
-}
-
-func (r *DatabaseResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
-	return []resource.ConfigValidator{}
 }
 
 func (r *DatabaseResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

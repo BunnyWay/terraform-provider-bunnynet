@@ -14,6 +14,7 @@ import (
 )
 
 var _ datasource.DataSource = &VideoLanguageDataSource{}
+var _ datasource.DataSourceWithConfigure = &VideoLanguageDataSource{}
 
 func NewVideoLanguageDataSource() datasource.DataSource {
 	return &VideoLanguageDataSource{}
