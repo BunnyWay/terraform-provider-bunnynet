@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.15.1 - 2026-06-22
+
+### Fixed
+- resource `account_subuser`: wrong permissions in the docs;
+
 ## 0.15.0 - 2026-06-22
 
 ### Added

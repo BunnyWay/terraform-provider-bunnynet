@@ -38,7 +38,7 @@ resource "bunnynet_account_subuser" "test" {
 - `email` (String) The user's email address.
 - `firstname` (String) The user's first name.
 - `lastname` (String) The user's last name.
-- `permissions` (Set of String) Options: `SubuserAbuse`, `SubuserBilling`, `SubuserManage`, `SubuserSupport`, `SubuserUsers`
+- `permissions` (Set of String) Options: `abuse`, `billing`, `support`, `users`, `zones`
 
 ### Optional
 

@@ -112,7 +112,7 @@ func (r *AccountSubuserResource) Schema(ctx context.Context, req resource.Schema
 			"permissions": schema.SetAttribute{
 				ElementType: types.StringType,
 				Required:    true,
-				Description: generateMarkdownMapOptions(accountSubuserPermissionsMap),
+				Description: generateMarkdownMapOptions(utils.MapInvert(accountSubuserPermissionsMap)),
 				Validators: []validator.Set{
 					setvalidator.SizeAtLeast(1),
 					setvalidator.ValueStringsAre(
