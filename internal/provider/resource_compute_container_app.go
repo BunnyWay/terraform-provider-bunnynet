@@ -95,6 +95,7 @@ var computeContainerAppContainerEndpointPortType = types.ObjectType{
 
 var computeContainerAppContainerEndpointType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
+		"id":   types.StringType,
 		"name": types.StringType,
 		"type": types.StringType,
 		"cdn": types.ListType{
@@ -528,6 +529,10 @@ func (r *ComputeContainerAppResource) Schema(ctx context.Context, req resource.S
 									computecontainerappresourcevalidator.ContainerEndpoint(),
 								},
 								Attributes: map[string]schema.Attribute{
+									"id": schema.StringAttribute{
+										Computed:    true,
+										Description: "The ID of the endpoint.",
+									},
 									"name": schema.StringAttribute{
 										Required: true,
 										PlanModifiers: []planmodifier.String{
@@ -1333,6 +1338,7 @@ func (r *ComputeContainerAppResource) convertApiToModel(ctx context.Context, dat
 				}
 
 				endpointAttrs := map[string]attr.Value{
+					"id":   types.StringValue(endpoint.Id),
 					"name": types.StringValue(endpoint.DisplayName),
 					"type": types.StringValue(endpointTypeMap[endpoint.Type]),
 					"cdn":  cdnList,

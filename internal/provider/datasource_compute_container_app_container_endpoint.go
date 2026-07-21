@@ -27,6 +27,7 @@ type ComputeContainerAppContainerEndpointDataSource struct {
 type ComputeContainerAppContainerEndpointDataSourceModel struct {
 	App        types.String `tfsdk:"app"`
 	Container  types.String `tfsdk:"container"`
+	Id         types.String `tfsdk:"id"`
 	Name       types.String `tfsdk:"name"`
 	Type       types.String `tfsdk:"type"`
 	PublicHost types.String `tfsdk:"public_host"`
@@ -49,6 +50,10 @@ func (d *ComputeContainerAppContainerEndpointDataSource) Schema(ctx context.Cont
 			"container": schema.StringAttribute{
 				Required:    true,
 				Description: "The container unique identifier.",
+			},
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The endpoint ID.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -121,6 +126,7 @@ func (d *ComputeContainerAppContainerEndpointDataSource) Read(ctx context.Contex
 			}
 
 			endpointFound = true
+			data.Id = types.StringValue(endpoint.Id)
 			data.Type = types.StringValue(endpointTypeMap[endpoint.Type])
 			data.PublicHost = types.StringValue(endpoint.PublicHost)
 			data.CDN = types.ObjectNull(computeContainerAppContainerEndpointCdnType.AttrTypes)

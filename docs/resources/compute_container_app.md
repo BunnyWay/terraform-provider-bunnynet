@@ -143,6 +143,10 @@ Optional:
 - `cdn` (Block List) Configurations for CDN endpoint. (see [below for nested schema](#nestedblock--container--endpoint--cdn))
 - `port` (Block List) Endpoint port configuration. (see [below for nested schema](#nestedblock--container--endpoint--port))
 
+Read-Only:
+
+- `id` (String) The ID of the endpoint.
+
 <a id="nestedblock--container--endpoint--cdn"></a>
 ### Nested Schema for `container.endpoint.cdn`
 

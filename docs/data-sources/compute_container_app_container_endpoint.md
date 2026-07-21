@@ -36,6 +36,7 @@ output "url" {
 ### Read-Only
 
 - `cdn` (Object) Configurations for CDN endpoints. (see [below for nested schema](#nestedatt--cdn))
+- `id` (String) The endpoint ID.
 - `public_host` (String) The publicly accessible `IP:port` or hostname for the endpoint.
 - `type` (String) The endpoint type.
 

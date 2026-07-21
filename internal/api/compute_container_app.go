@@ -30,6 +30,7 @@ type ComputeContainerAppContainerEndpointStickySessions struct {
 }
 
 type ComputeContainerAppContainerEndpoint struct {
+	Id             string                                              `json:"id,omitempty"`
 	DisplayName    string                                              `json:"displayName"`
 	PublicHost     string                                              `json:"publicHost,omitempty"`
 	Type           string                                              `json:"type"`

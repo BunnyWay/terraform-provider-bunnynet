@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Changed
+- resource `compute_container_app`: expose `container[].endpoint[].id`;
+- datasource `bunnynet_compute_container_app_container_endpoint`: expose endpoint `id`;
+
 ## 0.15.1 - 2026-06-22
 
 ### Fixed
