@@ -37,6 +37,7 @@ var ActionMap = map[uint8]string{
 	32: "DisableShieldRateLimiting",
 	33: "EnableRequestCoalescing",
 	34: "DisableRequestCoalescing",
+	37: "StripCookiesClientToOrigin",
 }
 
 var TriggerMatchTypeMap = map[uint8]string{
