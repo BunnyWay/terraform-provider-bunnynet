@@ -54,6 +54,7 @@ type StreamLibraryResourceModel struct {
 	Pullzone                            types.Int64  `tfsdk:"pullzone"`
 	StorageZone                         types.Int64  `tfsdk:"storage_zone"`
 	ApiKey                              types.String `tfsdk:"api_key"`
+	ReadOnlyApiKey                      types.String `tfsdk:"read_only_api_key"`
 	PlayerVersion                       types.Int64  `tfsdk:"player_version"`
 	PlayerLanguage                      types.String `tfsdk:"player_language"`
 	PlayerFontFamily                    types.String `tfsdk:"player_font_family"`
@@ -146,6 +147,14 @@ func (r *StreamLibraryResource) Schema(ctx context.Context, req resource.SchemaR
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Description: "The API key for accessing the stream library.",
+			},
+			"read_only_api_key": schema.StringAttribute{
+				Computed:  true,
+				Sensitive: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Description: "The read-only API key for accessing the stream library.",
 			},
 			"player_version": schema.Int64Attribute{
 				Optional: true,
@@ -824,6 +833,7 @@ func (r *StreamLibraryResource) convertApiToModel(dataApi api.StreamLibrary) (St
 	dataTf.Pullzone = types.Int64Value(dataApi.PullZoneId)
 	dataTf.StorageZone = types.Int64Value(dataApi.StorageZoneId)
 	dataTf.ApiKey = types.StringValue(dataApi.ApiKey)
+	dataTf.ReadOnlyApiKey = types.StringValue(dataApi.ReadOnlyApiKey)
 
 	// player
 	{
