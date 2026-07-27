@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- resource `stream_library`: expose `api_key_readonly`;
+
 ### Changed
 - resource `compute_container_app`: expose `container[].endpoint[].id`;
 - datasource `bunnynet_compute_container_app_container_endpoint`: expose endpoint `id`;
