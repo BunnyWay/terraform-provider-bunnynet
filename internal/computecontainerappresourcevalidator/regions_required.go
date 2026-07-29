@@ -17,7 +17,7 @@ func RegionRequiredMustAlsoBeAllowed() resource.ConfigValidator {
 type regionRequiredMustAlsoBeAllowedValidator struct{}
 
 func (v regionRequiredMustAlsoBeAllowedValidator) Description(ctx context.Context) string {
-	return "Any region required region must also be defined as an allowed region."
+	return "Any required region must also be defined as an allowed region."
 }
 
 func (v regionRequiredMustAlsoBeAllowedValidator) MarkdownDescription(ctx context.Context) string {
