@@ -23,6 +23,7 @@ type StorageZone struct {
 	Region             string   `json:"Region,omitempty"`
 	ReplicationRegions []string `json:"ReplicationRegions,omitempty"`
 	StorageHostname    string   `json:"StorageHostname,omitempty"`
+	S3Hostname         string   `json:"S3Hostname,omitempty"`
 	StorageZoneType    uint8    `json:"StorageZoneType,omitempty"`
 	ZoneTier           uint8    `json:"ZoneTier,omitempty"`
 	Custom404FilePath  string   `json:"Custom404FilePath,omitempty"`

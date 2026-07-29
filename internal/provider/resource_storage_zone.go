@@ -337,7 +337,6 @@ func (r *StorageZoneResource) convertModelToApi(ctx context.Context, dataTf Stor
 	dataApi.Region = dataTf.Region.ValueString()
 	dataApi.Rewrite404To200 = dataTf.Rewrite404To200.ValueBool()
 	dataApi.Custom404FilePath = dataTf.Custom404FilePath.ValueString()
-	dataApi.StorageHostname = dataTf.StorageHostname.ValueString()
 	dataApi.DateModified = dataTf.DateModified.ValueString()
 
 	{
@@ -359,9 +358,17 @@ func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (Storag
 	dataTf.ZoneTier = types.StringValue(mapKeyToValue(storageZoneTierMap, dataApi.ZoneTier))
 	dataTf.Region = types.StringValue(dataApi.Region)
 	dataTf.Rewrite404To200 = types.BoolValue(dataApi.Rewrite404To200)
-	dataTf.StorageHostname = types.StringValue(dataApi.StorageHostname)
 	dataTf.DateModified = types.StringValue(dataApi.DateModified)
 	dataTf.Custom404FilePath = typeStringOrNull(dataApi.Custom404FilePath)
+
+	switch dataApi.StorageZoneType {
+	case storageZoneTypeStandard:
+		dataTf.StorageHostname = types.StringValue(dataApi.StorageHostname)
+	case storageZoneTypeS3:
+		dataTf.StorageHostname = types.StringValue(dataApi.S3Hostname)
+	default:
+		panic("unexpected storage zone type")
+	}
 
 	{
 		replicationRegions, err := utils.ConvertStringSliceToSet(dataApi.ReplicationRegions)
