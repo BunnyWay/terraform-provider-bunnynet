@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.16.0 - 2026-07-30
+
+### Backwards compatibility breaks
+
+The `hostname` field in a `storage_zone` resource will now return the S3-specific hostname (i.e.: `sg-s3.storage.bunnycdn.com`) when `type = "S3"`. Previously it would return the Standard hostname (i.e.: `sg.storage.bunnycdn.com`).
+
 ### Added
 - resource `pullzone`: expose `origin.script_execute_before_cache`;
 
