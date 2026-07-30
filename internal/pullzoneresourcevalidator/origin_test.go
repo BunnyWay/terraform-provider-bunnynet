@@ -15,16 +15,17 @@ import (
 
 var testOriginOriginType = tftypes.Object{
 	AttributeTypes: map[string]tftypes.Type{
-		"type":                  tftypes.String,
-		"url":                   tftypes.String,
-		"host_header":           tftypes.String,
-		"storagezone":           tftypes.Number,
-		"script":                tftypes.Number,
-		"middleware_script":     tftypes.Number,
-		"container_app_id":      tftypes.String,
-		"container_endpoint_id": tftypes.String,
-		"dns_port":              tftypes.Number,
-		"dns_scheme":            tftypes.String,
+		"type":                        tftypes.String,
+		"url":                         tftypes.String,
+		"host_header":                 tftypes.String,
+		"storagezone":                 tftypes.Number,
+		"script":                      tftypes.Number,
+		"middleware_script":           tftypes.Number,
+		"script_execute_before_cache": tftypes.Bool,
+		"container_app_id":            tftypes.String,
+		"container_endpoint_id":       tftypes.String,
+		"dns_port":                    tftypes.Number,
+		"dns_scheme":                  tftypes.String,
 	},
 }
 
@@ -145,6 +146,14 @@ func TestOrigin(t *testing.T) {
 		testOriginMakeTestCase(false, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1"}, "eu"),
 		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1"}, "scripting"),
 		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1"}, "scripting,eu"),
+
+		// script_execute_before_cache
+		testOriginMakeTestCase(false, "OriginUrl", originPayload{Url: "https://example.com/", ScriptExecuteBeforeCache: false}, nil),
+		testOriginMakeTestCase(true, "OriginUrl", originPayload{Url: "https://example.com/", ScriptExecuteBeforeCache: true}, nil),
+		testOriginMakeTestCase(false, "ComputeScript", originPayload{Script: 12345, ScriptExecuteBeforeCache: false}, "scripting"),
+		testOriginMakeTestCase(false, "ComputeScript", originPayload{Script: 12345, ScriptExecuteBeforeCache: true}, "scripting"),
+		testOriginMakeTestCase(false, "OriginUrl", originPayload{Url: "https://example.com/", Middleware: 12345, ScriptExecuteBeforeCache: false}, "scripting"),
+		testOriginMakeTestCase(false, "OriginUrl", originPayload{Url: "https://example.com/", Middleware: 12345, ScriptExecuteBeforeCache: true}, "scripting"),
 	}
 
 	configSchema := schema.Schema{
@@ -155,14 +164,15 @@ func TestOrigin(t *testing.T) {
 					"url": schema.StringAttribute{
 						CustomType: customtype.PullzoneOriginUrlType{},
 					},
-					"host_header":           schema.StringAttribute{},
-					"storagezone":           schema.Int64Attribute{},
-					"script":                schema.Int64Attribute{},
-					"middleware_script":     schema.Int64Attribute{},
-					"container_app_id":      schema.StringAttribute{},
-					"container_endpoint_id": schema.StringAttribute{},
-					"dns_port":              schema.Int64Attribute{},
-					"dns_scheme":            schema.StringAttribute{},
+					"host_header":                 schema.StringAttribute{},
+					"storagezone":                 schema.Int64Attribute{},
+					"script":                      schema.Int64Attribute{},
+					"middleware_script":           schema.Int64Attribute{},
+					"script_execute_before_cache": schema.BoolAttribute{},
+					"container_app_id":            schema.StringAttribute{},
+					"container_endpoint_id":       schema.StringAttribute{},
+					"dns_port":                    schema.Int64Attribute{},
+					"dns_scheme":                  schema.StringAttribute{},
 				},
 			},
 			"routing": schema.SingleNestedBlock{
@@ -229,15 +239,16 @@ func testOriginMakeTestCase(err bool, ot string, op originPayload, filters any) 
 }
 
 type originPayload struct {
-	Url                 string
-	HostHeader          string
-	Storagezone         int64
-	Script              int64
-	Middleware          int64
-	ContainerAppId      string
-	ContainerEndpointId string
-	DnsPort             int64
-	DnsScheme           string
+	Url                      string
+	HostHeader               string
+	Storagezone              int64
+	Script                   int64
+	Middleware               int64
+	ScriptExecuteBeforeCache bool
+	ContainerAppId           string
+	ContainerEndpointId      string
+	DnsPort                  int64
+	DnsScheme                string
 }
 
 func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
@@ -288,15 +299,16 @@ func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 	}
 
 	return tftypes.NewValue(testOriginOriginType, map[string]tftypes.Value{
-		"type":                  tftypes.NewValue(tftypes.String, ot),
-		"url":                   tftypes.NewValue(tftypes.String, url),
-		"host_header":           tftypes.NewValue(tftypes.String, hostHeader),
-		"storagezone":           tftypes.NewValue(tftypes.Number, storagezone),
-		"script":                tftypes.NewValue(tftypes.Number, script),
-		"middleware_script":     tftypes.NewValue(tftypes.Number, middleware),
-		"container_app_id":      tftypes.NewValue(tftypes.String, containerAppId),
-		"container_endpoint_id": tftypes.NewValue(tftypes.String, containerEndpointId),
-		"dns_port":              tftypes.NewValue(tftypes.Number, dnsPort),
-		"dns_scheme":            tftypes.NewValue(tftypes.String, dnsScheme),
+		"type":                        tftypes.NewValue(tftypes.String, ot),
+		"url":                         tftypes.NewValue(tftypes.String, url),
+		"host_header":                 tftypes.NewValue(tftypes.String, hostHeader),
+		"storagezone":                 tftypes.NewValue(tftypes.Number, storagezone),
+		"script":                      tftypes.NewValue(tftypes.Number, script),
+		"middleware_script":           tftypes.NewValue(tftypes.Number, middleware),
+		"script_execute_before_cache": tftypes.NewValue(tftypes.Bool, payload.ScriptExecuteBeforeCache),
+		"container_app_id":            tftypes.NewValue(tftypes.String, containerAppId),
+		"container_endpoint_id":       tftypes.NewValue(tftypes.String, containerEndpointId),
+		"dns_port":                    tftypes.NewValue(tftypes.Number, dnsPort),
+		"dns_scheme":                  tftypes.NewValue(tftypes.String, dnsScheme),
 	})
 }

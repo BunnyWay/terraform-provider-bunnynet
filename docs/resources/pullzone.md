@@ -150,6 +150,7 @@ Optional:
 - `host_header` (String) The host header that will be sent to the origin.
 - `middleware_script` (Number) The ID of the compute script used as a middleware.
 - `script` (Number) The ID of the linked compute script.
+- `script_execute_before_cache` (Boolean) Indicates whether the script will execute ahead of the cache layer.
 - `storagezone` (Number) The ID of the linked storage zone.
 - `url` (String) The origin URL from where the files are fetched.
 - `verify_ssl` (Boolean) Indicates whether the Origin's TLS certificate should be verified.

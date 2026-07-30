@@ -125,6 +125,7 @@ type Pullzone struct {
 	FollowRedirects           bool   `json:"FollowRedirects"`
 	EdgeScriptId              int64  `json:"EdgeScriptId,omitempty"`
 	MiddlewareScriptId        int64  `json:"MiddlewareScriptId"`
+	EdgeScriptExecutionPhase  uint8  `json:"EdgeScriptExecutionPhase"`
 	MagicContainersAppId      string `json:"MagicContainersAppId,omitempty"`
 	MagicContainersEndpointId string `json:"MagicContainersEndpointId,omitempty"`
 	DnsOriginPort             uint16 `json:"DnsOriginPort,omitempty"`

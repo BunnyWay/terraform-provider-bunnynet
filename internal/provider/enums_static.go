@@ -111,6 +111,9 @@ var pullzoneOriginTypeMap = map[uint8]string{
 	5: "ComputeContainer",
 }
 
+var pullzoneOriginScriptExecuteBeforeCacheFalse uint8 = 0
+var pullzoneOriginScriptExecuteBeforeCacheTrue uint8 = 2
+
 var pullzoneRoutingTierMap = map[uint8]string{
 	0: "Standard",
 	1: "Volume",

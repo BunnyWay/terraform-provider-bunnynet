@@ -73,6 +73,11 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 		return
 	}
 
+	originScriptExecuteBeforeCache := originAttr["script_execute_before_cache"].(types.Bool)
+	if originScriptExecuteBeforeCache.IsUnknown() {
+		return
+	}
+
 	originContainerAppId := originAttr["container_app_id"].(types.String)
 	if originContainerAppId.IsUnknown() {
 		return
@@ -170,6 +175,12 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 	if hasScriptingRoutingFilter {
 		if originType.ValueString() != "ComputeScript" && !hasMiddlewareScript {
 			resp.Diagnostics.AddAttributeError(path.Root("routing").AtName("filters"), "Invalid routing.filters value", "The \"scripting\" filter must not be defined when scripts are not in use.")
+		}
+	}
+
+	if originScriptExecuteBeforeCache.ValueBool() {
+		if !hasMiddlewareScript && originType.ValueString() != "ComputeScript" {
+			resp.Diagnostics.AddAttributeError(path.Root("origin").AtName("script_execute_before_cache"), "xx", "origin.script_execute_before_cache is only applicable when invoking an Edge Script.")
 		}
 	}
 

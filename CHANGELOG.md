@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- resource `pullzone`: expose `origin.script_execute_before_cache`;
+
 ### Changed
 - resource `storage_zone`: `hostname` will now return the S3-specific hostname when applicable;
 

@@ -153,19 +153,20 @@ type PullzoneResourceModel struct {
 }
 
 var pullzoneOriginTypes = map[string]attr.Type{
-	"type":                  types.StringType,
-	"url":                   customtype.PullzoneOriginUrlType{},
-	"storagezone":           types.Int64Type,
-	"follow_redirects":      types.BoolType,
-	"host_header":           types.StringType,
-	"forward_host_header":   types.BoolType,
-	"verify_ssl":            types.BoolType,
-	"script":                types.Int64Type,
-	"middleware_script":     types.Int64Type,
-	"container_app_id":      types.StringType,
-	"container_endpoint_id": types.StringType,
-	"dns_port":              types.Int64Type,
-	"dns_scheme":            types.StringType,
+	"type":                        types.StringType,
+	"url":                         customtype.PullzoneOriginUrlType{},
+	"storagezone":                 types.Int64Type,
+	"follow_redirects":            types.BoolType,
+	"host_header":                 types.StringType,
+	"forward_host_header":         types.BoolType,
+	"verify_ssl":                  types.BoolType,
+	"script":                      types.Int64Type,
+	"middleware_script":           types.Int64Type,
+	"script_execute_before_cache": types.BoolType,
+	"container_app_id":            types.StringType,
+	"container_endpoint_id":       types.StringType,
+	"dns_port":                    types.Int64Type,
+	"dns_scheme":                  types.StringType,
 }
 
 var pullzoneRoutingTypes = map[string]attr.Type{
@@ -1224,6 +1225,12 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 						Default:     int64default.StaticInt64(0),
 						Description: "The ID of the compute script used as a middleware.",
 					},
+					"script_execute_before_cache": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
+						Description: "Indicates whether the script will execute ahead of the cache layer.",
+					},
 					"container_app_id": schema.StringAttribute{
 						Optional:    true,
 						Description: "The ID if the compute container app.",
@@ -1665,6 +1672,11 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.FollowRedirects = origin["follow_redirects"].(types.Bool).ValueBool()
 	dataApi.MiddlewareScriptId = origin["middleware_script"].(types.Int64).ValueInt64()
 
+	dataApi.EdgeScriptExecutionPhase = pullzoneOriginScriptExecuteBeforeCacheFalse
+	if origin["script_execute_before_cache"].(types.Bool).ValueBool() {
+		dataApi.EdgeScriptExecutionPhase = pullzoneOriginScriptExecuteBeforeCacheTrue
+	}
+
 	switch dataApi.OriginType {
 	case api.PullzoneOriginTypeOriginUrl:
 		dataApi.OriginUrl = origin["url"].(customtype.PullzoneOriginUrlValue).ValueString()
@@ -1964,19 +1976,20 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 	// origin
 	{
 		originValues := map[string]attr.Value{
-			"type":                  types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
-			"middleware_script":     types.Int64Value(dataApi.MiddlewareScriptId),
-			"follow_redirects":      types.BoolValue(dataApi.FollowRedirects),
-			"forward_host_header":   types.BoolValue(dataApi.AddHostHeader),
-			"verify_ssl":            types.BoolValue(dataApi.VerifyOriginSSL),
-			"url":                   customtype.PullzoneOriginUrlValue{StringValue: types.StringNull()},
-			"host_header":           types.StringValue(""),
-			"storagezone":           types.Int64Null(),
-			"script":                types.Int64Null(),
-			"container_app_id":      types.StringNull(),
-			"container_endpoint_id": types.StringNull(),
-			"dns_port":              types.Int64Null(),
-			"dns_scheme":            types.StringNull(),
+			"type":                        types.StringValue(mapKeyToValue(pullzoneOriginTypeMap, dataApi.OriginType)),
+			"middleware_script":           types.Int64Value(dataApi.MiddlewareScriptId),
+			"script_execute_before_cache": types.BoolValue(dataApi.EdgeScriptExecutionPhase == pullzoneOriginScriptExecuteBeforeCacheTrue),
+			"follow_redirects":            types.BoolValue(dataApi.FollowRedirects),
+			"forward_host_header":         types.BoolValue(dataApi.AddHostHeader),
+			"verify_ssl":                  types.BoolValue(dataApi.VerifyOriginSSL),
+			"url":                         customtype.PullzoneOriginUrlValue{StringValue: types.StringNull()},
+			"host_header":                 types.StringValue(""),
+			"storagezone":                 types.Int64Null(),
+			"script":                      types.Int64Null(),
+			"container_app_id":            types.StringNull(),
+			"container_endpoint_id":       types.StringNull(),
+			"dns_port":                    types.Int64Null(),
+			"dns_scheme":                  types.StringNull(),
 		}
 
 		switch dataApi.OriginType {
