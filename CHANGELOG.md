@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.17.0 - 2026-08-04
+
 ### Backwards compatibility breaks
 
 The `storage_zone.hostname` changes in [v0.16.0](#0160---2026-07-30) were reverted.
