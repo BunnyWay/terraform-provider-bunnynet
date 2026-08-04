@@ -16,6 +16,7 @@ The `pullzone_shield` `ddos.mode` attribute was removed. Shield Zones are always
 ### Added
 - resource `pullzone_shield`: support Upload Scanning;
 - resource `pullzone_shield`: support Whitelabel custom pages;
+- action `purge_url`: purge a URL from the CDN cache (requires Terraform 1.14+);
 
 ### Fixed
 - resource `dns_record`: changing `zone` should trigger a replacement ([#90](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/90));
