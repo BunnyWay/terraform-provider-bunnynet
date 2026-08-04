@@ -576,7 +576,7 @@ func (r *PullzoneOptimizerClassResource) convertApiToModel(dataApi api.PullzoneO
 	}
 
 	if v, ok := dataApi.Properties["auto_optimize"]; ok {
-		dataTf.CropGravity = types.StringValue(v)
+		dataTf.AutoOptimize = types.StringValue(v)
 	}
 
 	if v, ok := dataApi.Properties["sepia"]; ok {

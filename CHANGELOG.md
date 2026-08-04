@@ -19,6 +19,9 @@ The `storage_zone.hostname` changes in [v0.16.0](#0160---2026-07-30) were revert
 ### Changed
 - resource `storage_zone`: `hostname` will return the Standard hostname, regardless of `type`;
 
+### Fixed
+- resource `pullzone_optimizer_class`: `auto_optimize` wrongly overrides `crop_gravity`;
+
 ## 0.16.0 - 2026-07-30
 
 ### Backwards compatibility breaks
