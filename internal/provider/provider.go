@@ -9,6 +9,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"os"
 
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -17,6 +18,7 @@ import (
 )
 
 var _ provider.Provider = &BunnynetProvider{}
+var _ provider.ProviderWithActions = &BunnynetProvider{}
 
 type BunnynetProvider struct {
 	version string
@@ -105,6 +107,7 @@ func (p *BunnynetProvider) Configure(ctx context.Context, req provider.Configure
 	)
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
+	resp.ActionData = apiClient
 }
 
 func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Resource {
@@ -147,6 +150,12 @@ func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.
 		NewDnsZoneDataSource,
 		NewRegionDataSource,
 		NewVideoLanguageDataSource,
+	}
+}
+
+func (p *BunnynetProvider) Actions(ctx context.Context) []func() action.Action {
+	return []func() action.Action{
+		NewPurgeUrlAction,
 	}
 }
 
