@@ -39,7 +39,8 @@ resource "bunnynet_storage_zone" "example" {
 ### Read-Only
 
 - `date_modified` (String) The date when the zone was last modified.
-- `hostname` (String) The hostname for accessing the storage zone.
+- `hostname` (String) The hostname for accessing the storage zone over HTTP API.
+- `hostname_s3` (String) The hostname for accessing the storage zone over S3.
 - `id` (Number) The ID of the storage zone.
 - `password` (String, Sensitive) The password for accessing the storage zone.
 - `password_readonly` (String, Sensitive) The read-only password for accessing the storage zone.

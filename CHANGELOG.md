@@ -9,6 +9,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Backwards compatibility breaks
+
+The `storage_zone.hostname` changes in [v0.16.0](#0160---2026-07-30) were reverted.
+
+### Added
+- resource `storage_zone`: expose `hostname_s3`;
+
+### Changed
+- resource `storage_zone`: `hostname` will return the Standard hostname, regardless of `type`;
+
 ## 0.16.0 - 2026-07-30
 
 ### Backwards compatibility breaks

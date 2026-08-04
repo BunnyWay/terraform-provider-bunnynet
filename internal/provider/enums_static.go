@@ -169,12 +169,9 @@ var pullzoneShieldWafAllowedHttpMethodsOptions = []string{
 	"TRACE",
 }
 
-var storageZoneTypeStandard uint8 = 0
-var storageZoneTypeS3 uint8 = 1
-
 var storageZoneTypeMap = map[uint8]string{
-	storageZoneTypeStandard: "Standard",
-	storageZoneTypeS3:       "S3",
+	0: "Standard",
+	1: "S3",
 }
 
 var streamLibraryFontFamilyOptions = []string{"arial", "inter", "lato", "oswald", "raleway", "roboto", "rubik", "ubuntu"}

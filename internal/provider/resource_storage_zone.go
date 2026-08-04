@@ -53,6 +53,7 @@ type StorageZoneResourceModel struct {
 	Region             types.String `tfsdk:"region"`
 	ReplicationRegions types.Set    `tfsdk:"replication_regions"`
 	StorageHostname    types.String `tfsdk:"hostname"`
+	S3Hostname         types.String `tfsdk:"hostname_s3"`
 	Type               types.String `tfsdk:"type"`
 	ZoneTier           types.String `tfsdk:"zone_tier"`
 	Custom404FilePath  types.String `tfsdk:"custom_404_file_path"`
@@ -131,7 +132,14 @@ func (r *StorageZoneResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Description: "The hostname for accessing the storage zone.",
+				Description: "The hostname for accessing the storage zone over HTTP API.",
+			},
+			"hostname_s3": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Description: "The hostname for accessing the storage zone over S3.",
 			},
 			"password": schema.StringAttribute{
 				Computed:  true,
@@ -358,17 +366,10 @@ func (r *StorageZoneResource) convertApiToModel(dataApi api.StorageZone) (Storag
 	dataTf.ZoneTier = types.StringValue(mapKeyToValue(storageZoneTierMap, dataApi.ZoneTier))
 	dataTf.Region = types.StringValue(dataApi.Region)
 	dataTf.Rewrite404To200 = types.BoolValue(dataApi.Rewrite404To200)
+	dataTf.StorageHostname = types.StringValue(dataApi.StorageHostname)
+	dataTf.S3Hostname = types.StringValue(dataApi.S3Hostname)
 	dataTf.DateModified = types.StringValue(dataApi.DateModified)
 	dataTf.Custom404FilePath = typeStringOrNull(dataApi.Custom404FilePath)
-
-	switch dataApi.StorageZoneType {
-	case storageZoneTypeStandard:
-		dataTf.StorageHostname = types.StringValue(dataApi.StorageHostname)
-	case storageZoneTypeS3:
-		dataTf.StorageHostname = types.StringValue(dataApi.S3Hostname)
-	default:
-		panic("unexpected storage zone type")
-	}
 
 	{
 		replicationRegions, err := utils.ConvertStringSliceToSet(dataApi.ReplicationRegions)
