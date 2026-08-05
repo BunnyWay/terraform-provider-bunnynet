@@ -155,6 +155,7 @@ func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.
 
 func (p *BunnynetProvider) Actions(ctx context.Context) []func() action.Action {
 	return []func() action.Action{
+		NewPullzonePurgeCacheAction,
 		NewPurgeUrlAction,
 	}
 }

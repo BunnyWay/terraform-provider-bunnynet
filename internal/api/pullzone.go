@@ -341,3 +341,32 @@ func (c *Client) DeletePullzone(id int64) error {
 
 	return nil
 }
+
+func (c *Client) PurgePullzoneCache(id int64, cacheTag string) error {
+	var body io.Reader
+	if cacheTag != "" {
+		bodyBytes, err := json.Marshal(map[string]string{
+			"CacheTag": cacheTag,
+		})
+		if err != nil {
+			return err
+		}
+
+		body = bytes.NewReader(bodyBytes)
+	}
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d/purgeCache", c.apiUrl, id), body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+
+	if resp.StatusCode != http.StatusNoContent {
+		return errors.New(resp.Status)
+	}
+
+	return nil
+}

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## Unreleased
 
 ### Added
+- action `pullzone_purge_cache`: purge the entire cache for a pull zone (requires Terraform 1.14+);
 - action `purge_url`: purge a URL from the CDN cache (requires Terraform 1.14+);
 
 ## 0.17.0 - 2026-08-04
