@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -26,7 +25,7 @@ func NewPurgeUrlAction() action.Action {
 }
 
 type PurgeUrlAction struct {
-	client *api.Client
+	actionCommon
 }
 
 type PurgeUrlActionModel struct {
@@ -62,24 +61,6 @@ func (a *PurgeUrlAction) Schema(ctx context.Context, req action.SchemaRequest, r
 	}
 }
 
-func (a *PurgeUrlAction) Configure(ctx context.Context, req action.ConfigureRequest, resp *action.ConfigureResponse) {
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*api.Client)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Action Configure Type",
-			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	a.client = client
-}
-
 func (a *PurgeUrlAction) Invoke(ctx context.Context, req action.InvokeRequest, resp *action.InvokeResponse) {
 	var data PurgeUrlActionModel
 
@@ -88,8 +69,7 @@ func (a *PurgeUrlAction) Invoke(ctx context.Context, req action.InvokeRequest, r
 		return
 	}
 
-	if a.client == nil {
-		resp.Diagnostics.AddError("Action not configured", "The API client is missing. Please report this issue to the provider developers.")
+	if !a.checkClient(resp) {
 		return
 	}
 
