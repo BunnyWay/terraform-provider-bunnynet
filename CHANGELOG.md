@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- resource `dns_record`: changing `zone` should trigger a replacement ([#90](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/90));
+
 ## 0.17.0 - 2026-08-04
 
 ### Backwards compatibility breaks

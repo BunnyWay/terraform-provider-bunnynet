@@ -92,7 +92,7 @@ func (r *DnsRecordResource) Schema(ctx context.Context, req resource.SchemaReque
 			"zone": schema.Int64Attribute{
 				Required: true,
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
+					int64planmodifier.RequiresReplace(),
 				},
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
