@@ -45,6 +45,8 @@ type PullzoneShield struct {
 	DDoSMode                             uint8    `json:"dDoSExecutionMode"`
 	DDoSLevel                            uint8    `json:"dDoSShieldSensitivity"`
 	DDosChallengeWindow                  int64    `json:"dDoSChallengeWindow"`
+	UploadScanningAntivirus              uint8    `json:"-"`
+	UploadScanningCsam                   uint8    `json:"-"`
 	WafEnabled                           bool     `json:"wafEnabled"`
 	WafMode                              uint8    `json:"wafExecutionMode"`
 	WafRealtimeThreatIntelligenceEnabled bool     `json:"wafRealtimeThreatIntelligenceEnabled"`
@@ -327,6 +329,17 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		result.Data.BotDetectionComplexFingerprinting = botDetectionResult.ComplexFingerprinting
 	}
 
+	// fetch upload-scanning config
+	{
+		uploadScanningResult, err := c.fetchUploadScanning(ctx, id)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		result.Data.UploadScanningAntivirus = uploadScanningResult.Antivirus
+		result.Data.UploadScanningCsam = uploadScanningResult.Csam
+	}
+
 	return result.Data, nil
 }
 
@@ -407,6 +420,60 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 		IPSensitivity:          result.Data.IpAddress.Sensitivity,
 		RequestIntegrity:       result.Data.RequestIntegrity.Sensitivity,
 		ComplexFingerprinting:  result.Data.BrowserFingerprint.ComplexEnabled,
+	}, nil
+}
+
+type fetchUploadScanningResult struct {
+	Antivirus uint8
+	Csam      uint8
+}
+
+func (c *Client) fetchUploadScanning(ctx context.Context, shieldZoneId int64) (fetchUploadScanningResult, error) {
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/shield-zone/%d/upload-scanning", c.apiUrl, shieldZoneId), nil)
+	if err != nil {
+		return fetchUploadScanningResult{}, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := utils.ExtractErrorMessage(resp)
+		if err != nil {
+			return fetchUploadScanningResult{}, err
+		}
+
+		return fetchUploadScanningResult{}, errors.New("get shieldzone/upload-scanning for pullzone failed with " + resp.Status)
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fetchUploadScanningResult{}, err
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/upload-scanning: %+v", shieldZoneId, string(bodyResp)))
+
+	var result struct {
+		Data struct {
+			ShieldZoneId          int64 `json:"shieldZoneId"`
+			IsEnabled             bool  `json:"isEnabled"`
+			AntivirusScanningMode uint8 `json:"antivirusScanningMode"`
+			CsamScanningMode      uint8 `json:"csamScanningMode"`
+		} `json:"data"`
+	}
+
+	err = json.Unmarshal(bodyResp, &result)
+	if err != nil {
+		return fetchUploadScanningResult{}, err
+	}
+
+	if !result.Data.IsEnabled {
+		return fetchUploadScanningResult{
+			Antivirus: 0,
+			Csam:      0,
+		}, nil
+	}
+
+	return fetchUploadScanningResult{
+		Antivirus: result.Data.AntivirusScanningMode,
+		Csam:      result.Data.CsamScanningMode,
 	}, nil
 }
 
@@ -659,6 +726,36 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				} else {
 					return PullzoneShield{}, err
 				}
+			} else {
+				return PullzoneShield{}, errors.New("update pullzone shield/bot-detection failed with " + resp.Status)
+			}
+		}
+	}
+
+	// upload-scanning fields
+	{
+		body, err := json.Marshal(map[string]interface{}{
+			"shieldZoneId":          data.Id,
+			"isEnabled":             data.UploadScanningAntivirus != 0 || data.UploadScanningCsam != 0,
+			"antivirusScanningMode": data.UploadScanningAntivirus,
+			"csamScanningMode":      data.UploadScanningCsam,
+		})
+
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		tflog.Debug(ctx, fmt.Sprintf("POST /shield/shield-zone/%d/upload-scanning: %+v", data.Id, string(body)))
+
+		resp, err := c.doRequest(http.MethodPatch, fmt.Sprintf("%s/shield/shield-zone/%d/upload-scanning", c.apiUrl, data.Id), bytes.NewReader(body))
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			err := utils.ExtractShieldErrorMessage(resp)
+			if err != nil {
+				return PullzoneShield{}, err
 			} else {
 				return PullzoneShield{}, errors.New("update pullzone shield/bot-detection failed with " + resp.Status)
 			}

@@ -42,6 +42,8 @@ resource "bunnynet_pullzone_shield" "test" {
 - `bot_detection` (Block, Optional) Configures Bot Detection settings. (see [below for nested schema](#nestedblock--bot_detection))
 - `ddos` (Block, Optional) Configures DDoS settings. (see [below for nested schema](#nestedblock--ddos))
 - `tier` (String) Options: `Advanced`, `Basic`, `Business`, `Enterprise`
+- `upload_scanning_antivirus` (String) Scan file uploads for viruses, trojans, ransomware, and other forms of malware.
+- `upload_scanning_csam` (String) Scan file uploads for Child Sexual Abuse Material.
 - `waf` (Block, Optional) Configures WAF settings. (see [below for nested schema](#nestedblock--waf))
 - `whitelabel` (Boolean) Replace our bunny.net branded block and challenge pages with a white-labelled experience.
 

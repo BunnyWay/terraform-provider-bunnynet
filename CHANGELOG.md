@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 The `pullzone_shield` `ddos.mode` attribute was removed. Shield Zones are always in Blocking mode, but you can configure its sensitivity via the [`ddos.level`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone_shield#level-1) attribute.
 
+### Added
+- resource `pullzone_shield`: support Upload Scanning;
+
 ### Fixed
 - resource `dns_record`: changing `zone` should trigger a replacement ([#90](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/90));
 

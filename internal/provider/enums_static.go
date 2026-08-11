@@ -140,6 +140,12 @@ var pullzoneShieldBotDetectionModeMap = map[uint8]string{
 	1: "Challenge",
 }
 
+var pullzoneShieldUploadScanningValueMap = map[uint8]string{
+	0: "Disable",
+	1: "Log",
+	2: "Block",
+}
+
 var pullzoneShieldWafModeMap = map[uint8]string{
 	0: "Log",
 	1: "Block",

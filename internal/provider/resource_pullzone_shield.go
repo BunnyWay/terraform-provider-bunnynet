@@ -48,14 +48,16 @@ type PullzoneShieldResource struct {
 }
 
 type PullzoneShieldResourceModel struct {
-	Id           types.Int64  `tfsdk:"id"`
-	PullzoneId   types.Int64  `tfsdk:"pullzone"`
-	Tier         types.String `tfsdk:"tier"`
-	Whitelabel   types.Bool   `tfsdk:"whitelabel"`
-	AccessList   types.Set    `tfsdk:"access_list"`
-	BotDetection types.Object `tfsdk:"bot_detection"`
-	DDoS         types.Object `tfsdk:"ddos"`
-	WAF          types.Object `tfsdk:"waf"`
+	Id                      types.Int64  `tfsdk:"id"`
+	PullzoneId              types.Int64  `tfsdk:"pullzone"`
+	Tier                    types.String `tfsdk:"tier"`
+	Whitelabel              types.Bool   `tfsdk:"whitelabel"`
+	AccessList              types.Set    `tfsdk:"access_list"`
+	BotDetection            types.Object `tfsdk:"bot_detection"`
+	DDoS                    types.Object `tfsdk:"ddos"`
+	UploadScanningAntivirus types.String `tfsdk:"upload_scanning_antivirus"`
+	UploadScanningCsam      types.String `tfsdk:"upload_scanning_csam"`
+	WAF                     types.Object `tfsdk:"waf"`
 }
 
 var pullzoneShieldAccessListType = map[string]attr.Type{
@@ -155,6 +157,24 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 					stringvalidator.OneOf(maps.Values(pullzoneshieldresourcevalidator.PlanTypeMap)...),
 				},
 				Description: generateMarkdownMapOptions(pullzoneshieldresourcevalidator.PlanTypeMap),
+			},
+			"upload_scanning_antivirus": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("Disable"),
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneShieldUploadScanningValueMap)...),
+				},
+				Description: "Scan file uploads for viruses, trojans, ransomware, and other forms of malware.",
+			},
+			"upload_scanning_csam": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("Disable"),
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneShieldUploadScanningValueMap)...),
+				},
+				Description: "Scan file uploads for Child Sexual Abuse Material.",
 			},
 			"whitelabel": schema.BoolAttribute{
 				Optional:    true,
@@ -430,6 +450,7 @@ func (r *PullzoneShieldResource) ConfigValidators(ctx context.Context) []resourc
 	return []resource.ConfigValidator{
 		pullzoneshieldresourcevalidator.BotDetection(),
 		pullzoneshieldresourcevalidator.RealtimeThreatIntelligence(),
+		pullzoneshieldresourcevalidator.UploadScanning(),
 		pullzoneshieldresourcevalidator.Whitelabel(),
 	}
 }
@@ -647,6 +668,12 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 		dataApi.DDosChallengeWindow = attrs["challenge_window"].(types.Int64).ValueInt64()
 	}
 
+	// upload_scanning
+	{
+		dataApi.UploadScanningAntivirus = mapValueToKey(pullzoneShieldUploadScanningValueMap, dataTf.UploadScanningAntivirus.ValueString())
+		dataApi.UploadScanningCsam = mapValueToKey(pullzoneShieldUploadScanningValueMap, dataTf.UploadScanningCsam.ValueString())
+	}
+
 	// waf
 	{
 		attrs := dataTf.WAF.Attributes()
@@ -772,6 +799,12 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 		}
 
 		dataTf.DDoS = obj
+	}
+
+	// upload_scanning
+	{
+		dataTf.UploadScanningAntivirus = types.StringValue(mapKeyToValue(pullzoneShieldUploadScanningValueMap, dataApi.UploadScanningAntivirus))
+		dataTf.UploadScanningCsam = types.StringValue(mapKeyToValue(pullzoneShieldUploadScanningValueMap, dataApi.UploadScanningCsam))
 	}
 
 	// waf
