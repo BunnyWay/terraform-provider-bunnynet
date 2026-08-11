@@ -135,11 +135,6 @@ var pullzoneShieldDdosLevelMap = map[uint8]string{
 	4: "Extreme",
 }
 
-var pullzoneShieldDdosModeMap = map[uint8]string{
-	0: "Log",
-	1: "Block",
-}
-
 var pullzoneShieldBotDetectionModeMap = map[uint8]string{
 	0: "Log",
 	1: "Challenge",

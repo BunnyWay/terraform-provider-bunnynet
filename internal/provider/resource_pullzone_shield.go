@@ -65,7 +65,6 @@ var pullzoneShieldAccessListType = map[string]attr.Type{
 
 var pullzoneShieldDdosType = map[string]attr.Type{
 	"level":            types.StringType,
-	"mode":             types.StringType,
 	"challenge_window": types.Int64Type,
 }
 
@@ -258,15 +257,6 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 							stringvalidator.OneOf(maps.Values(pullzoneShieldDdosLevelMap)...),
 						},
 						Description: generateMarkdownMapOptions(pullzoneShieldDdosLevelMap),
-					},
-					"mode": schema.StringAttribute{
-						Optional: true,
-						Computed: true,
-						Default:  stringdefault.StaticString(pullzoneShieldDdosModeMap[0]),
-						Validators: []validator.String{
-							stringvalidator.OneOf(maps.Values(pullzoneShieldDdosModeMap)...),
-						},
-						Description: "Indicates the mode the engine is running. " + generateMarkdownMapOptions(pullzoneShieldDdosModeMap),
 					},
 					"challenge_window": schema.Int64Attribute{
 						Optional: true,
@@ -654,7 +644,6 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 		attrs := dataTf.DDoS.Attributes()
 
 		dataApi.DDoSLevel = mapValueToKey(pullzoneShieldDdosLevelMap, attrs["level"].(types.String).ValueString())
-		dataApi.DDoSMode = mapValueToKey(pullzoneShieldDdosModeMap, attrs["mode"].(types.String).ValueString())
 		dataApi.DDosChallengeWindow = attrs["challenge_window"].(types.Int64).ValueInt64()
 	}
 
@@ -774,7 +763,6 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 	{
 		values := map[string]attr.Value{
 			"level":            types.StringValue(mapKeyToValue(pullzoneShieldDdosLevelMap, dataApi.DDoSLevel)),
-			"mode":             types.StringValue(mapKeyToValue(pullzoneShieldDdosModeMap, dataApi.DDoSMode)),
 			"challenge_window": types.Int64Value(dataApi.DDosChallengeWindow),
 		}
 

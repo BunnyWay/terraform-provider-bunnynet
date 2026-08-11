@@ -81,7 +81,6 @@ Required:
 Optional:
 
 - `challenge_window` (Number) The window of time a visitor can access your website after passing a challenge. Once the timeout expires, they'll face a new challenge.
-- `mode` (String) Indicates the mode the engine is running. Options: `Block`, `Log`
 
 
 <a id="nestedblock--waf"></a>
