@@ -46,6 +46,9 @@ resource "bunnynet_pullzone_shield" "test" {
 - `upload_scanning_csam` (String) Scan file uploads for Child Sexual Abuse Material.
 - `waf` (Block, Optional) Configures WAF settings. (see [below for nested schema](#nestedblock--waf))
 - `whitelabel` (Boolean) Replace our bunny.net branded block and challenge pages with a white-labelled experience.
+- `whitelabel_block` (String) Customized Response Page for requests blocked by WAF, access list or bot detection.
+- `whitelabel_challenge` (String) Customized Response Page for challenged requests.
+- `whitelabel_rate_limit` (String) Customized Response Page for requests after a rate limit is breached.
 
 ### Read-Only
 

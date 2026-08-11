@@ -41,7 +41,10 @@ type PullzoneShield struct {
 	BotDetectionIPSensitivity            uint8    `json:"-"`
 	BotDetectionRequestIntegrity         uint8    `json:"-"`
 	BotDetectionComplexFingerprinting    bool     `json:"-"`
-	WhiteLabelResponsePages              bool     `json:"whitelabelResponsePages"`
+	WhitelabelResponsePages              bool     `json:"whitelabelResponsePages"`
+	WhitelabelBlock                      string   `json:"-"`
+	WhitelabelChallenge                  string   `json:"-"`
+	WhitelabelRateLimit                  string   `json:"-"`
 	DDoSMode                             uint8    `json:"dDoSExecutionMode"`
 	DDoSLevel                            uint8    `json:"dDoSShieldSensitivity"`
 	DDosChallengeWindow                  int64    `json:"dDoSChallengeWindow"`
@@ -329,6 +332,30 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		result.Data.BotDetectionComplexFingerprinting = botDetectionResult.ComplexFingerprinting
 	}
 
+	// fetch whitelabel pages
+	{
+		var v string
+		var err error
+
+		v, err = c.fetchWhitelabelPage(ctx, id, "block")
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+		result.Data.WhitelabelBlock = v
+
+		v, err = c.fetchWhitelabelPage(ctx, id, "challenge")
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+		result.Data.WhitelabelChallenge = v
+
+		v, err = c.fetchWhitelabelPage(ctx, id, "ratelimit")
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+		result.Data.WhitelabelRateLimit = v
+	}
+
 	// fetch upload-scanning config
 	{
 		uploadScanningResult, err := c.fetchUploadScanning(ctx, id)
@@ -423,6 +450,39 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 	}, nil
 }
 
+func (c *Client) fetchWhitelabelPage(ctx context.Context, shieldZoneId int64, pageType string) (string, error) {
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/shield/shield-zone/%d/custom-page/%s", c.apiUrl, shieldZoneId, pageType), nil)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "", nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := utils.ExtractShieldErrorMessage(resp)
+		if err != nil {
+			if err.Error() == "feature_not_available_on_plan" {
+				return "", nil
+			} else {
+				return "", err
+			}
+		}
+
+		return "", fmt.Errorf("get shieldzone/custom-page/%s for pullzone failed with %s", pageType, resp.Status)
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("GET /shield/shield-zone/%d/custom-page/%s: %+v", shieldZoneId, pageType, string(bodyResp)))
+
+	return string(bodyResp), nil
+}
+
 type fetchUploadScanningResult struct {
 	Antivirus uint8
 	Csam      uint8
@@ -504,7 +564,7 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			"wafEngineConfig":                      wafEngineConfig,
 			"wafDisabledRules":                     data.WafRulesDisabled,
 			"wafLogOnlyRules":                      data.WafRulesLogonly,
-			"whitelabelResponsePages":              data.WhiteLabelResponsePages,
+			"whitelabelResponsePages":              data.WhitelabelResponsePages,
 			"learningMode":                         false,
 			"wafRequestBodyLimitAction":            data.WafRequestBodyLimitAction,
 			"wafResponseBodyLimitAction":           data.WafResponseBodyLimitAction,
@@ -577,7 +637,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				"wafEngineConfig":                      wafEngineConfig,
 				"wafDisabledRules":                     data.WafRulesDisabled,
 				"wafLogOnlyRules":                      data.WafRulesLogonly,
-				"whitelabelResponsePages":              data.WhiteLabelResponsePages,
+				"whitelabelResponsePages":              data.WhitelabelResponsePages,
 				"learningMode":                         false,
 				"wafRequestBodyLimitAction":            data.WafRequestBodyLimitAction,
 				"wafResponseBodyLimitAction":           data.WafResponseBodyLimitAction,
@@ -732,6 +792,26 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		}
 	}
 
+	// whitelabel
+	{
+		var err error
+
+		err = c.saveWhitelabelPage(ctx, data.Id, "block", data.WhitelabelBlock)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		err = c.saveWhitelabelPage(ctx, data.Id, "challenge", data.WhitelabelChallenge)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		err = c.saveWhitelabelPage(ctx, data.Id, "ratelimit", data.WhitelabelRateLimit)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+	}
+
 	// upload-scanning fields
 	{
 		body, err := json.Marshal(map[string]interface{}{
@@ -796,7 +876,10 @@ func (c *Client) DeletePullzoneShield(ctx context.Context, id int64) error {
 		},
 		WafRulesDisabled:           []string{},
 		WafRulesLogonly:            []string{},
-		WhiteLabelResponsePages:    false,
+		WhitelabelResponsePages:    false,
+		WhitelabelBlock:            "",
+		WhitelabelChallenge:        "",
+		WhitelabelRateLimit:        "",
 		WafRequestBodyLimitAction:  1, // Log
 		WafResponseBodyLimitAction: 2, // Ignore
 	}
@@ -846,4 +929,36 @@ func (c *Client) convertPullzoneShieldWafEngineConfigToBody(data PullzoneShield)
 	}
 
 	return result, nil
+}
+
+func (c *Client) saveWhitelabelPage(ctx context.Context, shieldZoneId int64, pageType string, contents string) error {
+	method := http.MethodDelete
+	var body io.Reader = nil
+
+	if contents != "" {
+		method = http.MethodPut
+		body = bytes.NewBufferString(contents)
+	}
+
+	resp, err := c.doRequest(method, fmt.Sprintf("%s/shield/shield-zone/%d/custom-page/%s", c.apiUrl, shieldZoneId, pageType), body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := utils.ExtractShieldErrorMessage(resp)
+		if err != nil {
+			if contents == "" && err.Error() == "feature_not_available_on_plan" {
+				return nil
+			}
+
+			return err
+		}
+
+		return fmt.Errorf("%s shieldzone/custom-page/%s for pullzone failed with %s", method, pageType, resp.Status)
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("%s /shield/shield-zone/%d/custom-page/%s: %+v", method, shieldZoneId, pageType, contents))
+
+	return nil
 }

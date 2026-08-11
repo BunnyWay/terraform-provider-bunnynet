@@ -55,6 +55,9 @@ type PullzoneShieldResourceModel struct {
 	AccessList              types.Set    `tfsdk:"access_list"`
 	BotDetection            types.Object `tfsdk:"bot_detection"`
 	DDoS                    types.Object `tfsdk:"ddos"`
+	WhitelabelBlock         types.String `tfsdk:"whitelabel_block"`
+	WhitelabelChallenge     types.String `tfsdk:"whitelabel_challenge"`
+	WhitelabelRateLimit     types.String `tfsdk:"whitelabel_rate_limit"`
 	UploadScanningAntivirus types.String `tfsdk:"upload_scanning_antivirus"`
 	UploadScanningCsam      types.String `tfsdk:"upload_scanning_csam"`
 	WAF                     types.Object `tfsdk:"waf"`
@@ -181,6 +184,24 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 				Description: "Replace our bunny.net branded block and challenge pages with a white-labelled experience.",
+			},
+			"whitelabel_block": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+				Description: "Customized Response Page for requests blocked by WAF, access list or bot detection.",
+			},
+			"whitelabel_challenge": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+				Description: "Customized Response Page for challenged requests.",
+			},
+			"whitelabel_rate_limit": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+				Description: "Customized Response Page for requests after a rate limit is breached.",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -593,7 +614,10 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 	dataApi.Id = dataTf.Id.ValueInt64()
 	dataApi.PullzoneId = dataTf.PullzoneId.ValueInt64()
 	dataApi.PlanType = mapValueToKey(pullzoneshieldresourcevalidator.PlanTypeMap, dataTf.Tier.ValueString())
-	dataApi.WhiteLabelResponsePages = dataTf.Whitelabel.ValueBool()
+	dataApi.WhitelabelResponsePages = dataTf.Whitelabel.ValueBool()
+	dataApi.WhitelabelBlock = dataTf.WhitelabelBlock.ValueString()
+	dataApi.WhitelabelChallenge = dataTf.WhitelabelChallenge.ValueString()
+	dataApi.WhitelabelRateLimit = dataTf.WhitelabelRateLimit.ValueString()
 
 	// access_list
 	{
@@ -737,7 +761,10 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 	dataTf.Id = types.Int64Value(dataApi.Id)
 	dataTf.PullzoneId = types.Int64Value(dataApi.PullzoneId)
 	dataTf.Tier = types.StringValue(mapKeyToValue(pullzoneshieldresourcevalidator.PlanTypeMap, dataApi.PlanType))
-	dataTf.Whitelabel = types.BoolValue(dataApi.WhiteLabelResponsePages)
+	dataTf.Whitelabel = types.BoolValue(dataApi.WhitelabelResponsePages)
+	dataTf.WhitelabelBlock = types.StringValue(dataApi.WhitelabelBlock)
+	dataTf.WhitelabelChallenge = types.StringValue(dataApi.WhitelabelChallenge)
+	dataTf.WhitelabelRateLimit = types.StringValue(dataApi.WhitelabelRateLimit)
 
 	// access_list
 	{

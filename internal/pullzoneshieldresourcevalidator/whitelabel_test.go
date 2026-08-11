@@ -19,58 +19,142 @@ func TestWhitelabel(t *testing.T) {
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier":       tftypes.NewValue(tftypes.String, "Basic"),
-				"whitelabel": tftypes.NewValue(tftypes.Bool, nil),
+				"tier":                  tftypes.NewValue(tftypes.String, "Basic"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, nil),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier":       tftypes.NewValue(tftypes.String, "Basic"),
-				"whitelabel": tftypes.NewValue(tftypes.Bool, false),
+				"tier":                  tftypes.NewValue(tftypes.String, "Basic"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, false),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
 			ExpectedError: true,
 			PlanValues: map[string]tftypes.Value{
-				"tier":       tftypes.NewValue(tftypes.String, "Basic"),
-				"whitelabel": tftypes.NewValue(tftypes.Bool, true),
+				"tier":                  tftypes.NewValue(tftypes.String, "Basic"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, true),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"tier":                  tftypes.NewValue(tftypes.String, "Basic"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, false),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, "<h1>Blocked</h1>"),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"tier":                  tftypes.NewValue(tftypes.String, "Basic"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, true),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, "<h1>Blocked</h1>"),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier":       tftypes.NewValue(tftypes.String, "Advanced"),
-				"whitelabel": tftypes.NewValue(tftypes.Bool, nil),
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, nil),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier":       tftypes.NewValue(tftypes.String, "Advanced"),
-				"whitelabel": tftypes.NewValue(tftypes.Bool, false),
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, false),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
 			},
 		},
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
-				"tier":       tftypes.NewValue(tftypes.String, "Advanced"),
-				"whitelabel": tftypes.NewValue(tftypes.Bool, true),
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, true),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, true),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, "<h1>Blocked</h1>"),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, false),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, "<h1>Blocked</h1>"),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, false),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, "<h1>Challenge</h1>"),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, nil),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"tier":                  tftypes.NewValue(tftypes.String, "Advanced"),
+				"whitelabel":            tftypes.NewValue(tftypes.Bool, false),
+				"whitelabel_block":      tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_challenge":  tftypes.NewValue(tftypes.String, nil),
+				"whitelabel_rate_limit": tftypes.NewValue(tftypes.String, "<h1>Rate limit</h1>"),
 			},
 		},
 	}
 
 	configSchema := schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"tier":       schema.StringAttribute{},
-			"whitelabel": schema.BoolAttribute{},
+			"tier":                  schema.StringAttribute{},
+			"whitelabel":            schema.BoolAttribute{},
+			"whitelabel_block":      schema.StringAttribute{},
+			"whitelabel_challenge":  schema.StringAttribute{},
+			"whitelabel_rate_limit": schema.StringAttribute{},
 		},
 	}
 
 	configTypes := tftypes.Object{
 		AttributeTypes: map[string]tftypes.Type{
-			"tier":       tftypes.String,
-			"whitelabel": tftypes.Bool,
+			"tier":                  tftypes.String,
+			"whitelabel":            tftypes.Bool,
+			"whitelabel_block":      tftypes.String,
+			"whitelabel_challenge":  tftypes.String,
+			"whitelabel_rate_limit": tftypes.String,
 		},
 	}
 

@@ -111,6 +111,7 @@ func ExtractShieldErrorMessage(response *http.Response) error {
 			Message  string `json:"message"`
 			ErrorKey string `json:"errorKey"`
 		} `json:"error"`
+		ErrorKey string `json:"errorKey"`
 	}
 
 	err = json.Unmarshal(bodyBytes, &responseObj)
@@ -118,7 +119,11 @@ func ExtractShieldErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	return errors.New(responseObj.Error.ErrorKey)
+	if responseObj.Error.ErrorKey != "" {
+		return errors.New(responseObj.Error.ErrorKey)
+	}
+
+	return errors.New(responseObj.ErrorKey)
 }
 
 func MapInvert[k comparable, v comparable](m map[k]v) map[v]k {
