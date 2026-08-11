@@ -15,3 +15,6 @@ acc:
 
 unit:
 	@go list ./... | egrep -v '/internal/provider$$' | xargs go test -v
+
+license:
+	@addlicense -f license-header.txt -ignore '.github/**' -ignore 'examples/**' -ignore .golangci.yaml -ignore .goreleaser.yml -v .

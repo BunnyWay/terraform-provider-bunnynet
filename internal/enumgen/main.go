@@ -1,3 +1,6 @@
+// Copyright (c) BunnyWay d.o.o.
+// SPDX-License-Identifier: MPL-2.0
+
 package main
 
 import (
@@ -43,7 +46,7 @@ func main() {
 	}
 
 	for fileinfo, content := range files {
-		prefix := "// This file was generated via \"go generate\". DO NOT EDIT.\npackage " + fileinfo.Package + "\n\n"
+		prefix := "// Copyright (c) BunnyWay d.o.o.\n// SPDX-License-Identifier: MPL-2.0\n\n// This file was generated via \"go generate\". DO NOT EDIT.\npackage " + fileinfo.Package + "\n\n"
 		contentsFmt, err := format.Source([]byte(prefix + content))
 		if err != nil {
 			panic(err)
