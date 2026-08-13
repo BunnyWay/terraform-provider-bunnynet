@@ -14,10 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The `pullzone_shield` `ddos.mode` attribute was removed. Shield Zones are always in Blocking mode, but you can configure its sensitivity via the [`ddos.level`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone_shield#level-1) attribute.
 
 ### Added
+- action `pullzone_cache_purge`;
+- action `url_cache_purge`;
 - resource `pullzone_shield`: support Upload Scanning;
 - resource `pullzone_shield`: support Whitelabel custom pages;
-- action `pullzone_purge_cache`: purge the entire cache for a pull zone (requires Terraform 1.14+);
-- action `purge_url`: purge a URL from the CDN cache (requires Terraform 1.14+);
 
 ### Fixed
 - resource `dns_record`: changing `zone` should trigger a replacement ([#90](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/90));

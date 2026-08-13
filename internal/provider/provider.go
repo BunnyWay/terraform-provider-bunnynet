@@ -105,9 +105,10 @@ func (p *BunnynetProvider) Configure(ctx context.Context, req provider.Configure
 		data.StreamApiUrl.ValueString(),
 		userAgent,
 	)
+
+	resp.ActionData = apiClient
 	resp.DataSourceData = apiClient
 	resp.ResourceData = apiClient
-	resp.ActionData = apiClient
 }
 
 func (p *BunnynetProvider) Resources(ctx context.Context) []func() resource.Resource {
@@ -155,8 +156,8 @@ func (p *BunnynetProvider) DataSources(ctx context.Context) []func() datasource.
 
 func (p *BunnynetProvider) Actions(ctx context.Context) []func() action.Action {
 	return []func() action.Action{
-		NewPullzonePurgeCacheAction,
-		NewPurgeUrlAction,
+		NewPullzoneCachePurgeAction,
+		NewUrlCachePurgeAction,
 	}
 }
 

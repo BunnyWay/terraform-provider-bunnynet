@@ -3,12 +3,12 @@
 page_title: "bunnynet_pullzone Resource - terraform-provider-bunnynet"
 subcategory: ""
 description: |-
-  This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.
+  This resource manages a bunny.net Pullzone. Pullzones fetch content from the origin server and deliver it to end-users.
 ---
 
 # bunnynet_pullzone (Resource)
 
-This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.
+This resource manages a bunny.net Pullzone. Pullzones fetch content from the origin server and deliver it to end-users.
 
 ## Example Usage
 

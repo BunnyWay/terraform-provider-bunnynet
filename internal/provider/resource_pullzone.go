@@ -200,7 +200,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 	pullzoneSafehopRetryReasonsDefault := utils.ConvertStringSliceToSetMust([]string{"connectionTimeout", "responseTimeout"})
 
 	resp.Schema = schema.Schema{
-		Description: "This resource manages a bunny.net pullzone. Pullzones fetch content from the origin server and deliver it to end-users.",
+		Description: "This resource manages a bunny.net Pullzone. Pullzones fetch content from the origin server and deliver it to end-users.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

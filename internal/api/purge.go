@@ -4,29 +4,40 @@
 package api
 
 import (
-	"errors"
+	"context"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/http"
 	"net/url"
 	"strconv"
 )
 
-func (c *Client) PurgeUrl(purgeUrl string, async bool, exactPath bool) error {
-	query := url.Values{}
-	query.Set("url", purgeUrl)
-	query.Set("async", strconv.FormatBool(async))
-	query.Set("exactPath", strconv.FormatBool(exactPath))
+func (c *Client) UrlPurgeCache(ctx context.Context, urlToPurge string, exactPath bool) error {
+	query := url.Values{
+		"url":       []string{urlToPurge},
+		"async":     []string{"true"},
+		"exactPath": []string{strconv.FormatBool(exactPath)},
+	}
 
-	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/purge?%s", c.apiUrl, query.Encode()), nil)
+	queryEncoded := query.Encode()
+	tflog.Info(ctx, fmt.Sprintf("POST /purge?%s", queryEncoded))
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/purge?%s", c.apiUrl, queryEncoded), nil)
 	if err != nil {
 		return err
 	}
 
-	_ = resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
+	if resp.StatusCode == http.StatusOK {
+		return nil
 	}
 
-	return nil
+	err = utils.ExtractErrorMessage(resp)
+	if err != nil {
+		return err
+	}
+
+	return fmt.Errorf("Purge URL failed with %s", resp.Status)
 }
