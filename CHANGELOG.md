@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.18.0 - 2026-08-13
+
 ### Backwards compatibility breaks
 
 The `pullzone_shield` `ddos.mode` attribute was removed. Shield Zones are always in Blocking mode, but you can configure its sensitivity via the [`ddos.level`](https://registry.terraform.io/providers/BunnyWay/bunnynet/latest/docs/resources/pullzone_shield#level-1) attribute.
