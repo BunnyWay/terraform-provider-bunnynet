@@ -13,7 +13,7 @@ This resource manages an Access List for a bunny.net pullzone.
 ## Example Usage
 
 ```terraform
-resource "bunnynet_pullzone_access_list" "hetzner" {
+resource "bunnynet_pullzone_access_list" "vip-customers" {
   pullzone = bunnynet_pullzone.test.id
   name     = "VIP customers"
   action   = "Allow"

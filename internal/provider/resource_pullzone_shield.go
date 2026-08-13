@@ -168,7 +168,7 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneShieldUploadScanningValueMap)...),
 				},
-				Description: "Scan file uploads for viruses, trojans, ransomware, and other forms of malware.",
+				Description: "Scan file uploads for viruses, trojans, ransomware, and other forms of malware. " + generateMarkdownMapOptions(pullzoneShieldUploadScanningValueMap),
 			},
 			"upload_scanning_csam": schema.StringAttribute{
 				Optional: true,
@@ -177,7 +177,7 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 				Validators: []validator.String{
 					stringvalidator.OneOf(maps.Values(pullzoneShieldUploadScanningValueMap)...),
 				},
-				Description: "Scan file uploads for Child Sexual Abuse Material.",
+				Description: "Scan file uploads for Child Sexual Abuse Material. " + generateMarkdownMapOptions(pullzoneShieldUploadScanningValueMap),
 			},
 			"whitelabel": schema.BoolAttribute{
 				Optional:    true,

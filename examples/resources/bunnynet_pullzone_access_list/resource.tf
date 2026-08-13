@@ -1,4 +1,4 @@
-resource "bunnynet_pullzone_access_list" "hetzner" {
+resource "bunnynet_pullzone_access_list" "vip-customers" {
   pullzone = bunnynet_pullzone.test.id
   name     = "VIP customers"
   action   = "Allow"
