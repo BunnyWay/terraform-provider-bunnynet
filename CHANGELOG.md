@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.18.1 - 2026-08-21
+
 ### Fixed
 - resource `pullzone_access_list`: improve error messages;
 - resource `pullzone_access_list`: mark as removed if not found;
