@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resource `pullzone_rate_limit`: improve error messages;
 - resource `pullzone_shield`: improve error messages;
 - resource `pullzone_waf_rule`: improve error messages;
+- resource `pullzone_waf_rule`: mark as removed if not found ([#93](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/93));
 
 ## 0.18.0 - 2026-08-13
 
