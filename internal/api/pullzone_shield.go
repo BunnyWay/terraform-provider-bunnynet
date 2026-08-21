@@ -86,7 +86,7 @@ func (c *Client) GetPullzoneShieldDefaultWafEngineConfig() (PullzoneShieldWafEng
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneShieldWafEngineConfig{}, err
 		}
@@ -168,7 +168,7 @@ func (c *Client) GetPullzoneShieldIdByPullzone(pullzoneId int64) (int64, error) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return 0, err
 		}
@@ -213,7 +213,7 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractErrorMessage(resp)
+			err := utils.ExtractShieldErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
 			}
@@ -402,7 +402,7 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return fetchBotDetectionResult{}, err
 		}
@@ -495,7 +495,7 @@ func (c *Client) fetchUploadScanning(ctx context.Context, shieldZoneId int64) (f
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return fetchUploadScanningResult{}, err
 		}
@@ -583,7 +583,7 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneShield{}, err
 		}
@@ -656,7 +656,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractErrorMessage(resp)
+			err := utils.ExtractShieldErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
 			}

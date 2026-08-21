@@ -11,6 +11,9 @@ import (
 	"strings"
 )
 
+var ErrShieldPlanChangeBlocked = errors.New("The Shield Plan cannot be changed, using features not available in the new plan.")
+var ErrShieldWafLimitReached = errors.New("The limit for Custom WAF Rules was reached.")
+
 func SliceDiff[T comparable](s1 []T, s2 []T) []T {
 	diff := make([]T, 0)
 
@@ -111,6 +114,10 @@ func ExtractShieldErrorMessage(response *http.Response) error {
 			Message  string `json:"message"`
 			ErrorKey string `json:"errorKey"`
 		} `json:"error"`
+		ErrorResponse struct {
+			Message  string `json:"message"`
+			ErrorKey string `json:"errorKey"`
+		} `json:"errorResponse"`
 		ErrorKey string `json:"errorKey"`
 	}
 
@@ -119,11 +126,24 @@ func ExtractShieldErrorMessage(response *http.Response) error {
 		return nil
 	}
 
+	errorKey := responseObj.ErrorKey
+
 	if responseObj.Error.ErrorKey != "" {
-		return errors.New(responseObj.Error.ErrorKey)
+		errorKey = responseObj.Error.ErrorKey
 	}
 
-	return errors.New(responseObj.ErrorKey)
+	if responseObj.ErrorResponse.ErrorKey != "" {
+		errorKey = responseObj.ErrorResponse.ErrorKey
+	}
+
+	switch errorKey {
+	case "plan_change_blocked.shieldzone":
+		return ErrShieldPlanChangeBlocked
+	case "limit_reached.waf":
+		return ErrShieldWafLimitReached
+	}
+
+	return errors.New(errorKey)
 }
 
 func MapInvert[k comparable, v comparable](m map[k]v) map[v]k {

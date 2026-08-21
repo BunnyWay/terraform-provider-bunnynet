@@ -61,7 +61,7 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
@@ -182,7 +182,7 @@ func (c *Client) UpdatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
@@ -228,7 +228,7 @@ func (c *Client) DeletePullzoneAccessList(ctx context.Context, pullzoneId int64,
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return err
 		}
@@ -286,7 +286,7 @@ func (c *Client) getPullzoneAccessLists(ctx context.Context, shieldZoneId int64,
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := utils.ExtractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
