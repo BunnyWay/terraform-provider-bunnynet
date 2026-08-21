@@ -9,9 +9,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/memorycache"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
+	"os"
 )
 
 const PullzoneOriginTypeOriginUrl = 0
@@ -174,7 +176,16 @@ type Pullzone struct {
 	MonthlyBandwidthLimit     uint64  `json:"MonthlyBandwidthLimit"`
 }
 
+var pullzoneCache = memorycache.New[int64, Pullzone]()
+
 func (c *Client) GetPullzone(id int64) (Pullzone, error) {
+	if os.Getenv("TF_BUNNYNET_PULLZONE_CACHE") == "true" {
+		v, ok := pullzoneCache.Get(id)
+		if ok {
+			return *v, nil
+		}
+	}
+
 	var data Pullzone
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
 	if err != nil {
@@ -198,6 +209,10 @@ func (c *Client) GetPullzone(id int64) (Pullzone, error) {
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
+	}
+
+	if os.Getenv("TF_BUNNYNET_PULLZONE_CACHE") == "true" {
+		pullzoneCache.Set(id, data)
 	}
 
 	return data, nil
@@ -302,6 +317,10 @@ func (c *Client) UpdatePullzone(dataApi Pullzone) (Pullzone, error) {
 }
 
 func (c *Client) UpdatePullzoneWithBody(id int64, body []byte) (Pullzone, error) {
+	if os.Getenv("TF_BUNNYNET_PULLZONE_CACHE") == "true" {
+		pullzoneCache.Delete(id)
+	}
+
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), bytes.NewReader(body))
 	if err != nil {
 		return Pullzone{}, err
@@ -325,6 +344,10 @@ func (c *Client) UpdatePullzoneWithBody(id int64, body []byte) (Pullzone, error)
 }
 
 func (c *Client) DeletePullzone(id int64) error {
+	if os.Getenv("TF_BUNNYNET_PULLZONE_CACHE") == "true" {
+		pullzoneCache.Delete(id)
+	}
+
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/pullzone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err

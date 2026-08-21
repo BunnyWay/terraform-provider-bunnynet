@@ -9,9 +9,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/memorycache"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
+	"os"
 )
 
 type DnsZone struct {
@@ -46,7 +48,16 @@ type dnssecInfo struct {
 	DsConfigured bool   `json:"DsConfigured"`
 }
 
+var dnsCache = memorycache.New[int64, DnsZone]()
+
 func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
+	if os.Getenv("TF_BUNNYNET_DNS_CACHE") == "true" {
+		v, ok := dnsCache.Get(id)
+		if ok {
+			return *v, nil
+		}
+	}
+
 	var data DnsZone
 	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
 	if err != nil {
@@ -81,6 +92,10 @@ func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 		}
 
 		hydrateDnsZoneWithDnssec(&data, &info)
+	}
+
+	if os.Getenv("TF_BUNNYNET_DNS_CACHE") == "true" {
+		dnsCache.Set(id, data)
 	}
 
 	return data, nil
@@ -187,6 +202,10 @@ func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, erro
 func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, error) {
 	id := dataApi.Id
 
+	if os.Getenv("TF_BUNNYNET_DNS_CACHE") == "true" {
+		dnsCache.Delete(id)
+	}
+
 	body, err := json.Marshal(dataApi)
 	if err != nil {
 		return DnsZone{}, err
@@ -231,6 +250,10 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 }
 
 func (c *Client) DeleteDnsZone(ctx context.Context, id int64) error {
+	if os.Getenv("TF_BUNNYNET_DNS_CACHE") == "true" {
+		dnsCache.Delete(id)
+	}
+
 	resp, err := c.doRequest(http.MethodDelete, fmt.Sprintf("%s/dnszone/%d", c.apiUrl, id), nil)
 	if err != nil {
 		return err
