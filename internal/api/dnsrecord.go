@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -81,7 +80,7 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return DnsRecord{}, err
 		}
@@ -123,7 +122,7 @@ func (c *Client) UpdateDnsRecord(ctx context.Context, dataApi DnsRecord) (DnsRec
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return DnsRecord{}, err
 		} else {

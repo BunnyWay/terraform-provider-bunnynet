@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"net/http"
 )
 
@@ -65,7 +64,7 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return PullzoneHostname{}, errors.New("addHostname failed: " + err.Error())
 		}
@@ -131,7 +130,7 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		}
 
 		if resp.StatusCode != http.StatusNoContent {
-			err := utils.ExtractErrorMessage(resp)
+			err := extractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("removeCertificate failed: " + err.Error())
 			}
@@ -160,7 +159,7 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		}
 
 		if resp.StatusCode != http.StatusNoContent {
-			err := utils.ExtractErrorMessage(resp)
+			err := extractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("addCertificate failed: " + err.Error())
 			}
@@ -176,7 +175,7 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractErrorMessage(resp)
+			err := extractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("loadFreeCertificate failed: " + err.Error())
 			}
@@ -201,7 +200,7 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		}
 
 		if resp.StatusCode != http.StatusNoContent {
-			err := utils.ExtractErrorMessage(resp)
+			err := extractErrorMessage(resp)
 			if err != nil {
 				return PullzoneHostname{}, errors.New("forceSSL failed: " + err.Error())
 			}
@@ -264,7 +263,7 @@ func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return errors.New("delete failed: " + err.Error())
 		}

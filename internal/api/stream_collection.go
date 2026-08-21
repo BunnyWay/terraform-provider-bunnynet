@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -71,7 +70,7 @@ func (c *Client) CreateStreamCollection(dataApi StreamCollection) (StreamCollect
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return StreamCollection{}, err
 		}
@@ -113,7 +112,7 @@ func (c *Client) UpdateStreamCollection(dataApi StreamCollection) (StreamCollect
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return StreamCollection{}, err
 		}

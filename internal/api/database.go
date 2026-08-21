@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -82,7 +81,7 @@ func (c *Client) CreateDatabase(ctx context.Context, data Database) (Database, e
 	tflog.Info(ctx, fmt.Sprintf("POST /edgedb/v2/databases: %s", string(body)))
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractDatabaseErrorMessage(resp)
+		err := extractDatabaseErrorMessage(resp)
 		if err != nil {
 			return Database{}, err
 		}

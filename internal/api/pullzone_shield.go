@@ -86,7 +86,7 @@ func (c *Client) GetPullzoneShieldDefaultWafEngineConfig() (PullzoneShieldWafEng
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneShieldWafEngineConfig{}, err
 		}
@@ -168,7 +168,7 @@ func (c *Client) GetPullzoneShieldIdByPullzone(pullzoneId int64) (int64, error) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return 0, err
 		}
@@ -213,7 +213,7 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractShieldErrorMessage(resp)
+			err := extractShieldErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
 			}
@@ -386,7 +386,7 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 	}
 
 	if resp.StatusCode == http.StatusAccepted {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			if err.Error() == "invalid_plan_type.bot_detection" {
 				return fetchBotDetectionResult{
@@ -402,7 +402,7 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return fetchBotDetectionResult{}, err
 		}
@@ -461,7 +461,7 @@ func (c *Client) fetchWhitelabelPage(ctx context.Context, shieldZoneId int64, pa
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			if err.Error() == "feature_not_available_on_plan" {
 				return "", nil
@@ -495,7 +495,7 @@ func (c *Client) fetchUploadScanning(ctx context.Context, shieldZoneId int64) (f
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return fetchUploadScanningResult{}, err
 		}
@@ -583,7 +583,7 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneShield{}, err
 		}
@@ -656,7 +656,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractShieldErrorMessage(resp)
+			err := extractShieldErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
 			}
@@ -779,7 +779,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractShieldErrorMessage(resp)
+			err := extractShieldErrorMessage(resp)
 			if err != nil {
 				if data.PlanType == 0 && err.Error() == "invalid_plan_type.bot_detection" {
 					// noop
@@ -833,7 +833,7 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractShieldErrorMessage(resp)
+			err := extractShieldErrorMessage(resp)
 			if err != nil {
 				return PullzoneShield{}, err
 			} else {
@@ -946,7 +946,7 @@ func (c *Client) saveWhitelabelPage(ctx context.Context, shieldZoneId int64, pag
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			if contents == "" && err.Error() == "feature_not_available_on_plan" {
 				return nil

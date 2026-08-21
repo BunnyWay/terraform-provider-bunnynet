@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -46,7 +45,7 @@ func (c *Client) PullzonePurgeCache(ctx context.Context, id int64, tag string) e
 		return nil
 	}
 
-	err = utils.ExtractErrorMessage(resp)
+	err = extractErrorMessage(resp)
 	if err != nil {
 		return err
 	}

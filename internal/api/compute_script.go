@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -323,7 +322,7 @@ func (c *Client) publishComputeScript(data ComputeScript) error {
 	}()
 
 	if resp.StatusCode != http.StatusNoContent {
-		return utils.ExtractErrorMessage(resp)
+		return extractErrorMessage(resp)
 	}
 
 	return nil

@@ -4,15 +4,8 @@
 package utils
 
 import (
-	"encoding/json"
-	"errors"
-	"io"
-	"net/http"
 	"strings"
 )
-
-var ErrShieldPlanChangeBlocked = errors.New("The Shield Plan cannot be changed, using features not available in the new plan.")
-var ErrShieldWafLimitReached = errors.New("The limit for Custom WAF Rules was reached.")
 
 func SliceDiff[T comparable](s1 []T, s2 []T) []T {
 	diff := make([]T, 0)
@@ -32,118 +25,6 @@ func SliceDiff[T comparable](s1 []T, s2 []T) []T {
 	}
 
 	return diff
-}
-
-func ExtractErrorMessage(response *http.Response) error {
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil
-	}
-
-	_ = response.Body.Close()
-	var responseObj struct {
-		Message string `json:"Message"`
-	}
-
-	err = json.Unmarshal(bodyBytes, &responseObj)
-	if err != nil {
-		return nil
-	}
-
-	return errors.New(responseObj.Message)
-}
-
-func ExtractDatabaseErrorMessage(response *http.Response) error {
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil
-	}
-
-	_ = response.Body.Close()
-	var responseObj struct {
-		Message string `json:"error"`
-	}
-
-	err = json.Unmarshal(bodyBytes, &responseObj)
-	if err != nil {
-		return nil
-	}
-
-	return errors.New(responseObj.Message)
-}
-
-func ExtractMCErrorMessage(response *http.Response) error {
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil
-	}
-
-	_ = response.Body.Close()
-
-	var responseObj []struct {
-		Message string `json:"message"`
-	}
-
-	err = json.Unmarshal(bodyBytes, &responseObj)
-	if err != nil {
-		var responseMessage string
-		err = json.Unmarshal(bodyBytes, &responseMessage)
-		if err != nil {
-			return nil
-		}
-
-		return errors.New(responseMessage)
-	}
-
-	if len(responseObj) == 0 {
-		return nil
-	}
-
-	return errors.New(responseObj[0].Message)
-}
-
-func ExtractShieldErrorMessage(response *http.Response) error {
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil
-	}
-
-	_ = response.Body.Close()
-	var responseObj struct {
-		Error struct {
-			Message  string `json:"message"`
-			ErrorKey string `json:"errorKey"`
-		} `json:"error"`
-		ErrorResponse struct {
-			Message  string `json:"message"`
-			ErrorKey string `json:"errorKey"`
-		} `json:"errorResponse"`
-		ErrorKey string `json:"errorKey"`
-	}
-
-	err = json.Unmarshal(bodyBytes, &responseObj)
-	if err != nil {
-		return nil
-	}
-
-	errorKey := responseObj.ErrorKey
-
-	if responseObj.Error.ErrorKey != "" {
-		errorKey = responseObj.Error.ErrorKey
-	}
-
-	if responseObj.ErrorResponse.ErrorKey != "" {
-		errorKey = responseObj.ErrorResponse.ErrorKey
-	}
-
-	switch errorKey {
-	case "plan_change_blocked.shieldzone":
-		return ErrShieldPlanChangeBlocked
-	case "limit_reached.waf":
-		return ErrShieldWafLimitReached
-	}
-
-	return errors.New(errorKey)
 }
 
 func MapInvert[k comparable, v comparable](m map[k]v) map[v]k {

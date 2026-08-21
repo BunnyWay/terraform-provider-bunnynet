@@ -117,7 +117,7 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return StreamLibrary{}, err
 		}
@@ -155,7 +155,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return StreamLibrary{}, err
 		}
@@ -178,7 +178,7 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			err := utils.ExtractErrorMessage(resp)
+			err := extractErrorMessage(resp)
 			if err != nil {
 				return StreamLibrary{}, err
 			}

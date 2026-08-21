@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -89,7 +88,7 @@ func (c *Client) CreateStorageZone(ctx context.Context, data StorageZone) (Stora
 	})
 
 	if resp.StatusCode != http.StatusCreated {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return StorageZone{}, err
 		}
@@ -138,7 +137,7 @@ func (c *Client) UpdateStorageZone(ctx context.Context, dataApi StorageZone) (St
 	})
 
 	if resp.StatusCode != http.StatusNoContent {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return StorageZone{}, err
 		}

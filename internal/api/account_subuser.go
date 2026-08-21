@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -120,7 +119,7 @@ func (c *Client) CreateAccountSubuser(ctx context.Context, data AccountSubuser) 
 	tflog.Info(ctx, fmt.Sprintf("POST /team/member: %s", string(body)))
 
 	if resp.StatusCode != http.StatusCreated {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return AccountSubuser{}, err
 		}
@@ -165,7 +164,7 @@ func (c *Client) UpdateAccountSubuser(ctx context.Context, data AccountSubuser) 
 	}()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return AccountSubuser{}, err
 		}

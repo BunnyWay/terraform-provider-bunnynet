@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -182,7 +181,7 @@ func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data C
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractMCErrorMessage(resp)
+		err := extractMCErrorMessage(resp)
 		if err != nil {
 			return ComputeContainerImageregistry{}, err
 		}

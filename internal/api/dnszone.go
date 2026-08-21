@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -147,7 +146,7 @@ func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, erro
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return DnsZone{}, err
 		}
@@ -201,7 +200,7 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return DnsZone{}, err
 		}
@@ -257,7 +256,7 @@ func (c *Client) postDnssec(ctx context.Context, zoneId int64) (dnssecInfo, erro
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return dnssecInfo{}, err
 		}
@@ -289,7 +288,7 @@ func (c *Client) deleteDnssec(ctx context.Context, zoneId int64) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractErrorMessage(resp)
+		err := extractErrorMessage(resp)
 		if err != nil {
 			return err
 		}

@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -56,7 +55,7 @@ func (c *Client) GetPullzoneWafRule(ctx context.Context, pullzoneId int64, ruleI
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneWafRule{}, err
 		}
@@ -100,7 +99,7 @@ func (c *Client) CreatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneWafRule{}, err
 		}
@@ -136,7 +135,7 @@ func (c *Client) UpdatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneWafRule{}, err
 		}
@@ -171,7 +170,7 @@ func (c *Client) DeletePullzoneWafRule(ctx context.Context, ruleId int64) error 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return err
 		}

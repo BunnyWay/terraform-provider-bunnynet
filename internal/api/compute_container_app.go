@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/slices"
 	"io"
@@ -299,7 +298,7 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 	}
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		err := utils.ExtractMCErrorMessage(resp)
+		err := extractMCErrorMessage(resp)
 		if err != nil {
 			return ComputeContainerApp{}, err
 		}

@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -56,7 +55,7 @@ func (c *Client) GetPullzoneRatelimitRule(ctx context.Context, pullzoneId int64,
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneRatelimitRule{}, err
 		}
@@ -100,7 +99,7 @@ func (c *Client) CreatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneRatelimitRule{}, err
 		}
@@ -136,7 +135,7 @@ func (c *Client) UpdatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return PullzoneRatelimitRule{}, err
 		}
@@ -171,7 +170,7 @@ func (c *Client) DeletePullzoneRatelimitRule(ctx context.Context, ruleId int64) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return err
 		}

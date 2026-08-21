@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -61,7 +60,7 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
@@ -127,7 +126,7 @@ func (c *Client) CreatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
@@ -182,7 +181,7 @@ func (c *Client) UpdatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
@@ -228,7 +227,7 @@ func (c *Client) DeletePullzoneAccessList(ctx context.Context, pullzoneId int64,
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return err
 		}
@@ -286,7 +285,7 @@ func (c *Client) getPullzoneAccessLists(ctx context.Context, shieldZoneId int64,
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return result, err
 		}
@@ -371,7 +370,7 @@ func (c *Client) updatePullzoneAccessListConfiguration(ctx context.Context, shie
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err := utils.ExtractShieldErrorMessage(resp)
+		err := extractShieldErrorMessage(resp)
 		if err != nil {
 			return err
 		}

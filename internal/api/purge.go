@@ -6,7 +6,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/http"
 	"net/url"
@@ -34,7 +33,7 @@ func (c *Client) UrlPurgeCache(ctx context.Context, urlToPurge string, exactPath
 		return nil
 	}
 
-	err = utils.ExtractErrorMessage(resp)
+	err = extractErrorMessage(resp)
 	if err != nil {
 		return err
 	}
