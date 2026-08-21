@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - resource `pullzone_access_list`: improve error messages;
+- resource `pullzone_access_list`: mark as removed if not found;
 - resource `pullzone_rate_limit`: improve error messages;
 - resource `pullzone_shield`: improve error messages;
 - resource `pullzone_waf_rule`: improve error messages;

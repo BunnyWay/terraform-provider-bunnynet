@@ -123,6 +123,8 @@ func extractShieldErrorMessage(response *http.Response) error {
 		return ErrShieldWafLimitReached
 	case "not_found_or_unauthorised_access.waf_rule":
 		return ErrNotFound
+	case "not_found.access_list":
+		return ErrNotFound
 	}
 
 	return errors.New(errorKey)
