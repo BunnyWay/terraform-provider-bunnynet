@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- experimental memory cache for DNS and Pullzone resources ([#94](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/94));
+
 ## 0.18.1 - 2026-08-21
 
 ### Fixed
