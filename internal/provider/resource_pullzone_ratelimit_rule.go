@@ -29,8 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )

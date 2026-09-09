@@ -10,9 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 )
 

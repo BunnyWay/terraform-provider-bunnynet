@@ -7,7 +7,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 func ContainerProbe() validator.Object {

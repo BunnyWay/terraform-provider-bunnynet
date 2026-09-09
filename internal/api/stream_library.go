@@ -9,9 +9,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
-	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
+	"slices"
 )
 
 type StreamLibrary struct {

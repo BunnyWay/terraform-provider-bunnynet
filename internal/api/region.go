@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
+	"slices"
 )
 
 type Region struct {

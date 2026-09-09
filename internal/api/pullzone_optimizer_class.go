@@ -6,7 +6,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type PullzoneOptimizerClass struct {

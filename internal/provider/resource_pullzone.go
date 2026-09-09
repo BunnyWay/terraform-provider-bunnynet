@@ -36,8 +36,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 )

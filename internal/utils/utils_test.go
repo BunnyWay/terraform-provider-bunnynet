@@ -4,7 +4,7 @@
 package utils
 
 import (
-	"golang.org/x/exp/slices"
+	"slices"
 	"testing"
 )
 
