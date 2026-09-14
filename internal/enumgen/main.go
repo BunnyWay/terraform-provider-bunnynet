@@ -27,7 +27,8 @@ func main() {
 	}
 
 	var result []GenResult
-	result = append(result, generateFromOpenApiSchema()...)
+	result = append(result, generateFromOpenApiSchemaCore()...)
+	result = append(result, generateFromOpenApiSchemaShield()...)
 	result = append(result, generatePullzoneShield()...)
 	result = append(result, generatePullzoneShieldAccessList()...)
 
@@ -74,9 +75,117 @@ type GenResult struct {
 
 var FileinfoProvider = &Fileinfo{File: "internal/provider/enums.go", Package: "provider"}
 var FileinfoEdgeruleValidator = &Fileinfo{File: "internal/pullzoneedgeruleresourcevalidator/types.go", Package: "pullzoneedgeruleresourcevalidator"}
+var FileinfoShieldValidator = &Fileinfo{File: "internal/pullzoneshieldresourcevalidator/types.go", Package: "pullzoneshieldresourcevalidator"}
 
-func generateFromOpenApiSchema() []GenResult {
-	resp, err := http.Get("https://core-api-public-docs.b-cdn.net/docs/v3/public.json")
+type openapiVariable struct {
+	File      *Fileinfo
+	Variable  string
+	SchemaKey string
+	Type      string
+}
+
+func generateFromOpenApiSchemaCore() []GenResult {
+	return generateFromOpenApiSchema(
+		"https://core-api-public-docs.b-cdn.net/docs/v3/public.json",
+		[]openapiVariable{
+			{
+				File:      FileinfoProvider,
+				Variable:  "dnsRecordMonitorTypeMap",
+				SchemaKey: "DnsMonitoringType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "dnsRecordSmartRoutingTypeMap",
+				SchemaKey: "DnsSmartRoutingType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "dnsRecordTypeMap",
+				SchemaKey: "DnsRecordTypes",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "dnsZoneLogAnonymizedStyleMap",
+				SchemaKey: "LogAnonymizationType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "pullzoneLogAnonymizedStyleMap",
+				SchemaKey: "LogAnonymizationType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "pullzoneLogForwardFormatMap",
+				SchemaKey: "PullZoneLogFormat",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "pullzoneLogForwardProtocolMap",
+				SchemaKey: "PullZoneLogForwarderProtocolType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "pullzoneOptimizerWatermarkPositionMap",
+				SchemaKey: "OptimizerWatermarkPosition",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "storageZoneTierMap",
+				SchemaKey: "StorageZoneTier",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "streamLibraryEncodingTierMap",
+				SchemaKey: "EncodingTier",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoEdgeruleValidator,
+				Variable:  "ActionMap",
+				SchemaKey: "EdgeRuleActionType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoEdgeruleValidator,
+				Variable:  "TriggerTypeMap",
+				SchemaKey: "TriggerTypes",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoEdgeruleValidator,
+				Variable:  "TriggerMatchTypeMap",
+				SchemaKey: "PatternMatchingTypes",
+				Type:      "map[uint8]string",
+			},
+		},
+	)
+}
+
+func generateFromOpenApiSchemaShield() []GenResult {
+	return generateFromOpenApiSchema(
+		"https://api.bunny.net/shield/docs/v1/swagger.json",
+		[]openapiVariable{
+			{
+				File:      FileinfoShieldValidator,
+				Variable:  "PlanTypeMap",
+				SchemaKey: "ShieldPlanType",
+				Type:      "map[uint8]string",
+			},
+		},
+	)
+}
+
+func generateFromOpenApiSchema(refUrl string, variableMap []openapiVariable) []GenResult {
+	resp, err := http.Get(refUrl)
 	if err != nil {
 		panic(err)
 	}
@@ -95,9 +204,10 @@ func generateFromOpenApiSchema() []GenResult {
 	var schema struct {
 		Components struct {
 			Schemas map[string]struct {
-				Type       string        `json:"type"`
-				EnumValues []interface{} `json:"enum"`
-				EnumNames  []string      `json:"x-enumNames"`
+				Type         string        `json:"type"`
+				EnumValues   []interface{} `json:"enum"`
+				EnumNames    []string      `json:"x-enumNames"`
+				EnumVarNames []string      `json:"x-enum-varnames"`
 			} `json:"schemas"`
 		} `json:"components"`
 	}
@@ -105,92 +215,6 @@ func generateFromOpenApiSchema() []GenResult {
 	err = json.Unmarshal(body, &schema)
 	if err != nil {
 		panic(err)
-	}
-
-	var variableMap = []struct {
-		File      *Fileinfo
-		Variable  string
-		SchemaKey string
-		Type      string
-	}{
-		{
-			File:      FileinfoProvider,
-			Variable:  "dnsRecordMonitorTypeMap",
-			SchemaKey: "DnsMonitoringType",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "dnsRecordSmartRoutingTypeMap",
-			SchemaKey: "DnsSmartRoutingType",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "dnsRecordTypeMap",
-			SchemaKey: "DnsRecordTypes",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "dnsZoneLogAnonymizedStyleMap",
-			SchemaKey: "LogAnonymizationType",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "pullzoneLogAnonymizedStyleMap",
-			SchemaKey: "LogAnonymizationType",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "pullzoneLogForwardFormatMap",
-			SchemaKey: "PullZoneLogFormat",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "pullzoneLogForwardProtocolMap",
-			SchemaKey: "PullZoneLogForwarderProtocolType",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "pullzoneOptimizerWatermarkPositionMap",
-			SchemaKey: "OptimizerWatermarkPosition",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "storageZoneTierMap",
-			SchemaKey: "StorageZoneTier",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoProvider,
-			Variable:  "streamLibraryEncodingTierMap",
-			SchemaKey: "EncodingTier",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoEdgeruleValidator,
-			Variable:  "ActionMap",
-			SchemaKey: "EdgeRuleActionType",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoEdgeruleValidator,
-			Variable:  "TriggerTypeMap",
-			SchemaKey: "TriggerTypes",
-			Type:      "map[uint8]string",
-		},
-		{
-			File:      FileinfoEdgeruleValidator,
-			Variable:  "TriggerMatchTypeMap",
-			SchemaKey: "PatternMatchingTypes",
-			Type:      "map[uint8]string",
-		},
 	}
 
 	result := []GenResult{}
@@ -212,7 +236,13 @@ func generateFromOpenApiSchema() []GenResult {
 			case "map[int8]string":
 				fallthrough
 			case "map[uint8]string":
-				contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumNames[enumIdx])
+				if len(s.EnumNames) > enumIdx {
+					contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumNames[enumIdx])
+				}
+
+				if len(s.EnumVarNames) > enumIdx {
+					contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumVarNames[enumIdx])
+				}
 
 			case "[]int8":
 				fallthrough
