@@ -19,11 +19,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -65,16 +67,19 @@ var pullzoneRatelimitConditionType = types.ObjectType{
 		"variable_value": types.StringType,
 		"operator":       types.StringType,
 		"value":          types.StringType,
+		"negated":        types.BoolType,
 	},
 }
 
 var pullzoneRatelimitRuleLimitType = map[string]attr.Type{
-	"requests": types.Int64Type,
-	"interval": types.Int64Type,
+	"requests":    types.Int64Type,
+	"interval":    types.Int64Type,
+	"counter_key": types.StringType,
 }
 
 var pullzoneRatelimitRuleResponseType = map[string]attr.Type{
 	"interval": types.Int64Type,
+	"action":   types.StringType,
 }
 
 func (r *PullzoneRatelimitRuleResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -185,6 +190,12 @@ func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"negated": schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Negates the condition result.",
+						},
 					},
 					Validators: []validator.Object{
 						objectvalidator.IsRequired(),
@@ -216,6 +227,15 @@ func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource
 						},
 						Description: "The interval, in seconds, to consider for to trigger the rate limit rule.",
 					},
+					"counter_key": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString("IP"),
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneShieldRatelimitRuleCounterKeyMap)...),
+						},
+						Description: "The request property used to group rate limit counters. " + generateMarkdownMapOptions(pullzoneShieldRatelimitRuleCounterKeyMap),
+					},
 				},
 				Validators: []validator.Object{
 					objectvalidator.IsRequired(),
@@ -235,6 +255,15 @@ func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource
 							int64validator.OneOf(pullzoneShieldRatelimitRuleResponseTimeframeOptions...),
 						},
 						Description: "The interval, in seconds, that the rate limit will apply.",
+					},
+					"action": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+						Default:  stringdefault.StaticString("RateLimit"),
+						Validators: []validator.String{
+							stringvalidator.OneOf(maps.Values(pullzoneShieldRatelimitRuleActionMap)...),
+						},
+						Description: "The action to take once the rate limit is exceeded. " + generateMarkdownMapOptions(pullzoneShieldRatelimitRuleActionMap),
 					},
 				},
 				Validators: []validator.Object{
@@ -413,16 +442,19 @@ func (r *PullzoneRatelimitRuleResource) convertModelToApi(ctx context.Context, d
 			variableTypes := map[string]string{variable: variableValue}
 			operator := mapValueToKey(pullzoneShieldRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
 			value := conditionAttr["value"].(types.String).ValueString()
+			negated := conditionAttr["negated"].(types.Bool).ValueBool()
 
 			if i == 0 {
 				dataApi.RuleConfiguration.VariableTypes = variableTypes
 				dataApi.RuleConfiguration.OperatorType = operator
 				dataApi.RuleConfiguration.Value = value
+				dataApi.RuleConfiguration.IsNegated = negated
 			} else {
 				dataApi.RuleConfiguration.ChainedRules = append(dataApi.RuleConfiguration.ChainedRules, api.PullzoneRatelimitRuleChainedRule{
 					VariableTypes: variableTypes,
 					OperatorType:  operator,
 					Value:         value,
+					IsNegated:     negated,
 				})
 			}
 		}
@@ -446,13 +478,14 @@ func (r *PullzoneRatelimitRuleResource) convertModelToApi(ctx context.Context, d
 		attrs := dataTf.Limit.Attributes()
 		dataApi.RuleConfiguration.RequestCount = attrs["requests"].(types.Int64).ValueInt64()
 		dataApi.RuleConfiguration.Timeframe = attrs["interval"].(types.Int64).ValueInt64()
+		dataApi.RuleConfiguration.CounterKeyType = mapValueToKey(pullzoneShieldRatelimitRuleCounterKeyMap, attrs["counter_key"].(types.String).ValueString())
 	}
 
 	// response
 	{
 		attrs := dataTf.Response.Attributes()
 		dataApi.RuleConfiguration.BlockTime = attrs["interval"].(types.Int64).ValueInt64()
-		dataApi.RuleConfiguration.ActionType = 1 // RateLimit
+		dataApi.RuleConfiguration.ActionType = mapValueToKey(pullzoneShieldRatelimitRuleActionMap, attrs["action"].(types.String).ValueString())
 	}
 
 	return dataApi
@@ -501,6 +534,7 @@ func (r *PullzoneRatelimitRuleResource) convertApiToModel(ctx context.Context, d
 			"value":          types.StringValue(dataApi.RuleConfiguration.Value),
 			"variable":       types.StringValue(variable),
 			"variable_value": variableValue,
+			"negated":        types.BoolValue(dataApi.RuleConfiguration.IsNegated),
 		})
 
 		if diags.HasError() {
@@ -532,6 +566,7 @@ func (r *PullzoneRatelimitRuleResource) convertApiToModel(ctx context.Context, d
 				"variable":       types.StringValue(variable),
 				"variable_value": variableValue,
 				"value":          types.StringValue(rule.Value),
+				"negated":        types.BoolValue(rule.IsNegated),
 			})
 
 			if diags.HasError() {
@@ -591,8 +626,9 @@ func (r *PullzoneRatelimitRuleResource) convertApiToModel(ctx context.Context, d
 	// limits
 	{
 		limit, diags := types.ObjectValue(pullzoneRatelimitRuleLimitType, map[string]attr.Value{
-			"requests": types.Int64Value(dataApi.RuleConfiguration.RequestCount),
-			"interval": types.Int64Value(dataApi.RuleConfiguration.Timeframe),
+			"requests":    types.Int64Value(dataApi.RuleConfiguration.RequestCount),
+			"interval":    types.Int64Value(dataApi.RuleConfiguration.Timeframe),
+			"counter_key": types.StringValue(mapKeyToValue(pullzoneShieldRatelimitRuleCounterKeyMap, dataApi.RuleConfiguration.CounterKeyType)),
 		})
 
 		if diags.HasError() {
@@ -606,6 +642,7 @@ func (r *PullzoneRatelimitRuleResource) convertApiToModel(ctx context.Context, d
 	{
 		response, diags := types.ObjectValue(pullzoneRatelimitRuleResponseType, map[string]attr.Value{
 			"interval": types.Int64Value(dataApi.RuleConfiguration.BlockTime),
+			"action":   types.StringValue(mapKeyToValue(pullzoneShieldRatelimitRuleActionMap, dataApi.RuleConfiguration.ActionType)),
 		})
 
 		if diags.HasError() {

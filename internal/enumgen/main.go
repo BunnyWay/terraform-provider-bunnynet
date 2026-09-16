@@ -198,6 +198,18 @@ func generateFromOpenApiSchemaShield() []GenResult {
 				ExcludedValues: []string{"None"},
 				WithEnum:       true,
 			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "pullzoneShieldRatelimitRuleActionMap",
+				SchemaKey: "RatelimitRuleActionType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
+				Variable:  "pullzoneShieldRatelimitRuleCounterKeyMap",
+				SchemaKey: "WafRatelimitCounterKeyType",
+				Type:      "map[uint8]string",
+			},
 		},
 	)
 }

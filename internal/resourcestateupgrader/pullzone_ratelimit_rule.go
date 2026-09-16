@@ -58,18 +58,21 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 						"value":          tftypes.String,
 						"variable":       tftypes.String,
 						"variable_value": tftypes.String,
+						"negated":        tftypes.Bool,
 					},
 				},
 			},
 			"limit": tftypes.Object{
 				AttributeTypes: map[string]tftypes.Type{
-					"requests": tftypes.Number,
-					"interval": tftypes.Number,
+					"requests":    tftypes.Number,
+					"interval":    tftypes.Number,
+					"counter_key": tftypes.String,
 				},
 			},
 			"response": tftypes.Object{
 				AttributeTypes: map[string]tftypes.Type{
 					"interval": tftypes.Number,
+					"action":   tftypes.String,
 				},
 			},
 		},
@@ -97,7 +100,7 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 	var newStateTransformations []tftypes.Value
 
 	{
-		newConditionValues := make(map[string]tftypes.Value, 4)
+		newConditionValues := make(map[string]tftypes.Value, 5)
 		for _, attribute := range []string{"operator", "variable", "variable_value", "value"} {
 			var value string
 			err := oldCondition[attribute].As(&value)
@@ -113,6 +116,8 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 			}
 		}
 
+		newConditionValues["negated"] = tftypes.NewValue(tftypes.Bool, false)
+
 		newStateCondition = append(newStateCondition, tftypes.NewValue(newType.AttributeTypes["condition"].(tftypes.List).ElementType, newConditionValues))
 	}
 
@@ -127,6 +132,29 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 		newStateTransformations = append(newStateTransformations, transformations...)
 	}
 
+	var oldLimit map[string]tftypes.Value
+	if err := oldState["limit"].As(&oldLimit); err != nil {
+		resp.Diagnostics.AddError("Failed to convert old state", err.Error())
+		return
+	}
+
+	newStateLimit := tftypes.NewValue(newType.AttributeTypes["limit"], map[string]tftypes.Value{
+		"requests":    oldLimit["requests"],
+		"interval":    oldLimit["interval"],
+		"counter_key": tftypes.NewValue(tftypes.String, "IP"),
+	})
+
+	var oldResponse map[string]tftypes.Value
+	if err := oldState["response"].As(&oldResponse); err != nil {
+		resp.Diagnostics.AddError("Failed to convert old state", err.Error())
+		return
+	}
+
+	newStateResponse := tftypes.NewValue(newType.AttributeTypes["response"], map[string]tftypes.Value{
+		"interval": oldResponse["interval"],
+		"action":   tftypes.NewValue(tftypes.String, "RateLimit"),
+	})
+
 	newValue := tftypes.NewValue(newType, map[string]tftypes.Value{
 		"id":              oldState["id"],
 		"pullzone":        oldState["pullzone"],
@@ -134,8 +162,8 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 		"description":     oldState["description"],
 		"transformations": tftypes.NewValue(newType.AttributeTypes["transformations"], newStateTransformations),
 		"condition":       tftypes.NewValue(newType.AttributeTypes["condition"], newStateCondition),
-		"limit":           oldState["limit"],
-		"response":        oldState["response"],
+		"limit":           newStateLimit,
+		"response":        newStateResponse,
 	})
 
 	dv, err := tfprotov6.NewDynamicValue(newType, newValue)

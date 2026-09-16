@@ -67,6 +67,7 @@ Required:
 
 Optional:
 
+- `negated` (Boolean) Negates the condition result.
 - `variable_value` (String)
 
 
@@ -78,6 +79,10 @@ Required:
 - `interval` (Number) The interval, in seconds, to consider for to trigger the rate limit rule.
 - `requests` (Number) The number of request within the interval to trigger the rate limit rule.
 
+Optional:
+
+- `counter_key` (String) The request property used to group rate limit counters. Options: `ASN`, `City`, `Country`, `Host`, `IP`, `IP_JA4`, `JA4`, `Organization`
+
 
 <a id="nestedblock--response"></a>
 ### Nested Schema for `response`
@@ -85,6 +90,10 @@ Required:
 Required:
 
 - `interval` (Number) The interval, in seconds, that the rate limit will apply.
+
+Optional:
+
+- `action` (String) The action to take once the rate limit is exceeded. Options: `Challenge`, `Log`, `RateLimit`
 
 ## Import
 
