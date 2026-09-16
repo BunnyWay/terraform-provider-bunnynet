@@ -3,7 +3,12 @@
 
 package provider
 
-import "github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+import (
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
 
 var accountSubuserPermissionsMap = map[string]string{
 	"zones":   "SubuserManage",
@@ -181,3 +186,184 @@ var storageZoneTypeMap = map[uint8]string{
 var streamLibraryFontFamilyOptions = []string{"arial", "inter", "lato", "oswald", "raleway", "roboto", "rubik", "ubuntu"}
 var streamLibraryPlayerControlsOptions = []string{"airplay", "captions", "chromecast", "current-time", "duration", "fast-forward", "fullscreen", "mute", "pip", "play", "play-large", "progress", "rewind", "settings", "volume"}
 var streamLibraryOutputCodecsOptions = []string{"x264", "vp9", "hevc", "av1"}
+
+// @TODO generate from a new pullzone
+var pullzoneShieldBotCategorizationDefault = listdefault.StaticValue(types.ListValueMust(pullzoneShieldBotCategorizationType, []attr.Value{
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category":  types.StringValue("AIScraper"),
+		"action":    types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{}),
+	}),
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category":  types.StringValue("AITool"),
+		"action":    types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{}),
+	}),
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category": types.StringValue("Ads"),
+		"action":   types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("adsbot-google"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("adsbot-google-mobile"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("adsbot-google-mobile-apps"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("mediapartners-google"),
+				"action": types.StringValue("Allow"),
+			}),
+		}),
+	}),
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category": types.StringValue("Preview"),
+		"action":   types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("skypeuripreview"),
+				"action": types.StringValue("Allow"),
+			}),
+		}),
+	}),
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category": types.StringValue("SEO"),
+		"action":   types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("apis-google"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("applebot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("baiduspider"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("bingbot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("feedfetcher-google"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("google-adwords-express"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("google-adwords-instant"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("google-inspectiontool"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("google-site-verification"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("googlebot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("googlebot-image"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("googlebot-video"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("googleproducer"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("mojeekbot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("pinterestbot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("prerendergateway"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("qwantbot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("storebot-google"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("yahoo! slurp"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("yandex"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("yandexbot"),
+				"action": types.StringValue("Allow"),
+			}),
+		}),
+	}),
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category": types.StringValue("Social"),
+		"action":   types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("facebookexternalhit"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("linkedinbot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("pinterest"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("telegrambot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("tumblr"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("twitterbot"),
+				"action": types.StringValue("Allow"),
+			}),
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("whatsapp"),
+				"action": types.StringValue("Allow"),
+			}),
+		}),
+	}),
+	types.ObjectValueMust(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+		"category": types.StringValue("Tool"),
+		"action":   types.StringValue("Ignore"),
+		"overrides": types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{
+
+			types.ObjectValueMust(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+				"bot":    types.StringValue("chrome-lighthouse"),
+				"action": types.StringValue("Allow"),
+			}),
+		}),
+	}),
+}))

@@ -11,6 +11,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneshieldresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -20,6 +21,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
@@ -31,7 +34,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/exp/maps"
 	"regexp"
+	"slices"
 	"strconv"
+	"strings"
 )
 
 var _ resource.Resource = &PullzoneShieldResource{}
@@ -61,6 +66,7 @@ type PullzoneShieldResourceModel struct {
 	UploadScanningAntivirus types.String `tfsdk:"upload_scanning_antivirus"`
 	UploadScanningCsam      types.String `tfsdk:"upload_scanning_csam"`
 	WAF                     types.Object `tfsdk:"waf"`
+	BotCategorization       types.List   `tfsdk:"bot_categorization"`
 }
 
 var pullzoneShieldAccessListType = map[string]attr.Type{
@@ -80,6 +86,23 @@ var pullzoneShieldBotDetectionType = map[string]attr.Type{
 	"ip_sensitivity":          types.Int64Type,
 	"request_integrity":       types.Int64Type,
 	"complex_fingerprinting":  types.BoolType,
+}
+
+var pullzoneShieldBotCategorizationOverrideType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"bot":    types.StringType,
+		"action": types.StringType,
+	},
+}
+
+var pullzoneShieldBotCategorizationType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"category": types.StringType,
+		"action":   types.StringType,
+		"overrides": types.ListType{
+			ElemType: pullzoneShieldBotCategorizationOverrideType,
+		},
+	},
 }
 
 var pullzoneShieldWafType = map[string]attr.Type{
@@ -202,6 +225,46 @@ func (r *PullzoneShieldResource) Schema(ctx context.Context, req resource.Schema
 				Computed:    true,
 				Default:     stringdefault.StaticString(""),
 				Description: "Customized Response Page for requests after a rate limit is breached.",
+			},
+			"bot_categorization": schema.ListNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  pullzoneShieldBotCategorizationDefault,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
+					},
+					Attributes: map[string]schema.Attribute{
+						"category": schema.StringAttribute{
+							Required:    true,
+							Description: generateMarkdownMapOptions(pullzoneshieldresourcevalidator.BotCategorizationCategoryMap),
+						},
+						"action": schema.StringAttribute{
+							Required: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(maps.Values(pullzoneshieldresourcevalidator.BotCategorizationCategoryActionMap)...),
+							},
+							Description: generateMarkdownMapOptions(pullzoneshieldresourcevalidator.BotCategorizationCategoryActionMap),
+						},
+						"overrides": schema.ListAttribute{
+							Optional:    true,
+							Computed:    true,
+							ElementType: pullzoneShieldBotCategorizationOverrideType,
+							Default:     listdefault.StaticValue(types.ListValueMust(pullzoneShieldBotCategorizationOverrideType, []attr.Value{})),
+							Description: "Override actions for specific bots.",
+						},
+					},
+				},
+				Validators: []validator.List{
+					listvalidator.SizeBetween(len(pullzoneshieldresourcevalidator.BotCategorizationCategoryMap), len(pullzoneshieldresourcevalidator.BotCategorizationCategoryMap)),
+					pullzoneshieldresourcevalidator.BotCategorization(),
+				},
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -648,6 +711,37 @@ func (r *PullzoneShieldResource) convertModelToApi(ctx context.Context, dataTf P
 		dataApi.AccessLists = accessLists
 	}
 
+	// bot categorization
+	{
+		dataApi.BotCategorization = []api.PullzoneShieldBotCategory{}
+		blocks := dataTf.BotCategorization.Elements()
+
+		for _, block := range blocks {
+			attrs := block.(types.Object).Attributes()
+			category := attrs["category"].(types.String).ValueString()
+			action := attrs["action"].(types.String).ValueString()
+			overrides := attrs["overrides"].(types.List).Elements()
+			bots := make([]api.PullzoneShieldBotCategoryBot, 0, len(overrides))
+
+			for _, override := range overrides {
+				overrideAttrs := override.(types.Object).Attributes()
+				botName := overrideAttrs["bot"].(types.String).ValueString()
+				botAction := overrideAttrs["action"].(types.String).ValueString()
+
+				bots = append(bots, api.PullzoneShieldBotCategoryBot{
+					Name:   botName,
+					Action: pullzoneshieldresourcevalidator.BotCategorizationBotActionMapInverted[botAction],
+				})
+			}
+
+			dataApi.BotCategorization = append(dataApi.BotCategorization, api.PullzoneShieldBotCategory{
+				Id:     pullzoneshieldresourcevalidator.BotCategorizationCategoryMapInverted[category],
+				Action: pullzoneshieldresourcevalidator.BotCategorizationCategoryActionMapInverted[action],
+				Bots:   bots,
+			})
+		}
+	}
+
 	// bot_detection
 	{
 		attrs := dataTf.BotDetection.Attributes()
@@ -788,6 +882,69 @@ func (r *PullzoneShieldResource) convertApiToModel(dataApi api.PullzoneShield) (
 		}
 
 		dataTf.AccessList = accessListsSet
+	}
+
+	// bot_categorization
+	{
+		values := []attr.Value{}
+
+		for _, category := range dataApi.BotCategorization {
+			overrides := []attr.Value{}
+
+			for _, bot := range category.Bots {
+				if bot.Action == pullzoneshieldresourcevalidator.BotCategorizationBotActionOptBlock || bot.Action == pullzoneshieldresourcevalidator.BotCategorizationBotActionOptAllow {
+					if category.Action == bot.Action {
+						continue
+					}
+				}
+
+				if bot.Action == pullzoneshieldresourcevalidator.BotCategorizationBotActionOptIgnore && category.Action == pullzoneshieldresourcevalidator.BotCategorizationCategoryActionOptIgnore {
+					continue
+				}
+
+				overrideObj, diags := types.ObjectValue(pullzoneShieldBotCategorizationOverrideType.AttrTypes, map[string]attr.Value{
+					"bot":    types.StringValue(bot.Name),
+					"action": types.StringValue(pullzoneshieldresourcevalidator.BotCategorizationBotActionMap[bot.Action]),
+				})
+
+				if diags != nil {
+					return PullzoneShieldResourceModel{}, diags
+				}
+
+				overrides = append(overrides, overrideObj)
+			}
+
+			overridesList, diags := types.ListValue(pullzoneShieldBotCategorizationOverrideType, overrides)
+			if diags != nil {
+				return PullzoneShieldResourceModel{}, diags
+			}
+
+			obj, diags := types.ObjectValue(pullzoneShieldBotCategorizationType.AttrTypes, map[string]attr.Value{
+				"category":  types.StringValue(pullzoneshieldresourcevalidator.BotCategorizationCategoryMap[category.Id]),
+				"action":    types.StringValue(pullzoneshieldresourcevalidator.BotCategorizationCategoryActionMap[category.Action]),
+				"overrides": overridesList,
+			})
+
+			if diags != nil {
+				return PullzoneShieldResourceModel{}, diags
+			}
+
+			values = append(values, obj)
+		}
+
+		slices.SortFunc(values, func(a attr.Value, b attr.Value) int {
+			aName := a.(types.Object).Attributes()["category"].(types.String).ValueString()
+			bName := b.(types.Object).Attributes()["category"].(types.String).ValueString()
+
+			return strings.Compare(aName, bName)
+		})
+
+		list, diags := types.ListValue(pullzoneShieldBotCategorizationType, values)
+		if diags != nil {
+			return PullzoneShieldResourceModel{}, diags
+		}
+
+		dataTf.BotCategorization = list
 	}
 
 	// bot_detection

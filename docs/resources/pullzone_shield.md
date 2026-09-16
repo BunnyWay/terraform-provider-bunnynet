@@ -39,6 +39,7 @@ resource "bunnynet_pullzone_shield" "test" {
 ### Optional
 
 - `access_list` (Block Set) (see [below for nested schema](#nestedblock--access_list))
+- `bot_categorization` (Attributes List) (see [below for nested schema](#nestedatt--bot_categorization))
 - `bot_detection` (Block, Optional) Configures Bot Detection settings. (see [below for nested schema](#nestedblock--bot_detection))
 - `ddos` (Block, Optional) Configures DDoS settings. (see [below for nested schema](#nestedblock--ddos))
 - `tier` (String) Options: `Advanced`, `Basic`, `Business`, `Enterprise`
@@ -61,6 +62,28 @@ Required:
 
 - `action` (String) Options: `Allow`, `Block`, `Bypass`, `Challenge`, `Log`
 - `id` (Number) The ID of the Access List.
+
+
+<a id="nestedatt--bot_categorization"></a>
+### Nested Schema for `bot_categorization`
+
+Required:
+
+- `action` (String) Options: `Allow`, `Block`, `Ignore`
+- `category` (String) Options: `AIScraper`, `AITool`, `Ads`, `Preview`, `SEO`, `Social`, `Tool`
+
+Optional:
+
+- `overrides` (List of Object) Override actions for specific bots. (see [below for nested schema](#nestedatt--bot_categorization--overrides))
+
+<a id="nestedatt--bot_categorization--overrides"></a>
+### Nested Schema for `bot_categorization.overrides`
+
+Optional:
+
+- `action` (String)
+- `bot` (String)
+
 
 
 <a id="nestedblock--bot_detection"></a>

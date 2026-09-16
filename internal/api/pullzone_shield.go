@@ -66,8 +66,9 @@ type PullzoneShield struct {
 	WafRulesDisabled                     []string `json:"wafDisabledRules"`
 	WafRulesLogonly                      []string `json:"wafLogOnlyRules"`
 
-	AccessLists     []PullzoneShieldAccessList          `json:"-"`
-	WafEngineConfig []PullzoneShieldWafEngineConfigItem `json:"wafEngineConfig,omitempty"`
+	AccessLists       []PullzoneShieldAccessList          `json:"-"`
+	WafEngineConfig   []PullzoneShieldWafEngineConfigItem `json:"wafEngineConfig,omitempty"`
+	BotCategorization []PullzoneShieldBotCategory         `json:"-"`
 }
 
 type PullzoneShieldWafEngineConfig struct {
@@ -315,6 +316,16 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		}
 
 		result.Data.AccessLists = resultLists
+	}
+
+	// fetch bot-categorization
+	{
+		botCategorizationResult, err := c.getPullzoneShieldBotCategorization(ctx, id)
+		if err != nil {
+			return result.Data, err
+		}
+
+		result.Data.BotCategorization = botCategorizationResult
 	}
 
 	// fetch bot-detection config
@@ -745,6 +756,86 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				}
 
 				return PullzoneShield{}, err
+			}
+		}
+	}
+
+	// bot-categorization fields
+	{
+		overrides := make(map[uint8]map[string]uint8, 7)
+		validBotNames := make(map[uint8]map[string]struct{}, 7)
+
+		for _, category := range data.BotCategorization {
+			for _, bot := range category.Bots {
+				if overrides[category.Id] == nil {
+					overrides[category.Id] = make(map[string]uint8, len(category.Bots))
+				}
+
+				overrides[category.Id][bot.Name] = bot.Action
+			}
+
+			err := c.pullzoneShieldBotCategorizationUpdateCategoryAction(ctx, data.Id, category.Id, category.Action)
+			if err != nil {
+				return PullzoneShield{}, err
+			}
+		}
+
+		currentBotCategorization, err := c.getPullzoneShieldBotCategorization(ctx, data.Id)
+		if err != nil {
+			return PullzoneShield{}, err
+		}
+
+		for _, category := range currentBotCategorization {
+			if validBotNames[category.Id] == nil {
+				validBotNames[category.Id] = make(map[string]struct{}, len(category.Bots))
+			}
+
+			for _, bot := range category.Bots {
+				validBotNames[category.Id][bot.Name] = struct{}{}
+			}
+		}
+
+		for categoryId, bots := range overrides {
+			for botName := range bots {
+				if _, ok := validBotNames[categoryId][botName]; !ok {
+					return PullzoneShield{}, fmt.Errorf("Unexpected bot \"%s\"", botName)
+				}
+			}
+		}
+
+		for _, category := range currentBotCategorization {
+			botOverrides, _ := overrides[category.Id]
+
+			for _, bot := range category.Bots {
+				overrideAction, ok := botOverrides[bot.Name]
+
+				if !ok {
+					// API-aware for bot.Action == category.Action
+					if bot.Action != 0 && (bot.Action == category.Action || (bot.Action == 3 && category.Action == 0)) {
+						continue
+					}
+
+					// set to default
+					err = c.pullzoneShieldBotCategorizationUpdateBotAction(ctx, data.Id, bot.Id, 0)
+					if err != nil {
+						return PullzoneShield{}, err
+					}
+
+					continue
+				}
+
+				if bot.Action == overrideAction {
+					continue
+				}
+
+				if overrideAction != 0 && overrideAction == category.Action {
+					continue
+				}
+
+				err = c.pullzoneShieldBotCategorizationUpdateBotAction(ctx, data.Id, bot.Id, overrideAction)
+				if err != nil {
+					return PullzoneShield{}, err
+				}
 			}
 		}
 	}

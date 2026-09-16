@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"go/format"
 	"io"
 	"net/http"
@@ -78,10 +79,12 @@ var FileinfoEdgeruleValidator = &Fileinfo{File: "internal/pullzoneedgeruleresour
 var FileinfoShieldValidator = &Fileinfo{File: "internal/pullzoneshieldresourcevalidator/types.go", Package: "pullzoneshieldresourcevalidator"}
 
 type openapiVariable struct {
-	File      *Fileinfo
-	Variable  string
-	SchemaKey string
-	Type      string
+	File           *Fileinfo
+	Variable       string
+	SchemaKey      string
+	Type           string
+	ExcludedValues []string
+	WithEnum       bool
 }
 
 func generateFromOpenApiSchemaCore() []GenResult {
@@ -180,6 +183,21 @@ func generateFromOpenApiSchemaShield() []GenResult {
 				SchemaKey: "ShieldPlanType",
 				Type:      "map[uint8]string",
 			},
+			{
+				File:           FileinfoShieldValidator,
+				Variable:       "BotCategorizationCategoryMap",
+				SchemaKey:      "BotCategory",
+				Type:           "map[uint8]string",
+				ExcludedValues: []string{"None", "System"},
+			},
+			{
+				File:           FileinfoShieldValidator,
+				Variable:       "BotCategorizationBotAction",
+				SchemaKey:      "BotCategorizationAction",
+				Type:           "map[uint8]string",
+				ExcludedValues: []string{"None"},
+				WithEnum:       true,
+			},
 		},
 	)
 }
@@ -225,7 +243,39 @@ func generateFromOpenApiSchema(refUrl string, variableMap []openapiVariable) []G
 			continue
 		}
 
-		contents := fmt.Sprintf("var %s = %s{\n", v.Variable, v.Type)
+		var contents string
+		excluded := utils.SliceToSet(v.ExcludedValues)
+
+		if v.WithEnum {
+			for enumIdx, enumValue := range s.EnumValues {
+				switch v.Type {
+				case "map[uint8]string":
+					if len(s.EnumNames) > enumIdx {
+						if _, ok := excluded[s.EnumNames[enumIdx]]; ok {
+							continue
+						}
+
+						contents += fmt.Sprintf("const %sOpt%s = %0.f\n", v.Variable, s.EnumNames[enumIdx], enumValue)
+					}
+
+					if len(s.EnumVarNames) > enumIdx {
+						if _, ok := excluded[s.EnumVarNames[enumIdx]]; ok {
+							continue
+						}
+
+						contents += fmt.Sprintf("const %sOpt%s = %0.f\n", v.Variable, s.EnumVarNames[enumIdx], enumValue)
+					}
+				}
+			}
+
+			contents += "\n"
+		}
+
+		if v.WithEnum {
+			contents += fmt.Sprintf("var %sMap = %s{\n", v.Variable, v.Type)
+		} else {
+			contents += fmt.Sprintf("var %s = %s{\n", v.Variable, v.Type)
+		}
 
 		for enumIdx, enumValue := range s.EnumValues {
 			switch v.Type {
@@ -237,11 +287,27 @@ func generateFromOpenApiSchema(refUrl string, variableMap []openapiVariable) []G
 				fallthrough
 			case "map[uint8]string":
 				if len(s.EnumNames) > enumIdx {
-					contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumNames[enumIdx])
+					if _, ok := excluded[s.EnumNames[enumIdx]]; ok {
+						continue
+					}
+
+					if v.WithEnum {
+						contents += fmt.Sprintf("\t%sOpt%s: \"%s\",\n", v.Variable, s.EnumNames[enumIdx], s.EnumNames[enumIdx])
+					} else {
+						contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumNames[enumIdx])
+					}
 				}
 
 				if len(s.EnumVarNames) > enumIdx {
-					contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumVarNames[enumIdx])
+					if _, ok := excluded[s.EnumVarNames[enumIdx]]; ok {
+						continue
+					}
+
+					if v.WithEnum {
+						contents += fmt.Sprintf("\t%sOpt%s: \"%s\",\n", v.Variable, s.EnumVarNames[enumIdx], s.EnumVarNames[enumIdx])
+					} else {
+						contents += fmt.Sprintf("\t%0.f: \"%s\",\n", enumValue, s.EnumVarNames[enumIdx])
+					}
 				}
 
 			case "[]int8":

@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- resource `pullzone_shield`: support Bot Categorization;
+
 ### Fixed
 - resource `pullzone`: unknown `permacache_storagezone` causes invalid plan ([#96](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/96));
 
