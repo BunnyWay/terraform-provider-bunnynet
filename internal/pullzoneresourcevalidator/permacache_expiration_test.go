@@ -5,6 +5,7 @@ package pullzoneresourcevalidator
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -30,6 +31,13 @@ func TestPermacacheCacheExpirationTime(t *testing.T) {
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
 				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, -1),
 				"permacache_storagezone": tftypes.NewValue(tftypes.Number, nil),
 			},
@@ -44,7 +52,21 @@ func TestPermacacheCacheExpirationTime(t *testing.T) {
 		{
 			ExpectedError: false,
 			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, 3600),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, 0),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
 				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, nil),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, 123),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
 				"permacache_storagezone": tftypes.NewValue(tftypes.Number, 123),
 			},
 		},
@@ -60,6 +82,34 @@ func TestPermacacheCacheExpirationTime(t *testing.T) {
 			PlanValues: map[string]tftypes.Value{
 				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, DefaultCacheExpirationTimeForPermacache),
 				"permacache_storagezone": tftypes.NewValue(tftypes.Number, 123),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, DefaultCacheExpirationTimeForPermacache),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, nil),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+			},
+		},
+		{
+			ExpectedError: true,
+			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, 3600),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+			},
+		},
+		{
+			ExpectedError: false,
+			PlanValues: map[string]tftypes.Value{
+				"cache_expiration_time":  tftypes.NewValue(tftypes.Number, tftypes.UnknownValue),
+				"permacache_storagezone": tftypes.NewValue(tftypes.Number, 0),
 			},
 		},
 	}
@@ -78,23 +128,25 @@ func TestPermacacheCacheExpirationTime(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
-		request := resource.ValidateConfigRequest{
-			Config: tfsdk.Config{
-				Schema: configSchema,
-				Raw:    tftypes.NewValue(configTypes, testCase.PlanValues),
-			},
-		}
+	for n, tc := range testCases {
+		t.Run(fmt.Sprintf("%d", n), func(t *testing.T) {
+			request := resource.ValidateConfigRequest{
+				Config: tfsdk.Config{
+					Schema: configSchema,
+					Raw:    tftypes.NewValue(configTypes, tc.PlanValues),
+				},
+			}
 
-		response := resource.ValidateConfigResponse{}
-		permacacheCacheExpirationTimeValidator{}.ValidateResource(context.Background(), request, &response)
+			response := resource.ValidateConfigResponse{}
+			permacacheCacheExpirationTimeValidator{}.ValidateResource(context.Background(), request, &response)
 
-		if testCase.ExpectedError && !response.Diagnostics.HasError() {
-			t.Error("expected error, got none")
-		}
+			if tc.ExpectedError && !response.Diagnostics.HasError() {
+				t.Error("expected error, got none")
+			}
 
-		if !testCase.ExpectedError && response.Diagnostics.HasError() {
-			t.Errorf("expected no errors, got %s", response.Diagnostics.Errors())
-		}
+			if !tc.ExpectedError && response.Diagnostics.HasError() {
+				t.Errorf("expected no errors, got %s", response.Diagnostics.Errors())
+			}
+		})
 	}
 }

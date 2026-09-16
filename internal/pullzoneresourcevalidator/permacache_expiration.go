@@ -28,20 +28,32 @@ func (v permacacheCacheExpirationTimeValidator) MarkdownDescription(ctx context.
 }
 
 func (v permacacheCacheExpirationTimeValidator) ValidateResource(ctx context.Context, request resource.ValidateConfigRequest, response *resource.ValidateConfigResponse) {
-	var permacacheStoragezone types.Int64
-	request.Config.GetAttribute(ctx, path.Root("permacache_storagezone"), &permacacheStoragezone)
+	cacheExpirationTimeAttr := path.Root("cache_expiration_time")
+	permacacheStoragezoneAttr := path.Root("permacache_storagezone")
 
-	if permacacheStoragezone.IsUnknown() || permacacheStoragezone.IsNull() {
-		return
-	}
-
-	attr := path.Root("cache_expiration_time")
 	var cacheExpirationTime types.Int64
-	request.Config.GetAttribute(ctx, attr, &cacheExpirationTime)
+	request.Config.GetAttribute(ctx, cacheExpirationTimeAttr, &cacheExpirationTime)
 
-	if cacheExpirationTime.IsUnknown() || cacheExpirationTime.IsNull() || cacheExpirationTime.ValueInt64() == DefaultCacheExpirationTimeForPermacache {
+	var permacacheStoragezone types.Int64
+	request.Config.GetAttribute(ctx, permacacheStoragezoneAttr, &permacacheStoragezone)
+
+	if permacacheStoragezone.IsNull() || cacheExpirationTime.IsUnknown() || cacheExpirationTime.IsNull() {
 		return
 	}
 
-	response.Diagnostics.AddAttributeError(attr, "Attribute must be default", fmt.Sprintf("\"%s\" must be %d. It can also be omitted.", attr.String(), DefaultCacheExpirationTimeForPermacache))
+	if permacacheStoragezone.IsUnknown() && cacheExpirationTime.IsUnknown() {
+		return
+	}
+
+	permacacheStoragezoneId := permacacheStoragezone.ValueInt64()
+
+	if !permacacheStoragezone.IsUnknown() && !permacacheStoragezone.IsNull() && permacacheStoragezoneId == 0 {
+		return
+	}
+
+	if permacacheStoragezoneId > 0 && cacheExpirationTime.ValueInt64() == DefaultCacheExpirationTimeForPermacache {
+		return
+	}
+
+	response.Diagnostics.AddAttributeError(cacheExpirationTimeAttr, "Attribute must be omitted", fmt.Sprintf(`When "%s" is defined, "%s" should be omitted.`, permacacheStoragezoneAttr.String(), cacheExpirationTimeAttr.String()))
 }
