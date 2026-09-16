@@ -16,10 +16,12 @@ import (
 
 type PullzoneRatelimitRuleConfiguration struct {
 	ActionType          uint8                              `json:"actionType"`
+	CounterKeyType      uint8                              `json:"counterKeyType"`
 	VariableTypes       map[string]string                  `json:"variableTypes"`
 	OperatorType        int64                              `json:"operatorType"`
 	TransformationTypes []int64                            `json:"transformationTypes"`
 	Value               string                             `json:"value"`
+	IsNegated           bool                               `json:"isNegated"`
 	RequestCount        int64                              `json:"requestCount"`
 	BlockTime           int64                              `json:"blockTime"`
 	Timeframe           int64                              `json:"timeframe"`
@@ -30,6 +32,7 @@ type PullzoneRatelimitRuleChainedRule struct {
 	VariableTypes map[string]string `json:"variableTypes"`
 	OperatorType  int64             `json:"operatorType"`
 	Value         string            `json:"value"`
+	IsNegated     bool              `json:"isNegated"`
 }
 
 type PullzoneRatelimitRule struct {

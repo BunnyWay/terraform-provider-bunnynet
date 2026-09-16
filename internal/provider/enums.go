@@ -84,6 +84,23 @@ var pullzoneOptimizerWatermarkPositionMap = map[uint8]string{
 	5: "CenterStretch",
 }
 
+var pullzoneShieldRatelimitRuleActionMap = map[uint8]string{
+	1: "RateLimit",
+	2: "Log",
+	3: "Challenge",
+}
+
+var pullzoneShieldRatelimitRuleCounterKeyMap = map[uint8]string{
+	0: "IP",
+	1: "Host",
+	2: "Country",
+	3: "City",
+	4: "ASN",
+	5: "Organization",
+	6: "JA4",
+	7: "IP_JA4",
+}
+
 var pullzoneShieldRatelimitRuleLimitTimeframeOptions = []int64{
 	1,
 	10,
