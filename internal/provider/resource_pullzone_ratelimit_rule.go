@@ -63,11 +63,12 @@ type PullzoneRatelimitRuleResourceModel struct {
 
 var pullzoneRatelimitConditionType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
-		"variable":       types.StringType,
-		"variable_value": types.StringType,
-		"operator":       types.StringType,
-		"value":          types.StringType,
-		"negated":        types.BoolType,
+		"variable":             types.StringType,
+		"variable_value":       types.StringType,
+		"variable_value_regex": types.BoolType,
+		"operator":             types.StringType,
+		"value":                types.StringType,
+		"negated":              types.BoolType,
 	},
 }
 
@@ -173,6 +174,12 @@ func (r *PullzoneRatelimitRuleResource) Schema(ctx context.Context, req resource
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+						},
+						"variable_value_regex": schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Indicated whether variable_value is a regular expression.",
 						},
 						"operator": schema.StringAttribute{
 							Required: true,
@@ -439,6 +446,7 @@ func (r *PullzoneRatelimitRuleResource) convertModelToApi(ctx context.Context, d
 
 			variable := conditionAttr["variable"].(types.String).ValueString()
 			variableValue := conditionAttr["variable_value"].(types.String).ValueString()
+			variableValueRegex := conditionAttr["variable_value_regex"].(types.Bool).ValueBool()
 			variableTypes := map[string]string{variable: variableValue}
 			operator := mapValueToKey(pullzoneShieldRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
 			value := conditionAttr["value"].(types.String).ValueString()
@@ -449,12 +457,14 @@ func (r *PullzoneRatelimitRuleResource) convertModelToApi(ctx context.Context, d
 				dataApi.RuleConfiguration.OperatorType = operator
 				dataApi.RuleConfiguration.Value = value
 				dataApi.RuleConfiguration.IsNegated = negated
+				dataApi.RuleConfiguration.IsRegexVariable = variableValueRegex
 			} else {
 				dataApi.RuleConfiguration.ChainedRules = append(dataApi.RuleConfiguration.ChainedRules, api.PullzoneRatelimitRuleChainedRule{
-					VariableTypes: variableTypes,
-					OperatorType:  operator,
-					Value:         value,
-					IsNegated:     negated,
+					VariableTypes:   variableTypes,
+					OperatorType:    operator,
+					Value:           value,
+					IsNegated:       negated,
+					IsRegexVariable: variableValueRegex,
 				})
 			}
 		}
@@ -530,11 +540,12 @@ func (r *PullzoneRatelimitRuleResource) convertApiToModel(ctx context.Context, d
 		}
 
 		conditionObj, diags := types.ObjectValue(pullzoneRatelimitConditionType.AttrTypes, map[string]attr.Value{
-			"operator":       types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
-			"value":          types.StringValue(dataApi.RuleConfiguration.Value),
-			"variable":       types.StringValue(variable),
-			"variable_value": variableValue,
-			"negated":        types.BoolValue(dataApi.RuleConfiguration.IsNegated),
+			"operator":             types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
+			"value":                types.StringValue(dataApi.RuleConfiguration.Value),
+			"variable":             types.StringValue(variable),
+			"variable_value":       variableValue,
+			"variable_value_regex": types.BoolValue(dataApi.RuleConfiguration.IsRegexVariable),
+			"negated":              types.BoolValue(dataApi.RuleConfiguration.IsNegated),
 		})
 
 		if diags.HasError() {
@@ -562,11 +573,12 @@ func (r *PullzoneRatelimitRuleResource) convertApiToModel(ctx context.Context, d
 			}
 
 			condition, diags := types.ObjectValue(pullzoneRatelimitConditionType.AttrTypes, map[string]attr.Value{
-				"operator":       types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, rule.OperatorType)),
-				"variable":       types.StringValue(variable),
-				"variable_value": variableValue,
-				"value":          types.StringValue(rule.Value),
-				"negated":        types.BoolValue(rule.IsNegated),
+				"operator":             types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, rule.OperatorType)),
+				"variable":             types.StringValue(variable),
+				"variable_value":       variableValue,
+				"variable_value_regex": types.BoolValue(rule.IsRegexVariable),
+				"value":                types.StringValue(rule.Value),
+				"negated":              types.BoolValue(rule.IsNegated),
 			})
 
 			if diags.HasError() {

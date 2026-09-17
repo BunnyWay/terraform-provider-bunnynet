@@ -75,6 +75,7 @@ func TestAccPullzoneRatelimitRuleResourceWithBasicPlan(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(shieldResource, "tier", "Basic"),
 					resource.TestCheckResourceAttr(ratelimitResource, "condition.0.negated", "false"),
+					resource.TestCheckResourceAttr(ratelimitResource, "condition.0.variable_value_regex", "false"),
 					resource.TestCheckResourceAttr(ratelimitResource, "limit.counter_key", "IP"),
 					resource.TestCheckResourceAttr(ratelimitResource, "limit.interval", "10"),
 					resource.TestCheckResourceAttr(ratelimitResource, "response.action", "RateLimit"),
@@ -105,6 +106,7 @@ func TestAccPullzoneRatelimitRuleResourceWithAdvancedPlan(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(shieldResource, "tier", "Advanced"),
 					resource.TestCheckResourceAttr(ratelimitResource, "condition.0.negated", "false"),
+					resource.TestCheckResourceAttr(ratelimitResource, "condition.0.variable_value_regex", "false"),
 					resource.TestCheckResourceAttr(ratelimitResource, "limit.counter_key", "IP"),
 					resource.TestCheckResourceAttr(ratelimitResource, "limit.interval", "60"),
 					resource.TestCheckResourceAttr(ratelimitResource, "response.action", "RateLimit"),

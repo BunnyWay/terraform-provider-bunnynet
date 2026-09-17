@@ -22,6 +22,7 @@ type PullzoneRatelimitRuleConfiguration struct {
 	TransformationTypes []int64                            `json:"transformationTypes"`
 	Value               string                             `json:"value"`
 	IsNegated           bool                               `json:"isNegated"`
+	IsRegexVariable     bool                               `json:"isRegexVariable"`
 	RequestCount        int64                              `json:"requestCount"`
 	BlockTime           int64                              `json:"blockTime"`
 	Timeframe           int64                              `json:"timeframe"`
@@ -29,10 +30,11 @@ type PullzoneRatelimitRuleConfiguration struct {
 }
 
 type PullzoneRatelimitRuleChainedRule struct {
-	VariableTypes map[string]string `json:"variableTypes"`
-	OperatorType  int64             `json:"operatorType"`
-	Value         string            `json:"value"`
-	IsNegated     bool              `json:"isNegated"`
+	VariableTypes   map[string]string `json:"variableTypes"`
+	OperatorType    int64             `json:"operatorType"`
+	Value           string            `json:"value"`
+	IsNegated       bool              `json:"isNegated"`
+	IsRegexVariable bool              `json:"isRegexVariable"`
 }
 
 type PullzoneRatelimitRule struct {
