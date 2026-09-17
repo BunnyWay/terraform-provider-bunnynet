@@ -1,5 +1,5 @@
 resource "bunnynet_pullzone_ratelimit_rule" "wplogin" {
-  pullzone        = bunnynet_pullzone.test.id
+  pullzone        = bunnynet_pullzone_shield.test.pullzone
   name            = "WordPress Login"
   description     = "WordPress Login"
   transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]

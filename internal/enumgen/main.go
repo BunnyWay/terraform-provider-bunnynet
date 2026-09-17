@@ -204,12 +204,6 @@ func generateFromOpenApiSchemaShield() []GenResult {
 				SchemaKey: "RatelimitRuleActionType",
 				Type:      "map[uint8]string",
 			},
-			{
-				File:      FileinfoProvider,
-				Variable:  "pullzoneShieldRatelimitRuleCounterKeyMap",
-				SchemaKey: "WafRatelimitCounterKeyType",
-				Type:      "map[uint8]string",
-			},
 		},
 	)
 }

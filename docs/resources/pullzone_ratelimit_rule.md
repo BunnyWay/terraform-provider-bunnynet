@@ -14,7 +14,7 @@ This resource manages a rate limit rule for a bunny.net pullzone.
 
 ```terraform
 resource "bunnynet_pullzone_ratelimit_rule" "wplogin" {
-  pullzone        = bunnynet_pullzone.test.id
+  pullzone        = bunnynet_pullzone_shield.test.pullzone
   name            = "WordPress Login"
   description     = "WordPress Login"
   transformations = ["LOWERCASE", "NORMALIZEPATH", "URLDECODE"]
@@ -81,7 +81,7 @@ Required:
 
 Optional:
 
-- `counter_key` (String) The request property used to group rate limit counters. Options: `ASN`, `City`, `Country`, `Host`, `IP`, `IP_JA4`, `JA4`, `Organization`
+- `counter_key` (String) The request property used to group rate limit counters. Options: `ASN`, `City`, `Country`, `Host`, `IP`, `IP+JA4`, `JA4`, `Organization`
 
 
 <a id="nestedblock--response"></a>

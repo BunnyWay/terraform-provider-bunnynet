@@ -148,6 +148,18 @@ var pullzoneShieldBotDetectionModeMap = map[uint8]string{
 	1: "Challenge",
 }
 
+// @TODO use WafRatelimitCounterKeyType enum
+var pullzoneShieldRatelimitRuleCounterKeyMap = map[uint8]string{
+	0: "IP",
+	1: "Host",
+	2: "Country",
+	3: "City",
+	4: "ASN",
+	5: "Organization",
+	6: "JA4",
+	7: "IP+JA4",
+}
+
 var pullzoneShieldUploadScanningValueMap = map[uint8]string{
 	0: "Disable",
 	1: "Log",

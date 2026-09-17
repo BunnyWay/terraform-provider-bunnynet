@@ -101,6 +101,8 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 
 	{
 		newConditionValues := make(map[string]tftypes.Value, 5)
+		newConditionValues["negated"] = tftypes.NewValue(tftypes.Bool, false)
+
 		for _, attribute := range []string{"operator", "variable", "variable_value", "value"} {
 			var value string
 			err := oldCondition[attribute].As(&value)
@@ -115,8 +117,6 @@ func PullzoneRatelimitRuleV0(ctx context.Context, req resource.UpgradeStateReque
 				newConditionValues[attribute] = tftypes.NewValue(tftypes.String, value)
 			}
 		}
-
-		newConditionValues["negated"] = tftypes.NewValue(tftypes.Bool, false)
 
 		newStateCondition = append(newStateCondition, tftypes.NewValue(newType.AttributeTypes["condition"].(tftypes.List).ElementType, newConditionValues))
 	}
