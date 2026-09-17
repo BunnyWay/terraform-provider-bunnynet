@@ -5,15 +5,18 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/resourcestateupgrader"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
+	fwresource "github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestPullzoneRatelimitRuleModelConversion(t *testing.T) {
@@ -144,14 +147,14 @@ func TestPullzoneRatelimitRuleStateUpgradeV0(t *testing.T) {
 		"response": {"interval": 3600}
 	}`
 
-	schemaResp := &resource.SchemaResponse{}
-	(&PullzoneRatelimitRuleResource{}).Schema(ctx, resource.SchemaRequest{}, schemaResp)
+	schemaResp := &fwresource.SchemaResponse{}
+	(&PullzoneRatelimitRuleResource{}).Schema(ctx, fwresource.SchemaRequest{}, schemaResp)
 	if schemaResp.Diagnostics.HasError() {
 		t.Fatalf("unexpected schema diagnostics: %v", schemaResp.Diagnostics)
 	}
 
-	upgradeResp := &resource.UpgradeStateResponse{}
-	resourcestateupgrader.PullzoneRatelimitRuleV0(ctx, resource.UpgradeStateRequest{
+	upgradeResp := &fwresource.UpgradeStateResponse{}
+	resourcestateupgrader.PullzoneRatelimitRuleV0(ctx, fwresource.UpgradeStateRequest{
 		RawState: &tfprotov6.RawState{JSON: []byte(stateV0)},
 	}, upgradeResp)
 
@@ -219,5 +222,183 @@ func TestPullzoneRatelimitRuleStateUpgradeV0(t *testing.T) {
 	}
 	if action != "RateLimit" {
 		t.Fatalf("expected RateLimit action, got %q", action)
+	}
+}
+
+// rate limit rules need a paid Shield tier, Basic returns plan_limit_restriction.rate_limit
+const configPullzoneRatelimitRuleTest = `
+resource "bunnynet_pullzone" "test" {
+  name = "test-acceptance-%s"
+
+  origin {
+    type = "OriginUrl"
+    url  = "https://bunny.net"
+  }
+
+  routing {
+    tier = "Standard"
+  }
+}
+
+resource "bunnynet_pullzone_shield" "test" {
+  pullzone = bunnynet_pullzone.test.id
+  tier     = "Advanced"
+
+  ddos {
+    level = "Asleep"
+  }
+
+  waf {
+    enabled = true
+    mode    = "Log"
+  }
+}
+
+resource "bunnynet_pullzone_ratelimit_rule" "test" {
+  depends_on  = [bunnynet_pullzone_shield.test]
+  pullzone    = bunnynet_pullzone.test.id
+  name        = "WordPress Login"
+  description = "Login attempts without a session cookie"
+
+  condition {
+    variable = "REQUEST_COOKIES_NAMES"
+    operator = "CONTAINS"
+    value    = "session"
+    negated  = %s
+  }
+
+  condition {
+    variable = "REQUEST_URI"
+    operator = "BEGINSWITH"
+    value    = "/wp-login.php"
+  }
+
+  limit {
+    requests    = 5
+    interval    = 60
+    counter_key = "%s"
+  }
+
+  response {
+    interval = 30
+    action   = "%s"
+  }
+}
+`
+
+// same rule without action, counter_key and negated, as older configurations have it
+const configPullzoneRatelimitRuleTestLegacy = `
+resource "bunnynet_pullzone" "test" {
+  name = "test-acceptance-%s"
+
+  origin {
+    type = "OriginUrl"
+    url  = "https://bunny.net"
+  }
+
+  routing {
+    tier = "Standard"
+  }
+}
+
+resource "bunnynet_pullzone_shield" "test" {
+  pullzone = bunnynet_pullzone.test.id
+  tier     = "Advanced"
+
+  ddos {
+    level = "Asleep"
+  }
+
+  waf {
+    enabled = true
+    mode    = "Log"
+  }
+}
+
+resource "bunnynet_pullzone_ratelimit_rule" "test" {
+  depends_on  = [bunnynet_pullzone_shield.test]
+  pullzone    = bunnynet_pullzone.test.id
+  name        = "WordPress Login"
+  description = "Login attempts without a session cookie"
+
+  condition {
+    variable = "REQUEST_COOKIES_NAMES"
+    operator = "CONTAINS"
+    value    = "session"
+  }
+
+  condition {
+    variable = "REQUEST_URI"
+    operator = "BEGINSWITH"
+    value    = "/wp-login.php"
+  }
+
+  limit {
+    requests = 5
+    interval = 60
+  }
+
+  response {
+    interval = 30
+  }
+}
+`
+
+func TestAccPullzoneRatelimitRuleResource(t *testing.T) {
+	resourceName := "bunnynet_pullzone_ratelimit_rule.test"
+	testKey := generateRandomString(12)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(configPullzoneRatelimitRuleTest, testKey, "true", "IP", "Log"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "response.action", "Log"),
+					resource.TestCheckResourceAttr(resourceName, "response.interval", "30"),
+					resource.TestCheckResourceAttr(resourceName, "limit.counter_key", "IP"),
+					resource.TestCheckResourceAttr(resourceName, "limit.requests", "5"),
+					resource.TestCheckResourceAttr(resourceName, "limit.interval", "60"),
+					resource.TestCheckResourceAttr(resourceName, "condition.0.negated", "true"),
+					resource.TestCheckResourceAttr(resourceName, "condition.1.negated", "false"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(configPullzoneRatelimitRuleTest, testKey, "false", "Country", "Challenge"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "response.action", "Challenge"),
+					resource.TestCheckResourceAttr(resourceName, "limit.counter_key", "Country"),
+					resource.TestCheckResourceAttr(resourceName, "condition.0.negated", "false"),
+					resource.TestCheckResourceAttr(resourceName, "condition.1.negated", "false"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(configPullzoneRatelimitRuleTestLegacy, testKey),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "response.action", "RateLimit"),
+					resource.TestCheckResourceAttr(resourceName, "limit.counter_key", "IP"),
+					resource.TestCheckResourceAttr(resourceName, "condition.0.negated", "false"),
+					resource.TestCheckResourceAttr(resourceName, "condition.1.negated", "false"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateIdFunc: testAccPullzoneRatelimitRuleImportStateIdFunc(resourceName),
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPullzoneRatelimitRuleImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		return fmt.Sprintf("%s|%s", rs.Primary.Attributes["pullzone"], rs.Primary.Attributes["id"]), nil
 	}
 }
