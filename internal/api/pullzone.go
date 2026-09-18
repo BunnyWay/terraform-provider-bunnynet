@@ -88,6 +88,7 @@ type Pullzone struct {
 	LoggingStorageZoneId            uint64   `json:"LoggingStorageZoneId"`
 	EnableTLS1                      bool     `json:"EnableTLS1"`
 	EnableTLS11                     bool     `json:"EnableTLS1_1"`
+	TlsSecurityLevel                uint8    `json:"TlsSecurityLevel"`
 	ErrorPageWhitelabel             bool     `json:"ErrorPageWhitelabel"`
 	ErrorPageEnableStatuspageWidget bool     `json:"ErrorPageEnableStatuspageWidget"`
 	ErrorPageStatuspageCode         string   `json:"ErrorPageStatuspageCode"`

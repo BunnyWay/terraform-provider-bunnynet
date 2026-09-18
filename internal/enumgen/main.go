@@ -141,6 +141,12 @@ func generateFromOpenApiSchemaCore() []GenResult {
 			},
 			{
 				File:      FileinfoProvider,
+				Variable:  "pullzoneTlsLevelMap",
+				SchemaKey: "TlsSecurityLevelType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
 				Variable:  "storageZoneTierMap",
 				SchemaKey: "StorageZoneTier",
 				Type:      "map[uint8]string",

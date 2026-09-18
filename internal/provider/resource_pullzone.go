@@ -136,6 +136,7 @@ type PullzoneResourceModel struct {
 	LogStorageEnabled                  types.Bool    `tfsdk:"log_storage_enabled"`
 	LogStorageZone                     types.Int64   `tfsdk:"log_storage_zone"`
 	TlsSupport                         types.Set     `tfsdk:"tls_support"`
+	TlsLevel                           types.String  `tfsdk:"tls_level"`
 	ErrorPageWhitelabel                types.Bool    `tfsdk:"errorpage_whitelabel"`
 	ErrorPageStatuspageEnabled         types.Bool    `tfsdk:"errorpage_statuspage_enabled"`
 	ErrorPageStatuspageCode            types.String  `tfsdk:"errorpage_statuspage_code"`
@@ -678,6 +679,18 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 					),
 				},
 				MarkdownDescription: generateMarkdownSliceOptions(pullzoneTlsSupportOptions),
+			},
+			"tls_level": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString("Legacy"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(maps.Values(pullzoneTlsLevelMap)...),
+				},
+				MarkdownDescription: generateMarkdownMapOptions(pullzoneTlsLevelMap),
 			},
 			"errorpage_whitelabel": schema.BoolAttribute{
 				Computed: true,
@@ -1616,6 +1629,7 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 		dataApi.AWSSigningRegionName = dataTf.S3AuthRegion.ValueString()
 		dataApi.ZoneSecurityEnabled = dataTf.TokenAuthEnabled.ValueBool()
 		dataApi.ZoneSecurityIncludeHashRemoteIP = dataTf.TokenAuthIpValidation.ValueBool()
+		dataApi.TlsSecurityLevel = mapValueToKey(pullzoneTlsLevelMap, dataTf.TlsLevel.ValueString())
 
 		for _, v := range dataTf.TlsSupport.Elements() {
 			if v.(types.String).ValueString() == "TLSv1.0" {
@@ -1901,6 +1915,7 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 			dataTf.TlsSupport = tlsSupport
 		}
 
+		dataTf.TlsLevel = types.StringValue(mapKeyToValue(pullzoneTlsLevelMap, dataApi.TlsSecurityLevel))
 		dataTf.BlockRootPath = types.BoolValue(dataApi.BlockRootPathAccess)
 		dataTf.BlockPostRequests = types.BoolValue(dataApi.BlockPostRequests)
 		dataTf.ReferersAllowed = referersAllowed

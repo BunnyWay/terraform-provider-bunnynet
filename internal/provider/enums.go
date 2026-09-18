@@ -194,6 +194,12 @@ var pullzoneShieldWafRuleResponseActionMap = map[uint8]string{
 	5: "Bypass",
 }
 
+var pullzoneTlsLevelMap = map[uint8]string{
+	0: "Legacy",
+	1: "Compatible",
+	2: "ModernOnly",
+}
+
 var storageZoneTierMap = map[uint8]string{
 	0: "Standard",
 	1: "Edge",
