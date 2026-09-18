@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -60,10 +61,12 @@ type PullzoneWafRuleResourceModel struct {
 
 var pullzoneWafConditionType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
-		"variable":       types.StringType,
-		"variable_value": types.StringType,
-		"operator":       types.StringType,
-		"value":          types.StringType,
+		"variable":             types.StringType,
+		"variable_value":       types.StringType,
+		"variable_value_regex": types.BoolType,
+		"operator":             types.StringType,
+		"value":                types.StringType,
+		"negated":              types.BoolType,
 	},
 }
 
@@ -163,6 +166,12 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"variable_value_regex": schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Indicated whether variable_value is a regular expression.",
+						},
 						"operator": schema.StringAttribute{
 							Required: true,
 							PlanModifiers: []planmodifier.String{
@@ -178,6 +187,12 @@ func (r *PullzoneWafRuleResource) Schema(ctx context.Context, req resource.Schem
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+						},
+						"negated": schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Default:     booldefault.StaticBool(false),
+							Description: "Negates the condition result.",
 						},
 					},
 					Validators: []validator.Object{
@@ -386,19 +401,25 @@ func (r *PullzoneWafRuleResource) convertModelToApi(ctx context.Context, dataTf 
 
 			variable := conditionAttr["variable"].(types.String).ValueString()
 			variableValue := conditionAttr["variable_value"].(types.String).ValueString()
+			variableValueRegex := conditionAttr["variable_value_regex"].(types.Bool).ValueBool()
 			variableTypes := map[string]string{variable: variableValue}
 			operator := mapValueToKey(pullzoneShieldRuleConditionOperationMap, conditionAttr["operator"].(types.String).ValueString())
 			value := conditionAttr["value"].(types.String).ValueString()
+			negated := conditionAttr["negated"].(types.Bool).ValueBool()
 
 			if i == 0 {
 				dataApi.RuleConfiguration.VariableTypes = variableTypes
 				dataApi.RuleConfiguration.OperatorType = operator
 				dataApi.RuleConfiguration.Value = value
+				dataApi.RuleConfiguration.IsNegated = negated
+				dataApi.RuleConfiguration.IsRegexVariable = variableValueRegex
 			} else {
 				dataApi.RuleConfiguration.ChainedRules = append(dataApi.RuleConfiguration.ChainedRules, api.PullzoneWafRuleChainedRule{
-					VariableTypes: variableTypes,
-					OperatorType:  operator,
-					Value:         value,
+					VariableTypes:   variableTypes,
+					OperatorType:    operator,
+					Value:           value,
+					IsNegated:       negated,
+					IsRegexVariable: variableValueRegex,
 				})
 			}
 		}
@@ -465,10 +486,12 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 		}
 
 		conditionObj, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
-			"variable":       types.StringValue(variable),
-			"variable_value": variableValue,
-			"operator":       types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
-			"value":          types.StringValue(dataApi.RuleConfiguration.Value),
+			"variable":             types.StringValue(variable),
+			"operator":             types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, dataApi.RuleConfiguration.OperatorType)),
+			"variable_value":       variableValue,
+			"variable_value_regex": types.BoolValue(dataApi.RuleConfiguration.IsRegexVariable),
+			"value":                types.StringValue(dataApi.RuleConfiguration.Value),
+			"negated":              types.BoolValue(dataApi.RuleConfiguration.IsNegated),
 		})
 
 		if diags.HasError() {
@@ -496,10 +519,12 @@ func (r *PullzoneWafRuleResource) convertApiToModel(ctx context.Context, dataApi
 			}
 
 			condition, diags := types.ObjectValue(pullzoneWafConditionType.AttrTypes, map[string]attr.Value{
-				"operator":       types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, rule.OperatorType)),
-				"variable":       types.StringValue(variable),
-				"variable_value": variableValue,
-				"value":          types.StringValue(rule.Value),
+				"operator":             types.StringValue(mapKeyToValue(pullzoneShieldRuleConditionOperationMap, rule.OperatorType)),
+				"variable":             types.StringValue(variable),
+				"variable_value":       variableValue,
+				"variable_value_regex": types.BoolValue(rule.IsRegexVariable),
+				"value":                types.StringValue(rule.Value),
+				"negated":              types.BoolValue(rule.IsNegated),
 			})
 
 			if diags.HasError() {

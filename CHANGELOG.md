@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resource `pullzone_shield`: support Bot Categorization;
 - resource `pullzone_ratelimit_rule`: support `condition.negated`, `limit.counter_key` and `response.action` ([#97](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/97));
 - resource `pullzone_ratelimit_rule`: support `condition.variable_value_regex`;
+- resource `pullzone_waf_rule`: support `condition.negated` and `condition.variable_value_regex`;
 
 ### Fixed
 - resource `pullzone`: unknown `permacache_storagezone` causes invalid plan ([#96](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/96));

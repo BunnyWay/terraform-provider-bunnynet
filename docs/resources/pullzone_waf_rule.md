@@ -61,7 +61,9 @@ Required:
 
 Optional:
 
+- `negated` (Boolean) Negates the condition result.
 - `variable_value` (String)
+- `variable_value_regex` (Boolean) Indicated whether variable_value is a regular expression.
 
 
 <a id="nestedblock--response"></a>
