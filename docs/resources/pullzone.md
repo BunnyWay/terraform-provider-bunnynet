@@ -163,7 +163,7 @@ Optional:
 Optional:
 
 - `blocked_countries` (Set of String) The list of blocked countries with the two-letter Alpha2 ISO codes. Traffic connecting from a blocked country will be rejected on the DNS level.
-- `filters` (Set of String) Options: `all`, `eu`, `scripting`
+- `filters` (Set of String) Options: `all`, `eea`, `eu`, `scripting`
 - `redirected_countries` (Set of String) The list of budget redirected countries with the two-letter Alpha2 ISO codes. Traffic from a redirected country will connect to the cheapest possible node in North America or Europe.
 - `tier` (String) Options: `Standard`, `Volume`
 - `zones` (Set of String) Options: `AF`, `ASIA`, `EU`, `SA`, `US`

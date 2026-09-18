@@ -132,7 +132,7 @@ var pullzoneCacheStaleOptions = []string{"offline", "updating"}
 var pullzoneTlsSupportOptions = []string{"TLSv1.0", "TLSv1.1"}
 var pullzoneSafehopRetryReasonsOptions = []string{"connectionTimeout", "5xxResponse", "responseTimeout"}
 var pullzoneRoutingZonesOptions = []string{"AF", "ASIA", "EU", "SA", "US"}
-var pullzoneRoutingFiltersOptions = []string{"all", "eu", "scripting"}
+var pullzoneRoutingFiltersOptions = []string{"all", "eea", "eu", "scripting"}
 var pullzoneOriginShieldZoneOptions = []string{"IL", "FR"}
 
 var pullzoneShieldDdosLevelMap = map[uint8]string{

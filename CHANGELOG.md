@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - resource `pullzone`: support `tls_level`;
+- resource `pullzone`: support `eea` routing filter;
 - resource `pullzone_shield`: support Bot Categorization;
 - resource `pullzone_ratelimit_rule`: support `condition.negated`, `limit.counter_key` and `response.action` ([#97](https://github.com/BunnyWay/terraform-provider-bunnynet/pull/97));
 - resource `pullzone_ratelimit_rule`: support `condition.variable_value_regex`;
