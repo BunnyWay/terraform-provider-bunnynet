@@ -66,7 +66,7 @@ func (c *Client) CreateDatabase(ctx context.Context, data Database) (Database, e
 		"name":             data.Name,
 		"primary_regions":  data.PrimaryRegions,
 		"replicas_regions": data.ReplicasRegions,
-		"storage_region":   "us-east-1",
+		"storage_region":   data.StorageRegion,
 	})
 
 	if err != nil {

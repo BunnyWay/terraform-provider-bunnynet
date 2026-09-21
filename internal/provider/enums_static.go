@@ -111,6 +111,11 @@ var computeScriptTypeMap = map[uint8]string{
 	api.ScriptTypeMiddleware: "middleware",
 }
 
+var databaseStorageRegionOptions = []string{
+	"eu-west-1",
+	"us-east-1",
+}
+
 var pullzoneOriginTypeMap = map[uint8]string{
 	0: "OriginUrl",
 	1: "DnsAccelerate",

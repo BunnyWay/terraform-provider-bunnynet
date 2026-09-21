@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -40,6 +41,7 @@ type DatabaseResourceModel struct {
 	Url            types.String `tfsdk:"url"`
 	RegionsPrimary types.Set    `tfsdk:"regions_primary"`
 	RegionsReplica types.Set    `tfsdk:"regions_replica"`
+	StorageRegion  types.String `tfsdk:"storage_region"`
 }
 
 func (r *DatabaseResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -91,6 +93,18 @@ func (r *DatabaseResource) Schema(ctx context.Context, req resource.SchemaReques
 				Computed:    true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"storage_region": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("eu-west-1"),
+				Description: generateMarkdownSliceOptions(databaseStorageRegionOptions),
+				Validators: []validator.String{
+					stringvalidator.OneOf(databaseStorageRegionOptions...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 		},
@@ -226,6 +240,7 @@ func (r *DatabaseResource) convertModelToApi(ctx context.Context, dataTf Databas
 	dataApi.Id = dataTf.Id.ValueString()
 	dataApi.Name = dataTf.Name.ValueString()
 	dataApi.Url = dataTf.Url.ValueString()
+	dataApi.StorageRegion = dataTf.StorageRegion.ValueString()
 
 	{
 		elList := dataTf.RegionsPrimary.Elements()
@@ -253,6 +268,7 @@ func databaseApiToTf(dataApi api.Database) (DatabaseResourceModel, diag.Diagnost
 	dataTf.Id = types.StringValue(dataApi.Id)
 	dataTf.Name = types.StringValue(dataApi.Name)
 	dataTf.Url = types.StringValue(dataApi.Url)
+	dataTf.StorageRegion = types.StringValue(dataApi.StorageRegion)
 
 	{
 		primaryRegions := make([]attr.Value, 0, len(dataApi.PrimaryRegions))

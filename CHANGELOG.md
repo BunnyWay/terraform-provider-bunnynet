@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Backwards compatibility break
+
+The `database` `storage_region` attribute was introduced, defaulting to `eu-west-1`. However, older databases might have been created with `us-east-1`. If unaddressed, Terraform will re-create the database, causing data loss. To mitigate the issue, add `storage_region = "us-east-1"` to your resource.
+
 ### Added
 - resource `pullzone`: support `tls_level`;
 - resource `pullzone`: support `eea` routing filter;
@@ -19,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - resource `pullzone`: unknown `permacache_storagezone` causes invalid plan ([#96](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/96));
+- resource `database`: expose `storage_region` ([#98](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/98));
 
 ### Changed
 - Bumped minimum Go version to 1.26;

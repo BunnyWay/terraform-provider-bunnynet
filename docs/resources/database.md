@@ -31,6 +31,7 @@ resource "bunnynet_database" "test" {
 ### Optional
 
 - `regions_replica` (Set of String)
+- `storage_region` (String) Options: `eu-west-1`, `us-east-1`
 
 ### Read-Only
 
