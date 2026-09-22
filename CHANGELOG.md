@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.19.0 - 2026-09-22
+
 ### Backwards compatibility break
 
 The `database` `storage_region` attribute was introduced, defaulting to `eu-west-1`. However, older databases might have been created with `us-east-1`. If unaddressed, Terraform will re-create the database, causing data loss. To mitigate the issue, add `storage_region = "us-east-1"` to your resource.
