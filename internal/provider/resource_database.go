@@ -67,7 +67,7 @@ func (r *DatabaseResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Description: "The name of the database.",
 				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
+					stringvalidator.LengthBetween(1, 16),
 				},
 			},
 			"url": schema.StringAttribute{
