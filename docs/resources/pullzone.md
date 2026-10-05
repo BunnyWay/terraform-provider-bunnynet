@@ -83,6 +83,7 @@ resource "bunnynet_pullzone" "example" {
 - `optimizer_dynamic_image_api` (Boolean) Indicates whether the image manipulation should be enabled.
 - `optimizer_enabled` (Boolean) Indicates whether Bunny Optimizer should be enabled.
 - `optimizer_html_prerender` (Boolean) Indicates whether HTML Prerender should be enabled.
+- `optimizer_html_to_markdown` (Boolean) Indicates whether HTML to Markdown should be enabled.
 - `optimizer_minify_css` (Boolean) Indicates whether the CSS minification should be enabled.
 - `optimizer_minify_js` (Boolean) Indicates whether the JavaScript minification should be enabled.
 - `optimizer_smartimage` (Boolean) Indicates whether the automatic image optimization should be enabled.

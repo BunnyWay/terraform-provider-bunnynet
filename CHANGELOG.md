@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- resource `pullzone`: support Optimizer HTML to Markdown;
+
 ## 0.19.1 - 2026-09-24
 
 ### Fixed

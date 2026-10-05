@@ -153,6 +153,7 @@ type Pullzone struct {
 	OptimizerMinifyCss                    bool    `json:"OptimizerMinifyCSS"`
 	OptimizerMinifyJs                     bool    `json:"OptimizerMinifyJavaScript"`
 	OptimizerPrerenderHtml                bool    `json:"OptimizerPrerenderHtml"`
+	OptimizerHtmlToMarkdown               uint8   `json:"OptimizerHtmlToMarkdown"`
 	OptimizerEnableWebP                   bool    `json:"OptimizerEnableWebP"`
 	OptimizerForceClasses                 bool    `json:"OptimizerForceClasses"`
 	OptimizerEnableManipulationEngine     bool    `json:"OptimizerEnableManipulationEngine"`

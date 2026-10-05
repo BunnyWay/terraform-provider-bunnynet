@@ -98,6 +98,7 @@ type PullzoneResourceModel struct {
 	OptimizerMinifyCss                 types.Bool    `tfsdk:"optimizer_minify_css"`
 	OptimizerMinifyJs                  types.Bool    `tfsdk:"optimizer_minify_js"`
 	OptimizerHtmlPrerender             types.Bool    `tfsdk:"optimizer_html_prerender"`
+	OptimizerHtmlToMarkdown            types.Bool    `tfsdk:"optimizer_html_to_markdown"`
 	OptimizerBurrow                    types.Bool    `tfsdk:"optimizer_burrow"`
 	OptimizerWebp                      types.Bool    `tfsdk:"optimizer_webp"`
 	OptimizerClassesForce              types.Bool    `tfsdk:"optimizer_classes_force"`
@@ -956,6 +957,15 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Description: "Indicates whether HTML Prerender should be enabled.",
 			},
+			"optimizer_html_to_markdown": schema.BoolAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Description: "Indicates whether HTML to Markdown should be enabled.",
+			},
 			"optimizer_burrow": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
@@ -1660,10 +1670,16 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	dataApi.MonthlyBandwidthLimit = uint64(dataTf.LimitBandwidth.ValueInt64())
 
 	// optimizer
+	var optimizerHtmlToMarkdown uint8 = 0
+	if dataTf.OptimizerHtmlToMarkdown.ValueBool() {
+		optimizerHtmlToMarkdown = 1
+	}
+
 	dataApi.OptimizerEnabled = dataTf.OptimizerEnabled.ValueBool()
 	dataApi.OptimizerMinifyCss = dataTf.OptimizerMinifyCss.ValueBool()
 	dataApi.OptimizerMinifyJs = dataTf.OptimizerMinifyJs.ValueBool()
 	dataApi.OptimizerPrerenderHtml = dataTf.OptimizerHtmlPrerender.ValueBool()
+	dataApi.OptimizerHtmlToMarkdown = optimizerHtmlToMarkdown
 	dataApi.OptimizerTunnelEnabled = dataTf.OptimizerBurrow.ValueBool()
 	dataApi.OptimizerEnableWebP = dataTf.OptimizerWebp.ValueBool()
 	dataApi.OptimizerForceClasses = dataTf.OptimizerClassesForce.ValueBool()
@@ -1973,6 +1989,7 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 	dataTf.OptimizerMinifyCss = types.BoolValue(dataApi.OptimizerMinifyCss)
 	dataTf.OptimizerMinifyJs = types.BoolValue(dataApi.OptimizerMinifyJs)
 	dataTf.OptimizerHtmlPrerender = types.BoolValue(dataApi.OptimizerPrerenderHtml)
+	dataTf.OptimizerHtmlToMarkdown = types.BoolValue(dataApi.OptimizerHtmlToMarkdown == 1)
 	dataTf.OptimizerBurrow = types.BoolValue(dataApi.OptimizerTunnelEnabled)
 	dataTf.OptimizerWebp = types.BoolValue(dataApi.OptimizerEnableWebP)
 	dataTf.OptimizerClassesForce = types.BoolValue(dataApi.OptimizerForceClasses)
