@@ -40,6 +40,8 @@ var ActionMap = map[uint8]string{
 	32: "DisableShieldRateLimiting",
 	33: "EnableRequestCoalescing",
 	34: "DisableRequestCoalescing",
+	35: "UseLoadBalancer",
+	36: "ForceLoadBalancerStickySessionMode",
 	37: "StripCookiesClientToOrigin",
 }
 
