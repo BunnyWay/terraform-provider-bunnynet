@@ -47,9 +47,9 @@ func (v hostnameValidator) ValidateResource(ctx context.Context, req resource.Va
 		return
 	}
 
-	isNullMXRecord := rType == "MX" && value == "."
+	isNullRecord := (rType == "MX" || rType == "SRV") && value == "."
 	valueIsHostname := rType == "CNAME" || rType == "MX" || rType == "NS" || rType == "PTR" || rType == "SRV"
-	if valueIsHostname && !isNullMXRecord && value[len(value)-1] == '.' {
+	if valueIsHostname && !isNullRecord && value[len(value)-1] == '.' {
 		resp.Diagnostics.Append(diag.NewAttributeErrorDiagnostic(valueAttr, "Invalid attribute configuration", v.Description(ctx)))
 	}
 }
