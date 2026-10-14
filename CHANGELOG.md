@@ -9,9 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 0.19.2 - 2026-10-14
+
 ### Added
 - resource `pullzone`: support Optimizer HTML to Markdown;
-- resource `dns_record`: support "." as value for `SRV` records;
+- resource `dns_record`: support "." as value for `SRV` records ([#99](https://github.com/BunnyWay/terraform-provider-bunnynet/issues/99));
 
 ## 0.19.1 - 2026-09-24
 
