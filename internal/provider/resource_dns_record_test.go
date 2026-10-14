@@ -312,3 +312,48 @@ func TestAccDnsRecordDeletedOutOfBand(t *testing.T) {
 		},
 	})
 }
+
+const configDnsRecordNullTest = `
+data "bunnynet_dns_zone" "domain" {
+  domain = "terraform.internal"
+}
+
+resource "bunnynet_dns_record" "record-%s" {
+  zone      = data.bunnynet_dns_zone.domain.id
+  name      = "test-%s"
+  type      = "%s"
+  value     = "."
+  priority  = 1
+}
+`
+
+func TestAccDnsRecordNull(t *testing.T) {
+	testKeyMX := generateRandomString(4)
+	configMX := fmt.Sprintf(configDnsRecordNullTest, "MX", testKeyMX, "MX")
+
+	testKeySRV := generateRandomString(4)
+	configSRV := fmt.Sprintf(configDnsRecordNullTest, "SRV", testKeySRV, "SRV")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: configMX,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record-MX", "type", "MX"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record-MX", "name", fmt.Sprintf("test-%s", testKeyMX)),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record-MX", "value", "."),
+				),
+			},
+			{
+				Config: configSRV,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record-SRV", "type", "SRV"),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record-SRV", "name", fmt.Sprintf("test-%s", testKeySRV)),
+					resource.TestCheckResourceAttr("bunnynet_dns_record.record-SRV", "value", "."),
+				),
+			},
+		},
+	})
+}
