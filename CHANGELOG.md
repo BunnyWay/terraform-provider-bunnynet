@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- provider: API errors whose body has no message are now reported with the HTTP status instead of an empty error;
+
 ## 0.19.2 - 2026-10-14
 
 ### Added
