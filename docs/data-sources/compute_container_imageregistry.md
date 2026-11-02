@@ -37,7 +37,7 @@ data "bunnynet_compute_container_imageregistry" "my-org" {
 
 ### Required
 
-- `registry` (String) Options: `DockerHub`, `GitHub`
+- `registry` (String) The registry type. Use `DockerHub`, `GitHub`, or a hostname (with optional port) for OCI-compliant registries.
 - `username` (String) The username used to authenticate to the registry.
 
 ### Read-Only

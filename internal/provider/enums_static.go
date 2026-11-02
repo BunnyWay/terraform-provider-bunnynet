@@ -104,7 +104,10 @@ var computeContainerAppContainerProbeHttpStatusMap = map[int64]string{
 	511: "NetworkAuthenticationRequired",
 }
 
-var computeContainerImageRegistryRegistryOptions = []string{"GitHub", "DockerHub"}
+var computeContainerImageRegistryHostnameMap = map[string]string{
+	"GitHub":    "ghcr.io",
+	"DockerHub": "docker.io",
+}
 
 var computeScriptTypeMap = map[uint8]string{
 	api.ScriptTypeStandalone: "standalone",

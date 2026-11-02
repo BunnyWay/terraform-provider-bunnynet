@@ -16,32 +16,30 @@ import (
 )
 
 type ComputeContainerImageregistry struct {
-	Id                   int64  `json:"id"`
-	AccountId            string `json:"accountId"`
-	UserId               string `json:"userId"`
-	NamespaceId          string `json:"namespaceId"`
-	IsPublic             bool   `json:"isPublic"`
-	DisplayName          string `json:"displayName"`
-	HostName             string `json:"hostName"`
-	UserName             string `json:"userName"`
-	FirstPasswordSymbols string `json:"firstPasswordSymbols"`
-	LastPasswordSymbols  string `json:"lastPasswordSymbols"`
-	CreatedAt            string `json:"createdAt"`
-	LastUpdatedAt        string `json:"lastUpdatedAt"`
-
-	Token string `json:"-"`
+	Id          int64  `json:"id"`
+	IsPublic    bool   `json:"isPublic"`
+	DisplayName string `json:"displayName"`
+	HostName    string `json:"hostName"`
+	UserName    string `json:"userName"`
+	Token       string `json:"-"`
+	Type        string `json:"-"`
 }
 
 func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
-	body, err := json.Marshal(map[string]interface{}{
+	values := map[string]interface{}{
 		"displayName": data.DisplayName,
-		"type":        data.DisplayName,
+		"type":        data.Type,
 		"passwordCredentials": map[string]string{
 			"userName": data.UserName,
 			"password": data.Token,
 		},
-	})
+	}
 
+	if data.Type == "OCI" {
+		values["hostName"] = data.HostName
+	}
+
+	body, err := json.Marshal(values)
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
@@ -161,19 +159,26 @@ func (c *Client) FindComputeContainerImageregistry(ctx context.Context, registry
 func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data ComputeContainerImageregistry) (ComputeContainerImageregistry, error) {
 	token := data.Token
 
-	body, err := json.Marshal(map[string]interface{}{
+	values := map[string]interface{}{
 		"id":          data.Id,
 		"displayName": data.DisplayName,
-		"type":        data.DisplayName,
+		"type":        data.Type,
 		"passwordCredentials": map[string]string{
 			"userName": data.UserName,
 			"password": token,
 		},
-	})
+	}
 
+	if data.Type == "OCI" {
+		values["hostName"] = data.HostName
+	}
+
+	body, err := json.Marshal(values)
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("PUT /mc/registries/%d: %s", data.Id, string(body)))
 
 	resp, err := c.doRequest(http.MethodPut, fmt.Sprintf("%s/mc/registries/%d", c.apiUrl, data.Id), bytes.NewReader(body))
 	if err != nil {

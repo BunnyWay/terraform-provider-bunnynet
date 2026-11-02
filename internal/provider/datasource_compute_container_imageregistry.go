@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/computecontainerimageresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -46,9 +46,9 @@ func (d *ComputeContainerImageRegistryDataSource) Schema(ctx context.Context, re
 			},
 			"registry": schema.StringAttribute{
 				Required:    true,
-				Description: generateMarkdownSliceOptions(computeContainerImageRegistryRegistryOptions),
+				Description: "The registry type. Use `DockerHub`, `GitHub`, or a hostname (with optional port) for OCI-compliant registries.",
 				Validators: []validator.String{
-					stringvalidator.OneOf(computeContainerImageRegistryRegistryOptions...),
+					computecontainerimageresourcevalidator.Registry(),
 				},
 			},
 			"username": schema.StringAttribute{
