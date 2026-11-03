@@ -119,6 +119,30 @@ var databaseStorageRegionOptions = []string{
 	"us-east-1",
 }
 
+// enum:OriginGroupLoadBalancingMethod
+var loadbalancerMethodMap = map[uint8]string{
+	0: "Weight",
+	1: "RoundRobin",
+	2: "Geo",
+	3: "Latency",
+}
+
+// enum:OriginLoadBalancingMethod
+var loadbalancerGroupMethodMap = map[uint8]string{
+	0: "RoundRobin",
+	1: "Weight",
+	2: "LeastConnections",
+	3: "Latency",
+}
+
+// enum:OriginType
+var loadbalancerOriginTypeMap = map[uint8]string{
+	0: "OriginUrl",
+	1: "StorageZone",
+	2: "ComputeScript",
+	3: "ComputeContainer",
+}
+
 var pullzoneOriginTypeMap = map[uint8]string{
 	0: "OriginUrl",
 	1: "DnsAccelerate",

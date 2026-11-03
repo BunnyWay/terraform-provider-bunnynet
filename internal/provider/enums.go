@@ -41,6 +41,11 @@ var dnsZoneLogAnonymizedStyleMap = map[uint8]string{
 	1: "Drop",
 }
 
+var loadbalancerStickySessionMap = map[uint8]string{
+	0: "Off",
+	1: "Cookie",
+}
+
 var pullzoneAccessListActionMap = map[uint8]string{
 	1: "Allow",
 	2: "Block",

@@ -117,6 +117,12 @@ func generateFromOpenApiSchemaCore() []GenResult {
 			},
 			{
 				File:      FileinfoProvider,
+				Variable:  "loadbalancerStickySessionMap",
+				SchemaKey: "LoadBalancerStickySessionType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      FileinfoProvider,
 				Variable:  "pullzoneLogAnonymizedStyleMap",
 				SchemaKey: "LogAnonymizationType",
 				Type:      "map[uint8]string",
