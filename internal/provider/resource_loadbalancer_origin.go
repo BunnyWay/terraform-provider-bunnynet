@@ -424,20 +424,20 @@ func (r *LoadbalancerOriginResource) convertApiToModel(dataApi api.LoadbalancerO
 	dataTf.VerifySsl = types.BoolValue(true)
 
 	switch dataApi.OriginType {
-	case 0:
+	case api.LoadbalancerOriginTypeOriginUrl:
 		dataTf.Url = customtype.PullzoneOriginUrlValue{StringValue: types.StringValue(dataApi.OriginUrl.OriginUrl)}
 		dataTf.VerifySsl = types.BoolValue(dataApi.OriginUrl.VerifySsl)
 		if dataApi.OriginUrl.HostHeader != "" {
 			dataTf.HostHeader = types.StringValue(dataApi.OriginUrl.HostHeader)
 		}
 
-	case 1:
+	case api.LoadbalancerOriginTypeStorageZone:
 		dataTf.StoragezoneId = types.Int64Value(*dataApi.StorageZoneId)
 
-	case 2:
+	case api.LoadbalancerOriginTypeComputeScript:
 		dataTf.ScriptId = types.Int64Value(*dataApi.EdgeScriptId)
 
-	case 3:
+	case api.LoadbalancerOriginTypeComputeContainer:
 		dataTf.ContainerAppId = types.StringValue(dataApi.MagicContainersOrigin.AppId)
 		dataTf.ContainerEndpointId = types.StringValue(dataApi.MagicContainersOrigin.EndpointId)
 	}

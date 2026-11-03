@@ -293,7 +293,6 @@ func (c *Client) CreateLoadbalancerGroup(ctx context.Context, data LoadbalancerG
 	}
 	_ = resp.Body.Close()
 
-	loadbalancerCache.Delete(data.Id)
 	tflog.Debug(ctx, fmt.Sprintf("POST /loadbalancer/%d/origingroup: %s", data.LoadbalancerId, string(bodyResp)))
 
 	dataApiResult := LoadbalancerGroup{}
