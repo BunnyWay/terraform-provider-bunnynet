@@ -5,6 +5,7 @@ package pullzoneresourcevalidator
 
 import (
 	"context"
+	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/customtype"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -96,6 +97,9 @@ func TestOrigin(t *testing.T) {
 		// StorageZone
 		// ok
 		testOriginMakeTestCase(false, "StorageZone", originPayload{Storagezone: 12345}, nil),
+		// invalid args
+		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 0}, nil),
+		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: -1}, nil),
 		// unexpected args
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, Url: "https://example.com"}, nil),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, DnsScheme: "https", DnsPort: 443}, nil),
@@ -195,24 +199,26 @@ func TestOrigin(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
-		request := resource.ValidateConfigRequest{
-			Config: tfsdk.Config{
-				Schema: configSchema,
-				Raw:    tftypes.NewValue(configTypes, testCase.PlanValues),
-			},
-		}
+	for i, testCase := range testCases {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			request := resource.ValidateConfigRequest{
+				Config: tfsdk.Config{
+					Schema: configSchema,
+					Raw:    tftypes.NewValue(configTypes, testCase.PlanValues),
+				},
+			}
 
-		response := resource.ValidateConfigResponse{}
-		originValidator{}.ValidateResource(context.Background(), request, &response)
+			response := resource.ValidateConfigResponse{}
+			originValidator{}.ValidateResource(context.Background(), request, &response)
 
-		if testCase.ExpectedError && !response.Diagnostics.HasError() {
-			t.Error("expected error, got none")
-		}
+			if testCase.ExpectedError && !response.Diagnostics.HasError() {
+				t.Error("expected error, got none")
+			}
 
-		if !testCase.ExpectedError && response.Diagnostics.HasError() {
-			t.Errorf("expected no errors, got %s", response.Diagnostics.Errors())
-		}
+			if !testCase.ExpectedError && response.Diagnostics.HasError() {
+				t.Errorf("expected no errors, got %s", response.Diagnostics.Errors())
+			}
+		})
 	}
 }
 
