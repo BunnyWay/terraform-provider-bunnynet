@@ -147,6 +147,7 @@ var pullzoneOriginTypeMap = map[uint8]string{
 	0: "OriginUrl",
 	1: "DnsAccelerate",
 	2: "StorageZone",
+	3: "LoadBalancer",
 	4: "ComputeScript",
 	5: "ComputeContainer",
 }

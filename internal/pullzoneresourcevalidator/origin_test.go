@@ -23,6 +23,7 @@ var testOriginOriginType = tftypes.Object{
 		"url":                         tftypes.String,
 		"host_header":                 tftypes.String,
 		"storagezone":                 tftypes.Number,
+		"loadbalancer":                tftypes.Number,
 		"script":                      tftypes.Number,
 		"middleware_script":           tftypes.Number,
 		"script_execute_before_cache": tftypes.Bool,
@@ -61,6 +62,7 @@ func TestOrigin(t *testing.T) {
 		// unexpected args
 		testOriginMakeTestCase(true, "OriginUrl", originPayload{Url: "https://example.com", DnsScheme: "https", DnsPort: 443}, nil),
 		testOriginMakeTestCase(true, "OriginUrl", originPayload{Url: "https://example.com", Storagezone: 12345}, nil),
+		testOriginMakeTestCase(true, "OriginUrl", originPayload{Url: "https://example.com", Loadbalancer: 12345}, nil),
 		testOriginMakeTestCase(true, "OriginUrl", originPayload{Url: "https://example.com", Script: 12345}, nil),
 		testOriginMakeTestCase(true, "OriginUrl", originPayload{Url: "https://example.com", ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234-cdn-1"}, nil),
 		// middleware
@@ -81,6 +83,7 @@ func TestOrigin(t *testing.T) {
 		// unexpected args
 		testOriginMakeTestCase(true, "DnsAccelerate", originPayload{DnsScheme: "https", DnsPort: 443, Url: "https://192.0.2.3:443/"}, nil),
 		testOriginMakeTestCase(true, "DnsAccelerate", originPayload{DnsScheme: "https", DnsPort: 443, Storagezone: 12345}, nil),
+		testOriginMakeTestCase(true, "DnsAccelerate", originPayload{DnsScheme: "https", DnsPort: 443, Loadbalancer: 12345}, nil),
 		testOriginMakeTestCase(true, "DnsAccelerate", originPayload{DnsScheme: "https", DnsPort: 443, Script: 12345}, nil),
 		testOriginMakeTestCase(true, "DnsAccelerate", originPayload{DnsScheme: "https", DnsPort: 443, ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1"}, nil),
 		// middleware
@@ -102,6 +105,7 @@ func TestOrigin(t *testing.T) {
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: -1}, nil),
 		// unexpected args
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, Url: "https://example.com"}, nil),
+		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, Loadbalancer: 12345}, nil),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, DnsScheme: "https", DnsPort: 443}, nil),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, Script: 12345}, nil),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234-cdn-1"}, nil),
@@ -116,6 +120,29 @@ func TestOrigin(t *testing.T) {
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345}, "scripting"),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345}, "scripting,eu"),
 
+		// LoadBalancer
+		// ok
+		testOriginMakeTestCase(false, "LoadBalancer", originPayload{Loadbalancer: 12345}, nil),
+		// invalid args
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 0}, nil),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: -1}, nil),
+		// unexpected args
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, Url: "https://example.com"}, nil),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, Storagezone: 12345}, nil),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, DnsScheme: "https", DnsPort: 443}, nil),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, Script: 12345}, nil),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234-cdn-1"}, nil),
+		// middleware
+		testOriginMakeTestCase(false, "LoadBalancer", originPayload{Loadbalancer: 12345, Middleware: 12345}, "scripting"),
+		testOriginMakeTestCase(false, "LoadBalancer", originPayload{Loadbalancer: 12345, Middleware: 12345}, "scripting,eu"),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, Middleware: 12345}, "all"),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345, Middleware: 12345}, nil),
+		// routing filters
+		testOriginMakeTestCase(false, "LoadBalancer", originPayload{Loadbalancer: 12345}, "all"),
+		testOriginMakeTestCase(false, "LoadBalancer", originPayload{Loadbalancer: 12345}, "eu"),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345}, "scripting"),
+		testOriginMakeTestCase(true, "LoadBalancer", originPayload{Loadbalancer: 12345}, "scripting,eu"),
+
 		// ComputeScript
 		// ok
 		testOriginMakeTestCase(false, "ComputeScript", originPayload{Script: 12345}, "scripting"),
@@ -123,6 +150,7 @@ func TestOrigin(t *testing.T) {
 		testOriginMakeTestCase(true, "ComputeScript", originPayload{Script: 12345, Url: "https://example.com"}, "scripting"),
 		testOriginMakeTestCase(true, "ComputeScript", originPayload{Script: 12345, DnsScheme: "https", DnsPort: 443}, "scripting"),
 		testOriginMakeTestCase(true, "ComputeScript", originPayload{Script: 12345, Storagezone: 12345}, "scripting"),
+		testOriginMakeTestCase(true, "ComputeScript", originPayload{Script: 12345, Loadbalancer: 12345}, "scripting"),
 		testOriginMakeTestCase(true, "ComputeScript", originPayload{Script: 12345, ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234-cdn-1"}, "scripting"),
 		// middleware
 		testOriginMakeTestCase(false, "ComputeScript", originPayload{Script: 12345, Middleware: 12345}, "scripting"),
@@ -142,6 +170,7 @@ func TestOrigin(t *testing.T) {
 		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1", Url: "https://192.0.2.3:443/"}, nil),
 		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1", DnsScheme: "https", DnsPort: 443}, nil),
 		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1", Storagezone: 12345}, nil),
+		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1", Loadbalancer: 12345}, nil),
 		testOriginMakeTestCase(true, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1", Script: 12345}, nil),
 		// middleware
 		testOriginMakeTestCase(false, "ComputeContainer", originPayload{ContainerAppId: "abc1234d", ContainerEndpointId: "abc1234d-cdn-1", Middleware: 12345}, "scripting"),
@@ -173,6 +202,7 @@ func TestOrigin(t *testing.T) {
 					},
 					"host_header":                 schema.StringAttribute{},
 					"storagezone":                 schema.Int64Attribute{},
+					"loadbalancer":                schema.Int64Attribute{},
 					"script":                      schema.Int64Attribute{},
 					"middleware_script":           schema.Int64Attribute{},
 					"script_execute_before_cache": schema.BoolAttribute{},
@@ -251,6 +281,7 @@ type originPayload struct {
 	Url                      string
 	HostHeader               string
 	Storagezone              int64
+	Loadbalancer             int64
 	Script                   int64
 	Middleware               int64
 	ScriptExecuteBeforeCache bool
@@ -264,6 +295,7 @@ func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 	var url any = nil
 	var hostHeader any = nil
 	var storagezone any = nil
+	var loadbalancer any = nil
 	var script any = nil
 	var middleware any = nil
 	var containerAppId any = nil
@@ -281,6 +313,10 @@ func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 
 	if payload.Storagezone != 0 {
 		storagezone = payload.Storagezone
+	}
+
+	if payload.Loadbalancer != 0 {
+		loadbalancer = payload.Loadbalancer
 	}
 
 	if payload.Script != 0 {
@@ -312,6 +348,7 @@ func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 		"url":                         tftypes.NewValue(tftypes.String, url),
 		"host_header":                 tftypes.NewValue(tftypes.String, hostHeader),
 		"storagezone":                 tftypes.NewValue(tftypes.Number, storagezone),
+		"loadbalancer":                tftypes.NewValue(tftypes.Number, loadbalancer),
 		"script":                      tftypes.NewValue(tftypes.Number, script),
 		"middleware_script":           tftypes.NewValue(tftypes.Number, middleware),
 		"script_execute_before_cache": tftypes.NewValue(tftypes.Bool, payload.ScriptExecuteBeforeCache),
