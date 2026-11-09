@@ -30,7 +30,7 @@ func extractErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	return errors.New(responseObj.Message)
+	return messageError(responseObj.Message)
 }
 
 func extractDatabaseErrorMessage(response *http.Response) error {
@@ -49,7 +49,7 @@ func extractDatabaseErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	return errors.New(responseObj.Message)
+	return messageError(responseObj.Message)
 }
 
 func extractMCErrorMessage(response *http.Response) error {
@@ -71,7 +71,7 @@ func extractMCErrorMessage(response *http.Response) error {
 				return nil
 			}
 
-			return errors.New(responseObj[0].Message)
+			return messageError(responseObj[0].Message)
 		}
 	}
 
@@ -92,7 +92,7 @@ func extractMCErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	return errors.New(responseMessage)
+	return messageError(responseMessage)
 }
 
 func extractShieldErrorMessage(response *http.Response) error {
@@ -140,5 +140,15 @@ func extractShieldErrorMessage(response *http.Response) error {
 		return ErrNotFound
 	}
 
-	return errors.New(errorKey)
+	return messageError(errorKey)
+}
+
+// messageError returns nil for an empty message, so callers fall back to
+// their "... failed with <status>" error instead of reporting an empty error.
+func messageError(message string) error {
+	if message == "" {
+		return nil
+	}
+
+	return errors.New(message)
 }
