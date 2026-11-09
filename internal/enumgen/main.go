@@ -30,6 +30,7 @@ func main() {
 	var result []GenResult
 	result = append(result, generateFromOpenApiSchemaCore()...)
 	result = append(result, generateFromOpenApiSchemaShield()...)
+	result = append(result, generateFromStorageRegionsApi()...)
 	result = append(result, generatePullzoneShield()...)
 	result = append(result, generatePullzoneShieldAccessList()...)
 
@@ -74,9 +75,10 @@ type GenResult struct {
 	Contents string
 }
 
-var FileinfoProvider = &Fileinfo{File: "internal/provider/enums.go", Package: "provider"}
-var FileinfoEdgeruleValidator = &Fileinfo{File: "internal/pullzoneedgeruleresourcevalidator/types.go", Package: "pullzoneedgeruleresourcevalidator"}
-var FileinfoShieldValidator = &Fileinfo{File: "internal/pullzoneshieldresourcevalidator/types.go", Package: "pullzoneshieldresourcevalidator"}
+var providerFile = &Fileinfo{File: "internal/provider/enums.go", Package: "provider"}
+var edgeruleValidatorFile = &Fileinfo{File: "internal/pullzoneedgeruleresourcevalidator/types.go", Package: "pullzoneedgeruleresourcevalidator"}
+var shieldValidatorFile = &Fileinfo{File: "internal/pullzoneshieldresourcevalidator/types.go", Package: "pullzoneshieldresourcevalidator"}
+var storagezoneValidatorFile = &Fileinfo{File: "internal/storagezoneresourcevalidator/types.go", Package: "storagezoneresourcevalidator"}
 
 type openapiVariable struct {
 	File           *Fileinfo
@@ -92,85 +94,91 @@ func generateFromOpenApiSchemaCore() []GenResult {
 		"https://core-api-public-docs.b-cdn.net/docs/v3/public.json",
 		[]openapiVariable{
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "dnsRecordMonitorTypeMap",
 				SchemaKey: "DnsMonitoringType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "dnsRecordSmartRoutingTypeMap",
 				SchemaKey: "DnsSmartRoutingType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "dnsRecordTypeMap",
 				SchemaKey: "DnsRecordTypes",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "dnsZoneLogAnonymizedStyleMap",
 				SchemaKey: "LogAnonymizationType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
+				Variable:  "loadbalancerStickySessionMap",
+				SchemaKey: "LoadBalancerStickySessionType",
+				Type:      "map[uint8]string",
+			},
+			{
+				File:      providerFile,
 				Variable:  "pullzoneLogAnonymizedStyleMap",
 				SchemaKey: "LogAnonymizationType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "pullzoneLogForwardFormatMap",
 				SchemaKey: "PullZoneLogFormat",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "pullzoneLogForwardProtocolMap",
 				SchemaKey: "PullZoneLogForwarderProtocolType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "pullzoneOptimizerWatermarkPositionMap",
 				SchemaKey: "OptimizerWatermarkPosition",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "pullzoneTlsLevelMap",
 				SchemaKey: "TlsSecurityLevelType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "storageZoneTierMap",
 				SchemaKey: "StorageZoneTier",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "streamLibraryEncodingTierMap",
 				SchemaKey: "EncodingTier",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoEdgeruleValidator,
+				File:      edgeruleValidatorFile,
 				Variable:  "ActionMap",
 				SchemaKey: "EdgeRuleActionType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoEdgeruleValidator,
+				File:      edgeruleValidatorFile,
 				Variable:  "TriggerTypeMap",
 				SchemaKey: "TriggerTypes",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:      FileinfoEdgeruleValidator,
+				File:      edgeruleValidatorFile,
 				Variable:  "TriggerMatchTypeMap",
 				SchemaKey: "PatternMatchingTypes",
 				Type:      "map[uint8]string",
@@ -184,20 +192,20 @@ func generateFromOpenApiSchemaShield() []GenResult {
 		"https://api.bunny.net/shield/docs/v1/swagger.json",
 		[]openapiVariable{
 			{
-				File:      FileinfoShieldValidator,
+				File:      shieldValidatorFile,
 				Variable:  "PlanTypeMap",
 				SchemaKey: "ShieldPlanType",
 				Type:      "map[uint8]string",
 			},
 			{
-				File:           FileinfoShieldValidator,
+				File:           shieldValidatorFile,
 				Variable:       "BotCategorizationCategoryMap",
 				SchemaKey:      "BotCategory",
 				Type:           "map[uint8]string",
 				ExcludedValues: []string{"None", "System"},
 			},
 			{
-				File:           FileinfoShieldValidator,
+				File:           shieldValidatorFile,
 				Variable:       "BotCategorizationBotAction",
 				SchemaKey:      "BotCategorizationAction",
 				Type:           "map[uint8]string",
@@ -205,7 +213,7 @@ func generateFromOpenApiSchemaShield() []GenResult {
 				WithEnum:       true,
 			},
 			{
-				File:      FileinfoProvider,
+				File:      providerFile,
 				Variable:  "pullzoneShieldRatelimitRuleActionMap",
 				SchemaKey: "RatelimitRuleActionType",
 				Type:      "map[uint8]string",
@@ -402,13 +410,13 @@ func generatePullzoneShield() []GenResult {
 		Variable string
 		Type     string
 	}{
-		"WafRuleOperatorType":       {File: FileinfoProvider, Variable: "pullzoneShieldRuleConditionOperationMap", Type: "map[int64]string"},
-		"WafRuleTransformationType": {File: FileinfoProvider, Variable: "pullzoneShieldRuleTransformationMap", Type: "map[int64]string"},
-		"WafRuleVariableType":       {File: FileinfoProvider, Variable: "pullzoneShieldRuleConditionVariableMap", Type: "map[uint8]string"},
-		"WafRateLimitTimeframeType": {File: FileinfoProvider, Variable: "pullzoneShieldRatelimitRuleLimitTimeframeOptions", Type: "[]int64"},
-		"WafRatelimitBlockType":     {File: FileinfoProvider, Variable: "pullzoneShieldRatelimitRuleResponseTimeframeOptions", Type: "[]int64"},
-		"WAFPayloadLimitAction":     {File: FileinfoProvider, Variable: "pullzoneShieldWafBodyLimitMap", Type: "map[uint8]string"},
-		"WafRuleActionType":         {File: FileinfoProvider, Variable: "pullzoneShieldWafRuleResponseActionMap", Type: "map[uint8]string"},
+		"WafRuleOperatorType":       {File: providerFile, Variable: "pullzoneShieldRuleConditionOperationMap", Type: "map[int64]string"},
+		"WafRuleTransformationType": {File: providerFile, Variable: "pullzoneShieldRuleTransformationMap", Type: "map[int64]string"},
+		"WafRuleVariableType":       {File: providerFile, Variable: "pullzoneShieldRuleConditionVariableMap", Type: "map[uint8]string"},
+		"WafRateLimitTimeframeType": {File: providerFile, Variable: "pullzoneShieldRatelimitRuleLimitTimeframeOptions", Type: "[]int64"},
+		"WafRatelimitBlockType":     {File: providerFile, Variable: "pullzoneShieldRatelimitRuleResponseTimeframeOptions", Type: "[]int64"},
+		"WAFPayloadLimitAction":     {File: providerFile, Variable: "pullzoneShieldWafBodyLimitMap", Type: "map[uint8]string"},
+		"WafRuleActionType":         {File: providerFile, Variable: "pullzoneShieldWafRuleResponseActionMap", Type: "map[uint8]string"},
 	}
 
 	result := []GenResult{}
@@ -505,8 +513,8 @@ func generatePullzoneShieldAccessList() []GenResult {
 		Variable string
 		Type     string
 	}{
-		"AccessListType":   {File: FileinfoProvider, Variable: "pullzoneAccessListTypeMap", Type: "map[uint8]string"},
-		"AccessListAction": {File: FileinfoProvider, Variable: "pullzoneAccessListActionMap", Type: "map[uint8]string"},
+		"AccessListType":   {File: providerFile, Variable: "pullzoneAccessListTypeMap", Type: "map[uint8]string"},
+		"AccessListAction": {File: providerFile, Variable: "pullzoneAccessListActionMap", Type: "map[uint8]string"},
 	}
 
 	result := []GenResult{}
@@ -549,4 +557,76 @@ func generatePullzoneShieldAccessList() []GenResult {
 	}
 
 	return result
+}
+
+func generateFromStorageRegionsApi() []GenResult {
+	req, err := http.NewRequest(http.MethodGet, "https://api.bunny.net/storagezone/regions", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic(fmt.Sprintf("failed to fetch enums from API: %s", resp.Status))
+	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			fmt.Printf("[WARN] failed to close response body: %s\n", err)
+		}
+	}()
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	type regionType struct {
+		Code string `json:"Code"`
+		Tier uint8  `json:"Tier"`
+	}
+
+	var data []regionType
+	err = json.Unmarshal(bodyResp, &data)
+	if err != nil {
+		panic(err)
+	}
+
+	slices.SortFunc(data, func(a, b regionType) int {
+		return strings.Compare(a.Code, b.Code)
+	})
+
+	standardRegions := make([]string, 0, 8)
+	edgeRegions := make([]string, 0, 8)
+
+	for _, value := range data {
+		switch value.Tier {
+		case 0:
+			standardRegions = append(standardRegions, value.Code)
+
+		case 1:
+			edgeRegions = append(edgeRegions, value.Code)
+
+		default:
+			panic(fmt.Sprintf("Unexpected tier: %d", value.Tier))
+		}
+	}
+
+	return []GenResult{
+		{
+			File:     storagezoneValidatorFile,
+			Variable: "standardRegions",
+			Contents: fmt.Sprintf(`var standardRegions = []string{"%s"}`, strings.Join(standardRegions, `","`)),
+		},
+		{
+			File:     storagezoneValidatorFile,
+			Variable: "edgeRegions",
+			Contents: fmt.Sprintf(`var edgeRegions = []string{"%s"}`, strings.Join(edgeRegions, `","`)),
+		},
+	}
 }

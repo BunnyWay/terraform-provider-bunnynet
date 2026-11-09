@@ -13,9 +13,6 @@ import (
 	"strings"
 )
 
-var standardRegions = []string{"BR", "DE", "JH", "LA", "NY", "SE", "SG", "SYD", "UK"}
-var edgeRegions = []string{"BR", "CZ", "ES", "HK", "JH", "JP", "LA", "MI", "NY", "SE", "SG", "SYD", "UK", "WA"}
-
 func Region() resource.ConfigValidator {
 	return regionValidator{}
 }

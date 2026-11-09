@@ -60,26 +60,39 @@ func extractMCErrorMessage(response *http.Response) error {
 
 	_ = response.Body.Close()
 
-	var responseObj []struct {
-		Message string `json:"message"`
-	}
-
-	err = json.Unmarshal(bodyBytes, &responseObj)
-	if err != nil {
-		var responseMessage string
-		err = json.Unmarshal(bodyBytes, &responseMessage)
-		if err != nil {
-			return nil
+	{
+		var responseObj []struct {
+			Message string `json:"message"`
 		}
 
-		return messageError(responseMessage)
+		err = json.Unmarshal(bodyBytes, &responseObj)
+		if err == nil {
+			if len(responseObj) == 0 {
+				return nil
+			}
+
+			return messageError(responseObj[0].Message)
+		}
 	}
 
-	if len(responseObj) == 0 {
+	{
+		var responseObj struct {
+			Detail string `json:"detail"`
+		}
+
+		err = json.Unmarshal(bodyBytes, &responseObj)
+		if err == nil && len(responseObj.Detail) > 0 {
+			return errors.New(responseObj.Detail)
+		}
+	}
+
+	var responseMessage string
+	err = json.Unmarshal(bodyBytes, &responseMessage)
+	if err != nil {
 		return nil
 	}
 
-	return messageError(responseObj[0].Message)
+	return messageError(responseMessage)
 }
 
 func extractShieldErrorMessage(response *http.Response) error {

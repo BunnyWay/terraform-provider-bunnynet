@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/api"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/computecontainerimageresourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -57,14 +58,14 @@ func (r *ComputeContainerImageregistryResource) Schema(ctx context.Context, req 
 				Description: "The unique identifier for the image registry.",
 			},
 			"registry": schema.StringAttribute{
-				Required: true,
+				Required:    true,
+				Description: "The registry type. Use `DockerHub`, `GitHub`, or a hostname (with optional port) for OCI-compliant registries.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.OneOf(computeContainerImageRegistryRegistryOptions...),
+					computecontainerimageresourcevalidator.Registry(),
 				},
-				Description: generateMarkdownSliceOptions(computeContainerImageRegistryRegistryOptions),
 			},
 			"username": schema.StringAttribute{
 				Required: true,
@@ -231,15 +232,43 @@ func (r *ComputeContainerImageregistryResource) convertModelToApi(ctx context.Co
 	dataApi.UserName = dataTf.Username.ValueString()
 	dataApi.Token = dataTf.Token.ValueString()
 
+	// registry
+	{
+		tfRegistry := dataTf.Registry.ValueString()
+		if v, ok := computeContainerImageRegistryHostnameMap[tfRegistry]; ok {
+			dataApi.Type = tfRegistry
+			dataApi.HostName = v
+		} else {
+			dataApi.Type = "OCI"
+			dataApi.HostName = tfRegistry
+		}
+	}
+
 	return dataApi
 }
 
 func (r *ComputeContainerImageregistryResource) convertApiToModel(dataApi api.ComputeContainerImageregistry) (ComputeContainerImageregistryResourceModel, diag.Diagnostics) {
 	dataTf := ComputeContainerImageregistryResourceModel{}
 	dataTf.Id = types.Int64Value(dataApi.Id)
-	dataTf.Registry = types.StringValue(dataApi.DisplayName)
 	dataTf.Username = types.StringValue(dataApi.UserName)
 	dataTf.Token = types.StringValue(dataApi.Token)
+
+	// registry
+	{
+		var tfRegistry string
+		for k, hostname := range computeContainerImageRegistryHostnameMap {
+			if dataApi.HostName == hostname {
+				tfRegistry = k
+				break
+			}
+		}
+
+		if tfRegistry == "" {
+			tfRegistry = dataApi.HostName
+		}
+
+		dataTf.Registry = types.StringValue(tfRegistry)
+	}
 
 	return dataTf, nil
 }

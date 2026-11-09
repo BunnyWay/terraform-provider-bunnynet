@@ -67,6 +67,11 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 		return
 	}
 
+	originLoadBalancer := originAttr["loadbalancer"].(types.Int64)
+	if originLoadBalancer.IsUnknown() {
+		return
+	}
+
 	originScript := originAttr["script"].(types.Int64)
 	originMiddlewareScript := originAttr["middleware_script"].(types.Int64)
 	if originMiddlewareScript.IsUnknown() {
@@ -151,6 +156,12 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 			}
 		}
 
+		if originType.ValueString() != "LoadBalancer" {
+			if !originLoadBalancer.IsNull() {
+				resp.Diagnostics.AddAttributeError(originPath.AtName("loadbalancer"), "Invalid origin.loadbalancer value", "origin.loadbalancer is only applicable for LoadBalancer origins.")
+			}
+		}
+
 		if originType.ValueString() != "ComputeScript" {
 			if !originScript.IsNull() {
 				resp.Diagnostics.AddAttributeError(originPath.AtName("script"), "Invalid origin.script value", "origin.script is only applicable for ComputeScript origins.")
@@ -209,6 +220,11 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 	case "StorageZone":
 		if originStorageZone.IsNull() || (!originStorageZone.IsUnknown() && originStorageZone.ValueInt64() <= 0) {
 			resp.Diagnostics.AddAttributeError(originTypePath, "Invalid origin.storagezone value", "StorageZone requires origin.storagezone to be defined.")
+		}
+
+	case "LoadBalancer":
+		if originLoadBalancer.IsNull() || (!originLoadBalancer.IsUnknown() && originLoadBalancer.ValueInt64() <= 0) {
+			resp.Diagnostics.AddAttributeError(originTypePath, "Invalid origin.loadbalancer value", "LoadBalancer requires origin.loadbalancer to be defined.")
 		}
 
 	case "ComputeScript":

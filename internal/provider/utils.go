@@ -6,6 +6,7 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -15,7 +16,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 func mapValueToKey[T constraints.Integer](mapped map[T]string, value string) T {
@@ -38,38 +38,8 @@ func mapKeyToValue[T constraints.Integer](mapped map[T]string, value T) string {
 
 // Mutex to manage concurrent changes to pullzone sub-resources (i.e. bunnynet_pullzone_edgerule and bunnynet_pullzone_optimizer_class)
 // Based on https://discuss.hashicorp.com/t/cooping-with-parallelism-is-there-a-way-to-prioritise-resource-types/55690
-var pzMutex *pullzoneMutex
-var pzWafRuleMutex *pullzoneMutex
-
-func init() {
-	pzMutex = &pullzoneMutex{mu: sync.Mutex{}, pullzones: map[int64]*sync.Mutex{}}
-	pzWafRuleMutex = &pullzoneMutex{mu: sync.Mutex{}, pullzones: map[int64]*sync.Mutex{}}
-}
-
-type pullzoneMutex struct {
-	mu        sync.Mutex
-	pullzones map[int64]*sync.Mutex
-}
-
-func (p *pullzoneMutex) Lock(id int64) {
-	p.mu.Lock()
-	if v, ok := p.pullzones[id]; ok {
-		p.mu.Unlock()
-		v.Lock()
-	} else {
-		p.pullzones[id] = &sync.Mutex{}
-		p.pullzones[id].Lock()
-		p.mu.Unlock()
-	}
-}
-
-func (p *pullzoneMutex) Unlock(id int64) {
-	p.mu.Lock()
-	if _, ok := p.pullzones[id]; ok {
-		p.pullzones[id].Unlock()
-	}
-	p.mu.Unlock()
-}
+var pzMutex = utils.NewIdMutex()
+var pzWafRuleMutex = utils.NewIdMutex()
 
 func convertTimestampToSeconds(timestamp string) (uint64, error) {
 	parts := strings.Split(timestamp, ":")

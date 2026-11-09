@@ -158,6 +158,7 @@ var pullzoneOriginTypes = map[string]attr.Type{
 	"type":                        types.StringType,
 	"url":                         customtype.PullzoneOriginUrlType{},
 	"storagezone":                 types.Int64Type,
+	"loadbalancer":                types.Int64Type,
 	"follow_redirects":            types.BoolType,
 	"host_header":                 types.StringType,
 	"forward_host_header":         types.BoolType,
@@ -1214,6 +1215,13 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 							int64validator.AtLeast(0),
 						},
 					},
+					"loadbalancer": schema.Int64Attribute{
+						Optional:    true,
+						Description: "The ID of the linked Load Balancer.",
+						Validators: []validator.Int64{
+							int64validator.AtLeast(0),
+						},
+					},
 					"follow_redirects": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -1719,6 +1727,9 @@ func (r *PullzoneResource) convertModelToApi(ctx context.Context, dataTf Pullzon
 	case api.PullzoneOriginTypeStorageZone:
 		dataApi.StorageZoneId = origin["storagezone"].(types.Int64).ValueInt64()
 
+	case api.PullzoneOriginTypeLoadBalancer:
+		dataApi.LoadBalancerId = origin["loadbalancer"].(types.Int64).ValueInt64()
+
 	case api.PullzoneOriginTypeComputeScript:
 		dataApi.EdgeScriptId = origin["script"].(types.Int64).ValueInt64()
 
@@ -2017,6 +2028,7 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 			"url":                         customtype.PullzoneOriginUrlValue{StringValue: types.StringNull()},
 			"host_header":                 types.StringValue(""),
 			"storagezone":                 types.Int64Null(),
+			"loadbalancer":                types.Int64Null(),
 			"script":                      types.Int64Null(),
 			"container_app_id":            types.StringNull(),
 			"container_endpoint_id":       types.StringNull(),
@@ -2060,6 +2072,11 @@ func pullzoneApiToTf(dataApi api.Pullzone) (PullzoneResourceModel, diag.Diagnost
 		case api.PullzoneOriginTypeStorageZone:
 			if dataApi.StorageZoneId > 0 {
 				originValues["storagezone"] = types.Int64Value(dataApi.StorageZoneId)
+			}
+
+		case api.PullzoneOriginTypeLoadBalancer:
+			if dataApi.LoadBalancerId > 0 {
+				originValues["loadbalancer"] = types.Int64Value(dataApi.LoadBalancerId)
 			}
 
 		case api.PullzoneOriginTypeComputeScript:

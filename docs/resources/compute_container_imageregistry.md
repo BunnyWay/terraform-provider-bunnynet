@@ -25,7 +25,7 @@ resource "bunnynet_compute_container_imageregistry" "github" {
 
 ### Required
 
-- `registry` (String) Options: `DockerHub`, `GitHub`
+- `registry` (String) The registry type. Use `DockerHub`, `GitHub`, or a hostname (with optional port) for OCI-compliant registries.
 - `token` (String, Sensitive) The token used to authenticate to the registry. If you are importing a resource, declare the token as an empty string.
 - `username` (String) The username used to authenticate to the registry.
 

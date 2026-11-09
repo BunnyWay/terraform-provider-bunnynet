@@ -19,6 +19,7 @@ import (
 const PullzoneOriginTypeOriginUrl = 0
 const PullzoneOriginTypeDnsAccelerate = 1
 const PullzoneOriginTypeStorageZone = 2
+const PullzoneOriginTypeLoadBalancer = 3
 const PullzoneOriginTypeComputeScript = 4
 const PullzoneOriginTypeComputeContainer = 5
 
@@ -121,6 +122,7 @@ type Pullzone struct {
 	OriginType                uint8  `json:"OriginType"`
 	OriginUrl                 string `json:"OriginUrl,omitempty"`
 	StorageZoneId             int64  `json:"StorageZoneId,omitempty"`
+	LoadBalancerId            int64  `json:"LoadBalancerId,omitempty"`
 	OriginHostHeader          string `json:"OriginHostHeader"`
 	AddHostHeader             bool   `json:"AddHostHeader"`
 	VerifyOriginSSL           bool   `json:"VerifyOriginSSL"`

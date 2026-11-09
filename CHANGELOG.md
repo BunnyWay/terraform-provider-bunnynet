@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - provider: API errors whose body has no message are now reported with the HTTP status instead of an empty error;
 
+## 0.20.1 - 2026-11-05
+
+### Fixed
+- resource `pullzone`: support `LoadBalancer` origin.type;
+
+## 0.20.0 - 2026-11-03
+
+### Added
+- Support for Load Balancer;
+- resource `compute_container_imageregistry`: support OCI-compliant registries;
+
 ## 0.19.2 - 2026-10-14
 
 ### Added

@@ -139,7 +139,7 @@ resource "bunnynet_pullzone" "example" {
 
 Required:
 
-- `type` (String) Options: `ComputeContainer`, `ComputeScript`, `DnsAccelerate`, `OriginUrl`, `StorageZone`
+- `type` (String) Options: `ComputeContainer`, `ComputeScript`, `DnsAccelerate`, `LoadBalancer`, `OriginUrl`, `StorageZone`
 
 Optional:
 
@@ -150,6 +150,7 @@ Optional:
 - `follow_redirects` (Boolean) Indicates whether the zone will follow origin redirects.
 - `forward_host_header` (Boolean) Indicates whether the current hostname is forwarded to the origin.
 - `host_header` (String) The host header that will be sent to the origin.
+- `loadbalancer` (Number) The ID of the linked Load Balancer.
 - `middleware_script` (Number) The ID of the compute script used as a middleware.
 - `script` (Number) The ID of the linked compute script.
 - `script_execute_before_cache` (Boolean) Indicates whether the script will execute ahead of the cache layer.
