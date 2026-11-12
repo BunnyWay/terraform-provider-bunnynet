@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -36,6 +37,8 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -51,11 +54,12 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 
 	tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d: %+v", id, string(bodyResp)))
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	// code
 	{
@@ -63,6 +67,8 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 		if err != nil {
 			return data, err
 		}
+
+		defer utils.Drain(codeResp.Body)
 
 		if codeResp.StatusCode != http.StatusOK {
 			return data, errors.New(codeResp.Status)
@@ -72,7 +78,6 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 		if err != nil {
 			return data, err
 		}
-		_ = codeResp.Body.Close()
 
 		tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d/code: %+v", id, string(codeBodyResp)))
 
@@ -83,6 +88,8 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 		}
 
 		data.Content = codeData["Code"]
+
+		utils.Drain(codeResp.Body) // force drain before the next request
 	}
 
 	// current release
@@ -117,13 +124,14 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 		return ComputeScript{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		bodyResp, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return ComputeScript{}, err
 		}
 
-		_ = resp.Body.Close()
 		var obj struct {
 			Message string `json:"Message"`
 		}
@@ -140,13 +148,14 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 	if err != nil {
 		return ComputeScript{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := ComputeScript{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	// set code
 	{
@@ -159,18 +168,19 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 			return ComputeScript{}, err
 		}
 
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, dataApiResult.Id), bytes.NewReader(codeBodyBytes))
+		codeResp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, dataApiResult.Id), bytes.NewReader(codeBodyBytes))
 		if err != nil {
 			return ComputeScript{}, err
 		}
 
-		if resp.StatusCode != http.StatusNoContent {
-			bodyResp, err := io.ReadAll(resp.Body)
+		defer utils.Drain(codeResp.Body)
+
+		if codeResp.StatusCode != http.StatusNoContent {
+			bodyResp, err := io.ReadAll(codeResp.Body)
 			if err != nil {
 				return ComputeScript{}, err
 			}
 
-			_ = resp.Body.Close()
 			var obj struct {
 				Message string `json:"Message"`
 			}
@@ -183,7 +193,7 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 			return ComputeScript{}, errors.New(obj.Message)
 		}
 
-		_ = resp.Body.Close()
+		utils.Drain(codeResp.Body) // force drain before the next request
 	}
 
 	// @TODO should we publish the script on creation?
@@ -220,13 +230,14 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 			return ComputeScript{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusOK {
 			bodyResp, err := io.ReadAll(resp.Body)
 			if err != nil {
 				return ComputeScript{}, err
 			}
 
-			_ = resp.Body.Close()
 			var obj struct {
 				Message string `json:"Message"`
 			}
@@ -238,6 +249,8 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 
 			return ComputeScript{}, errors.New(obj.Message)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	// update code
@@ -255,13 +268,14 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 			return ComputeScript{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusNoContent {
 			bodyResp, err := io.ReadAll(resp.Body)
 			if err != nil {
 				return ComputeScript{}, err
 			}
 
-			_ = resp.Body.Close()
 			var obj struct {
 				Message string `json:"Message"`
 			}
@@ -273,6 +287,8 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 
 			return ComputeScript{}, errors.New(obj.Message)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 
 		// publish script
 		if previousData.CurrentReleaseId > 0 {
@@ -291,6 +307,8 @@ func (c *Client) DeleteComputeScript(id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound
@@ -317,9 +335,7 @@ func (c *Client) publishComputeScript(data ComputeScript) error {
 		return err
 	}
 
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
 		return extractErrorMessage(resp)

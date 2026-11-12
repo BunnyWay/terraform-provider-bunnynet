@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -55,6 +56,8 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 		return result, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return result, ErrNotFound
 	}
@@ -86,6 +89,8 @@ func (c *Client) GetPullzoneAccessList(ctx context.Context, pullzoneId int64, li
 	result.Name = httpResult.Data.Name
 	result.Type = httpResult.Data.Type
 	result.Entries = strings.Split(httpResult.Data.Content, "\n")
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	{
 		v, err := c.getPullzoneAccessListInfo(ctx, shieldZoneId, listId)
@@ -125,6 +130,8 @@ func (c *Client) CreatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 		return result, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -146,6 +153,8 @@ func (c *Client) CreatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 	if err != nil {
 		return result, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	// save action
 	{
@@ -180,6 +189,8 @@ func (c *Client) UpdatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 		return result, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -199,6 +210,8 @@ func (c *Client) UpdatePullzoneAccessList(ctx context.Context, data PullzoneAcce
 	if err != nil {
 		return result, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	// save action
 	{
@@ -221,6 +234,8 @@ func (c *Client) DeletePullzoneAccessList(ctx context.Context, pullzoneId int64,
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound
@@ -283,6 +298,8 @@ func (c *Client) getPullzoneAccessLists(ctx context.Context, shieldZoneId int64,
 	if err != nil {
 		return result, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
@@ -369,6 +386,8 @@ func (c *Client) updatePullzoneAccessListConfiguration(ctx context.Context, shie
 		return err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -378,7 +397,6 @@ func (c *Client) updatePullzoneAccessListConfiguration(ctx context.Context, shie
 		return errors.New("update access list failed with " + resp.Status)
 	}
 
-	_ = resp.Body.Close()
 	return nil
 }
 

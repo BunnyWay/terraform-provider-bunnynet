@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/http"
 	"net/url"
@@ -27,7 +28,7 @@ func (c *Client) UrlPurgeCache(ctx context.Context, urlToPurge string, exactPath
 		return err
 	}
 
-	defer func() { _ = resp.Body.Close() }()
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusOK {
 		return nil

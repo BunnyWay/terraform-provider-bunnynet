@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -28,6 +29,8 @@ func (c *Client) GetComputeScriptVariableByName(scriptId int64, name string) (Co
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -41,7 +44,6 @@ func (c *Client) GetComputeScriptVariableByName(scriptId int64, name string) (Co
 		EdgeScriptVariables []ComputeScriptVariable `json:"EdgeScriptVariables"`
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &scriptData)
 	if err != nil {
 		return data, err
@@ -65,6 +67,8 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -78,7 +82,6 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -101,13 +104,14 @@ func (c *Client) CreateComputeScriptVariable(dataApi ComputeScriptVariable) (Com
 		return ComputeScriptVariable{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		bodyResp, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return ComputeScriptVariable{}, err
 		}
 
-		_ = resp.Body.Close()
 		var obj struct {
 			Message string `json:"Message"`
 		}
@@ -124,13 +128,14 @@ func (c *Client) CreateComputeScriptVariable(dataApi ComputeScriptVariable) (Com
 	if err != nil {
 		return ComputeScriptVariable{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := ComputeScriptVariable{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetComputeScriptVariable(scriptId, dataApiResult.Id)
 }
@@ -153,13 +158,14 @@ func (c *Client) UpdateComputeScriptVariable(dataApi ComputeScriptVariable) (Com
 			return ComputeScriptVariable{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusOK {
 			bodyResp, err := io.ReadAll(resp.Body)
 			if err != nil {
 				return ComputeScriptVariable{}, err
 			}
 
-			_ = resp.Body.Close()
 			var obj struct {
 				Message string `json:"Message"`
 			}
@@ -171,6 +177,8 @@ func (c *Client) UpdateComputeScriptVariable(dataApi ComputeScriptVariable) (Com
 
 			return ComputeScriptVariable{}, errors.New(obj.Message)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	return c.GetComputeScriptVariable(scriptId, id)
@@ -181,6 +189,8 @@ func (c *Client) DeleteComputeScriptVariable(scriptId int64, id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

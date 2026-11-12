@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/memorycache"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -64,6 +65,8 @@ func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -79,11 +82,12 @@ func (c *Client) GetDnsZone(ctx context.Context, id int64) (DnsZone, error) {
 
 	tflog.Debug(ctx, fmt.Sprintf("GET /dnszone/%d: %+v", id, string(bodyResp)))
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	if data.DnssecEnabled {
 		info, err := c.postDnssec(ctx, id)
@@ -108,6 +112,8 @@ func (c *Client) GetDnsZoneByDomain(ctx context.Context, domain string) (DnsZone
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -117,7 +123,6 @@ func (c *Client) GetDnsZoneByDomain(ctx context.Context, domain string) (DnsZone
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	var result struct {
 		Items []DnsZone `json:"Items"`
 	}
@@ -126,6 +131,8 @@ func (c *Client) GetDnsZoneByDomain(ctx context.Context, domain string) (DnsZone
 	if err != nil {
 		return data, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	for _, record := range result.Items {
 		if record.Domain == domain {
@@ -160,6 +167,8 @@ func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, erro
 		return DnsZone{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -173,13 +182,14 @@ func (c *Client) CreateDnsZone(ctx context.Context, data DnsZone) (DnsZone, erro
 	if err != nil {
 		return DnsZone{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := DnsZone{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	data.Id = dataApiResult.Id
 	dataApiResult, err = c.UpdateDnsZone(ctx, data)
@@ -218,6 +228,8 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 		return DnsZone{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -226,6 +238,8 @@ func (c *Client) UpdateDnsZone(ctx context.Context, dataApi DnsZone) (DnsZone, e
 
 		return DnsZone{}, errors.New("update DNS zone failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	if dataApi.DnssecEnabled {
 		info, err := c.postDnssec(ctx, dataApi.Id)
@@ -259,6 +273,8 @@ func (c *Client) DeleteDnsZone(ctx context.Context, id int64) error {
 		return err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d: %s", id, resp.Status))
 
 	if resp.StatusCode == http.StatusNotFound {
@@ -278,6 +294,8 @@ func (c *Client) postDnssec(ctx context.Context, zoneId int64) (dnssecInfo, erro
 		return dnssecInfo{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -291,7 +309,6 @@ func (c *Client) postDnssec(ctx context.Context, zoneId int64) (dnssecInfo, erro
 	if err != nil {
 		return dnssecInfo{}, err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("POST /dnszone/%d/dnssec: %+v", zoneId, string(bodyResp)))
 
@@ -305,6 +322,8 @@ func (c *Client) deleteDnssec(ctx context.Context, zoneId int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound
@@ -323,7 +342,6 @@ func (c *Client) deleteDnssec(ctx context.Context, zoneId int64) error {
 	if err != nil {
 		return err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d/dnssec: %+v", zoneId, string(bodyResp)))
 

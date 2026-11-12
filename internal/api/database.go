@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -37,6 +38,8 @@ func (c *Client) GetDatabase(ctx context.Context, id string) (Database, error) {
 		return data.Database, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Info(ctx, fmt.Sprintf("GET /edgedb/v2/databases/%s: %s", id, resp.Status))
 
 	if resp.StatusCode == http.StatusNotFound {
@@ -52,7 +55,6 @@ func (c *Client) GetDatabase(ctx context.Context, id string) (Database, error) {
 		return data.Database, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data.Database, err
@@ -78,6 +80,8 @@ func (c *Client) CreateDatabase(ctx context.Context, data Database) (Database, e
 		return Database{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Info(ctx, fmt.Sprintf("POST /edgedb/v2/databases: %s", string(body)))
 
 	if resp.StatusCode != http.StatusOK {
@@ -93,7 +97,6 @@ func (c *Client) CreateDatabase(ctx context.Context, data Database) (Database, e
 	if err != nil {
 		return Database{}, err
 	}
-	_ = resp.Body.Close()
 
 	var dataApiResult struct {
 		Id string `json:"db_id"`
@@ -103,6 +106,8 @@ func (c *Client) CreateDatabase(ctx context.Context, data Database) (Database, e
 	if err != nil {
 		return Database{}, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetDatabase(ctx, dataApiResult.Id)
 }
@@ -124,12 +129,14 @@ func (c *Client) UpdateDatabase(ctx context.Context, data Database) (Database, e
 		return Database{}, err
 	}
 
-	_, _ = io.Copy(io.Discard, resp.Body)
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		// @TODO extract error message
 		return Database{}, errors.New("update database failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetDatabase(ctx, data.Id)
 }
@@ -139,6 +146,8 @@ func (c *Client) DeleteDatabase(id string) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

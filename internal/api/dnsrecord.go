@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -79,6 +80,8 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 		return DnsRecord{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -92,7 +95,6 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 	if err != nil {
 		return DnsRecord{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := DnsRecord{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
@@ -101,6 +103,8 @@ func (c *Client) CreateDnsRecord(ctx context.Context, data DnsRecord) (DnsRecord
 	}
 
 	dataApiResult.Zone = dnsZoneId
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.UpdateDnsRecord(ctx, dataApiResult)
 }
@@ -120,6 +124,8 @@ func (c *Client) UpdateDnsRecord(ctx context.Context, dataApi DnsRecord) (DnsRec
 	if err != nil {
 		return DnsRecord{}, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
 		err := extractErrorMessage(resp)
@@ -143,6 +149,8 @@ func (c *Client) DeleteDnsRecord(ctx context.Context, zoneId int64, id int64) er
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /dnszone/%d/records/%d: %s", zoneId, id, resp.Status))
 

@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- resource `storage_zone`: avoid panic on network errors;
+
 ## 0.20.1 - 2026-11-05
 
 ### Fixed

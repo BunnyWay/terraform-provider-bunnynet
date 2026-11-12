@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -51,6 +52,8 @@ func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data C
 		return ComputeContainerImageregistry{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		bodyResp, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -72,7 +75,6 @@ func (c *Client) CreateComputeContainerImageregistry(ctx context.Context, data C
 	}
 
 	err = json.Unmarshal(bodyResp, &result)
-	_ = resp.Body.Close()
 
 	if err != nil {
 		return ComputeContainerImageregistry{}, err
@@ -89,6 +91,8 @@ func (c *Client) getAllComputeContainerImageregistries(ctx context.Context) ([]C
 		return nil, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(resp.Status)
 	}
@@ -103,7 +107,6 @@ func (c *Client) getAllComputeContainerImageregistries(ctx context.Context) ([]C
 		Items []ComputeContainerImageregistry `json:"items"`
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
 	if err != nil {
 		return nil, err
@@ -185,6 +188,8 @@ func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data C
 		return ComputeContainerImageregistry{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractMCErrorMessage(resp)
 		if err != nil {
@@ -193,6 +198,8 @@ func (c *Client) UpdateComputeContainerImageregistry(ctx context.Context, data C
 
 		return ComputeContainerImageregistry{}, fmt.Errorf("Error: HTTP Status: %s", resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	dataApiResult, err := c.GetComputeContainerImageregistry(ctx, data.Id)
 	if err != nil {
@@ -209,6 +216,8 @@ func (c *Client) DeleteComputeContainerImageregistry(id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

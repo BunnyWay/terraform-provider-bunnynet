@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -72,10 +73,11 @@ func (c *Client) CreateStorageFile(ctx context.Context, data StorageFile) (Stora
 	}
 
 	resp, err := httpClient.Do(req)
-	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return StorageFile{}, err
 	}
+
+	utils.Drain(resp.Body)
 
 	tflog.Debug(ctx, fmt.Sprintf("PUT https://%s/%s/%s", zone.StorageHostname, zone.Name, data.Path), map[string]interface{}{
 		"status": resp.Status,
@@ -111,10 +113,11 @@ func (c *Client) DeleteStorageFile(ctx context.Context, zoneId int64, path strin
 	}
 
 	resp, err := client.Do(req)
-	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE https://%s/%s/%s", zone.StorageHostname, zone.Name, path), map[string]interface{}{
 		"status": resp.Status,
@@ -145,10 +148,11 @@ func getStorageFileInfo(ctx context.Context, zone StorageZone, path string) (Sto
 	}
 
 	resp, err := client.Do(req)
-	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		return StorageFile{}, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return StorageFile{}, ErrNotFound

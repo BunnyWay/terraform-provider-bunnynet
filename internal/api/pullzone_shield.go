@@ -86,6 +86,8 @@ func (c *Client) GetPullzoneShieldDefaultWafEngineConfig() (PullzoneShieldWafEng
 		return PullzoneShieldWafEngineConfig{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -168,6 +170,8 @@ func (c *Client) GetPullzoneShieldIdByPullzone(pullzoneId int64) (int64, error) 
 		return 0, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -209,6 +213,8 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 			return PullzoneShield{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode == http.StatusNotFound {
 			return PullzoneShield{}, ErrNotFound
 		}
@@ -233,6 +239,8 @@ func (c *Client) GetPullzoneShield(ctx context.Context, id int64) (PullzoneShiel
 		if err != nil {
 			return PullzoneShield{}, err
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 
 		engineConfigDefaults, err := c.GetPullzoneShieldDefaultWafEngineConfig()
 		if err != nil {
@@ -396,6 +404,8 @@ func (c *Client) fetchBotDetection(ctx context.Context, shieldZoneId int64) (fet
 		return fetchBotDetectionResult{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusAccepted {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -467,6 +477,8 @@ func (c *Client) fetchWhitelabelPage(ctx context.Context, shieldZoneId int64, pa
 		return "", err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return "", nil
 	}
@@ -504,6 +516,8 @@ func (c *Client) fetchUploadScanning(ctx context.Context, shieldZoneId int64) (f
 	if err != nil {
 		return fetchUploadScanningResult{}, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
@@ -593,6 +607,8 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 		return PullzoneShield{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -621,6 +637,8 @@ func (c *Client) CreatePullzoneShield(ctx context.Context, data PullzoneShield) 
 	}
 
 	data.Id = result.Data.ShieldZone.Id
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.UpdatePullzoneShield(ctx, data)
 }
@@ -666,6 +684,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			return PullzoneShield{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusOK {
 			err := extractShieldErrorMessage(resp)
 			if err != nil {
@@ -674,6 +694,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 
 			return PullzoneShield{}, errors.New("update pullzone shield failed with " + resp.Status)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	// managed access lists
@@ -869,6 +891,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			return PullzoneShield{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusOK {
 			err := extractShieldErrorMessage(resp)
 			if err != nil {
@@ -881,6 +905,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				return PullzoneShield{}, errors.New("update pullzone shield/bot-detection failed with " + resp.Status)
 			}
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	// whitelabel
@@ -923,6 +949,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 			return PullzoneShield{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusOK {
 			err := extractShieldErrorMessage(resp)
 			if err != nil {
@@ -931,6 +959,8 @@ func (c *Client) UpdatePullzoneShield(ctx context.Context, data PullzoneShield) 
 				return PullzoneShield{}, errors.New("update pullzone shield/bot-detection failed with " + resp.Status)
 			}
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	return c.GetPullzoneShield(ctx, data.Id)
@@ -1035,6 +1065,8 @@ func (c *Client) saveWhitelabelPage(ctx context.Context, shieldZoneId int64, pag
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)

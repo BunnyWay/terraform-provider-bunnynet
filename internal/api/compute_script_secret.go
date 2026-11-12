@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -27,6 +28,8 @@ func (c *Client) GetComputeScriptSecretByName(scriptId int64, name string) (Comp
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -44,7 +47,6 @@ func (c *Client) GetComputeScriptSecretByName(scriptId int64, name string) (Comp
 		Secrets []ComputeScriptSecret `json:"Secrets"`
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
 	if err != nil {
 		return data, err
@@ -72,13 +74,14 @@ func (c *Client) CreateComputeScriptSecret(dataApi ComputeScriptSecret) (Compute
 		return ComputeScriptSecret{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		bodyResp, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return ComputeScriptSecret{}, err
 		}
 
-		_ = resp.Body.Close()
 		var obj struct {
 			Message string `json:"Message"`
 		}
@@ -95,13 +98,14 @@ func (c *Client) CreateComputeScriptSecret(dataApi ComputeScriptSecret) (Compute
 	if err != nil {
 		return ComputeScriptSecret{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := ComputeScriptSecret{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetComputeScriptSecretByName(scriptId, dataApiResult.Name)
 }
@@ -123,13 +127,14 @@ func (c *Client) UpdateComputeScriptSecret(dataApi ComputeScriptSecret) (Compute
 			return ComputeScriptSecret{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusNoContent {
 			bodyResp, err := io.ReadAll(resp.Body)
 			if err != nil {
 				return ComputeScriptSecret{}, err
 			}
 
-			_ = resp.Body.Close()
 			var obj struct {
 				Message string `json:"Message"`
 			}
@@ -141,6 +146,8 @@ func (c *Client) UpdateComputeScriptSecret(dataApi ComputeScriptSecret) (Compute
 
 			return ComputeScriptSecret{}, errors.New(obj.Message)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	return c.GetComputeScriptSecretByName(scriptId, dataApi.Name)
@@ -151,6 +158,8 @@ func (c *Client) DeleteComputeScriptSecret(scriptId int64, id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

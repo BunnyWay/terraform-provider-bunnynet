@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -61,6 +62,8 @@ func (c *Client) CreatePullzoneEdgerule(ctx context.Context, data PullzoneEdgeru
 		return PullzoneEdgerule{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -74,7 +77,6 @@ func (c *Client) CreatePullzoneEdgerule(ctx context.Context, data PullzoneEdgeru
 	if err != nil {
 		return PullzoneEdgerule{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := PullzoneEdgerule{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
@@ -108,6 +110,8 @@ func (c *Client) DeletePullzoneEdgerule(pullzoneId int64, guid string) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

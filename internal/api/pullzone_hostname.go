@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"net/http"
 )
 
@@ -63,6 +64,8 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 		return PullzoneHostname{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusNoContent {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -71,6 +74,8 @@ func (c *Client) CreatePullzoneHostname(data PullzoneHostname) (PullzoneHostname
 
 		return PullzoneHostname{}, errors.New("addHostname failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	pullzone, err = c.GetPullzone(pullzoneId)
 	if err != nil {
@@ -129,6 +134,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			return PullzoneHostname{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusNoContent {
 			err := extractErrorMessage(resp)
 			if err != nil {
@@ -137,6 +144,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 
 			return PullzoneHostname{}, errors.New("removeCertificate failed with " + resp.Status)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	if shouldAddCustomCertificate {
@@ -158,6 +167,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			return PullzoneHostname{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusNoContent {
 			err := extractErrorMessage(resp)
 			if err != nil {
@@ -166,6 +177,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 
 			return PullzoneHostname{}, errors.New("addCertificate failed with " + resp.Status)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	if shouldAddManagedCertificate {
@@ -173,6 +186,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 		if err != nil {
 			return PullzoneHostname{}, err
 		}
+
+		defer utils.Drain(resp.Body)
 
 		if resp.StatusCode != http.StatusOK {
 			err := extractErrorMessage(resp)
@@ -182,6 +197,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 
 			return PullzoneHostname{}, errors.New("loadFreeCertificate failed with " + resp.Status)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	if shouldSetForceSsl {
@@ -199,6 +216,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 			return PullzoneHostname{}, err
 		}
 
+		defer utils.Drain(resp.Body)
+
 		if resp.StatusCode != http.StatusNoContent {
 			err := extractErrorMessage(resp)
 			if err != nil {
@@ -207,6 +226,8 @@ func (c *Client) UpdatePullzoneHostname(data PullzoneHostname, previousData Pull
 
 			return PullzoneHostname{}, errors.New("forceSSL failed with " + resp.Status)
 		}
+
+		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	return c.GetPullzoneHostname(pullzoneId, data.Id)
@@ -257,6 +278,8 @@ func (c *Client) DeletePullzoneHostname(pullzoneId int64, hostname string) error
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

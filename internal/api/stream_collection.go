@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -31,6 +32,8 @@ func (c *Client) GetStreamCollection(libraryId int64, id string) (StreamCollecti
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -44,7 +47,6 @@ func (c *Client) GetStreamCollection(libraryId int64, id string) (StreamCollecti
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -69,6 +71,8 @@ func (c *Client) CreateStreamCollection(dataApi StreamCollection) (StreamCollect
 		return StreamCollection{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -82,7 +86,6 @@ func (c *Client) CreateStreamCollection(dataApi StreamCollection) (StreamCollect
 	if err != nil {
 		return StreamCollection{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := StreamCollection{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
@@ -111,6 +114,8 @@ func (c *Client) UpdateStreamCollection(dataApi StreamCollection) (StreamCollect
 		return StreamCollection{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -119,6 +124,8 @@ func (c *Client) UpdateStreamCollection(dataApi StreamCollection) (StreamCollect
 
 		return StreamCollection{}, errors.New("update stream collection failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	dataApiResult, err := c.GetStreamCollection(dataApi.LibraryId, id)
 	if err != nil {
@@ -138,6 +145,8 @@ func (c *Client) DeleteStreamCollection(libraryId int64, id string) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

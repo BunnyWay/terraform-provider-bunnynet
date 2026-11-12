@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -54,6 +55,8 @@ func (c *Client) GetPullzoneRatelimitRule(ctx context.Context, pullzoneId int64,
 	if err != nil {
 		return PullzoneRatelimitRule{}, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return PullzoneRatelimitRule{}, ErrNotFound
@@ -103,6 +106,8 @@ func (c *Client) CreatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 		return PullzoneRatelimitRule{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -122,6 +127,8 @@ func (c *Client) CreatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 	if err != nil {
 		return PullzoneRatelimitRule{}, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetPullzoneRatelimitRule(ctx, data.PullzoneId, result.Id)
 }
@@ -139,6 +146,8 @@ func (c *Client) UpdatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 		return PullzoneRatelimitRule{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -159,6 +168,8 @@ func (c *Client) UpdatePullzoneRatelimitRule(ctx context.Context, data PullzoneR
 		return PullzoneRatelimitRule{}, err
 	}
 
+	utils.Drain(resp.Body) // force drain before the next request
+
 	return c.GetPullzoneRatelimitRule(ctx, data.PullzoneId, data.Id)
 }
 
@@ -169,6 +180,8 @@ func (c *Client) DeletePullzoneRatelimitRule(ctx context.Context, ruleId int64) 
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

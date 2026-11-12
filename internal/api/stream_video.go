@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -51,6 +52,8 @@ func (c *Client) GetStreamVideo(libraryId int64, id string) (StreamVideo, error)
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -64,7 +67,6 @@ func (c *Client) GetStreamVideo(libraryId int64, id string) (StreamVideo, error)
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -91,6 +93,8 @@ func (c *Client) UpdateStreamVideo(dataApi StreamVideo) (StreamVideo, error) {
 		return StreamVideo{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -99,6 +103,8 @@ func (c *Client) UpdateStreamVideo(dataApi StreamVideo) (StreamVideo, error) {
 
 		return StreamVideo{}, errors.New("update stream video failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	dataApiResult, err := c.GetStreamVideo(dataApi.LibraryId, id)
 	if err != nil {
@@ -118,6 +124,8 @@ func (c *Client) DeleteStreamVideo(libraryId int64, id string) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

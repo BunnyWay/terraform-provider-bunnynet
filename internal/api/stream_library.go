@@ -73,6 +73,8 @@ func (c *Client) GetStreamLibrary(id int64) (StreamLibrary, error) {
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -86,11 +88,12 @@ func (c *Client) GetStreamLibrary(id int64) (StreamLibrary, error) {
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	pullzone, err := c.GetPullzone(data.PullZoneId)
 	if err != nil {
@@ -116,6 +119,8 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 		return StreamLibrary{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -129,13 +134,14 @@ func (c *Client) CreateStreamLibrary(data StreamLibrary) (StreamLibrary, error) 
 	if err != nil {
 		return StreamLibrary{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := StreamLibrary{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	data.Id = dataApiResult.Id
 	return c.UpdateStreamLibrary(data)
@@ -154,6 +160,8 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 		return StreamLibrary{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -162,6 +170,8 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 
 		return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	// update EnableTokenAuthentication
 	{
@@ -172,19 +182,23 @@ func (c *Client) UpdateStreamLibrary(dataApi StreamLibrary) (StreamLibrary, erro
 			return StreamLibrary{}, err
 		}
 
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videolibrary/%d", c.apiUrl, id), bytes.NewReader(body))
+		respToken, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/videolibrary/%d", c.apiUrl, id), bytes.NewReader(body))
 		if err != nil {
 			return StreamLibrary{}, err
 		}
 
-		if resp.StatusCode != http.StatusOK {
-			err := extractErrorMessage(resp)
+		defer utils.Drain(respToken.Body)
+
+		if respToken.StatusCode != http.StatusOK {
+			err := extractErrorMessage(respToken)
 			if err != nil {
 				return StreamLibrary{}, err
 			}
 
-			return StreamLibrary{}, errors.New("update stream library failed with " + resp.Status)
+			return StreamLibrary{}, errors.New("update stream library failed with " + respToken.Status)
 		}
+
+		utils.Drain(respToken.Body) // force drain before the next request
 	}
 
 	dataApiResult, err := c.GetStreamLibrary(id)
@@ -261,6 +275,8 @@ func (c *Client) DeleteStreamLibrary(id int64) error {
 		return err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound
 	}
@@ -285,6 +301,8 @@ func (c *Client) streamLibraryRefererAddRemove(id int64, hostname string, refTyp
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("StreamLibrary %d %s%sReferrer failed: %s", id, method, refType, resp.Status)

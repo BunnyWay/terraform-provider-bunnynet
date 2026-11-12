@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -39,7 +40,7 @@ func (c *Client) PullzonePurgeCache(ctx context.Context, id int64, tag string) e
 		return err
 	}
 
-	defer func() { _ = resp.Body.Close() }()
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNoContent {
 		return nil
