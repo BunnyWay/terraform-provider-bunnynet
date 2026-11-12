@@ -306,7 +306,10 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, errors.New(resp.Status)
 	}
 
-	bodyStr, _ := io.ReadAll(resp.Body)
+	bodyStr, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ComputeContainerApp{}, err
+	}
 
 	defer func() {
 		_ = resp.Body.Close()
