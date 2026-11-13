@@ -30,67 +30,18 @@ type ComputeScript struct {
 }
 
 func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript, error) {
-	var data ComputeScript
-
-	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/compute/script/%d", c.apiUrl, id), nil)
+	data, err := c.getComputeScriptInfo(ctx, id)
 	if err != nil {
 		return data, err
 	}
-
-	defer utils.Drain(resp.Body)
-
-	if resp.StatusCode == http.StatusNotFound {
-		return data, ErrNotFound
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return data, errors.New(resp.Status)
-	}
-
-	bodyResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return data, err
-	}
-
-	tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d: %+v", id, string(bodyResp)))
-
-	err = json.Unmarshal(bodyResp, &data)
-	if err != nil {
-		return data, err
-	}
-
-	utils.Drain(resp.Body) // force drain before the next request
 
 	// code
-	{
-		codeResp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, id), nil)
-		if err != nil {
-			return data, err
-		}
-
-		defer utils.Drain(codeResp.Body)
-
-		if codeResp.StatusCode != http.StatusOK {
-			return data, errors.New(codeResp.Status)
-		}
-
-		codeBodyResp, err := io.ReadAll(codeResp.Body)
-		if err != nil {
-			return data, err
-		}
-
-		tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d/code: %+v", id, string(codeBodyResp)))
-
-		var codeData map[string]string
-		err = json.Unmarshal(codeBodyResp, &codeData)
-		if err != nil {
-			return data, err
-		}
-
-		data.Content = codeData["Code"]
-
-		utils.Drain(codeResp.Body) // force drain before the next request
+	code, err := c.getComputeScriptCode(ctx, id)
+	if err != nil {
+		return data, err
 	}
+
+	data.Content = code
 
 	// current release
 	if data.CurrentReleaseId > 0 {
@@ -107,93 +58,87 @@ func (c *Client) GetComputeScript(ctx context.Context, id int64) (ComputeScript,
 	return data, nil
 }
 
-func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript) (ComputeScript, error) {
-	body := map[string]interface{}{
-		"Name":                 dataApi.Name,
-		"ScriptType":           dataApi.ScriptType,
-		"CreateLinkedPullZone": false,
-	}
+func (c *Client) getComputeScriptInfo(ctx context.Context, id int64) (ComputeScript, error) {
+	var data ComputeScript
 
-	bodyBytes, err := json.Marshal(body)
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/compute/script/%d", c.apiUrl, id), nil)
 	if err != nil {
-		return ComputeScript{}, err
-	}
-
-	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script", c.apiUrl), bytes.NewReader(bodyBytes))
-	if err != nil {
-		return ComputeScript{}, err
+		return data, err
 	}
 
 	defer utils.Drain(resp.Body)
 
-	if resp.StatusCode != http.StatusCreated {
-		bodyResp, err := io.ReadAll(resp.Body)
+	if resp.StatusCode == http.StatusNotFound {
+		return data, ErrNotFound
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err = extractErrorMessage(resp)
 		if err != nil {
-			return ComputeScript{}, err
+			return data, err
 		}
-
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		return ComputeScript{}, errors.New(obj.Message)
+		return data, errors.New(resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ComputeScript{}, err
+		return data, err
 	}
 
-	dataApiResult := ComputeScript{}
-	err = json.Unmarshal(bodyResp, &dataApiResult)
+	tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d: %+v", id, string(bodyResp)))
+
+	err = json.Unmarshal(bodyResp, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
+func (c *Client) getComputeScriptCode(ctx context.Context, id int64) (string, error) {
+	resp, err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, id), nil)
+	if err != nil {
+		return "", err
+	}
+
+	defer utils.Drain(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return "", err
+		}
+		return "", errors.New(resp.Status)
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("GET /compute/script/%d/code: %+v", id, string(bodyResp)))
+
+	var data struct {
+		Code string `json:"code"`
+	}
+
+	err = json.Unmarshal(bodyResp, &data)
+	if err != nil {
+		return "", err
+	}
+
+	return data.Code, nil
+}
+
+func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript) (ComputeScript, error) {
+	dataApiResult, err := c.createComputeScript(ctx, dataApi)
 	if err != nil {
 		return dataApiResult, err
 	}
 
-	utils.Drain(resp.Body) // force drain before the next request
-
-	// set code
-	{
-		codeBody := map[string]interface{}{
-			"Code": dataApi.Content,
-		}
-
-		codeBodyBytes, err := json.Marshal(codeBody)
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		codeResp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, dataApiResult.Id), bytes.NewReader(codeBodyBytes))
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		defer utils.Drain(codeResp.Body)
-
-		if codeResp.StatusCode != http.StatusNoContent {
-			bodyResp, err := io.ReadAll(codeResp.Body)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			return ComputeScript{}, errors.New(obj.Message)
-		}
-
-		utils.Drain(codeResp.Body) // force drain before the next request
+	err = c.setComputeScriptCode(ctx, dataApiResult.Id, dataApi.Content)
+	if err != nil {
+		return ComputeScript{}, err
 	}
 
 	// @TODO should we publish the script on creation?
@@ -201,94 +146,97 @@ func (c *Client) CreateComputeScript(ctx context.Context, dataApi ComputeScript)
 	return c.GetComputeScript(ctx, dataApiResult.Id)
 }
 
+func (c *Client) createComputeScript(ctx context.Context, data ComputeScript) (ComputeScript, error) {
+	var dataApiResult ComputeScript
+
+	body := map[string]interface{}{
+		"Name":                 data.Name,
+		"ScriptType":           data.ScriptType,
+		"CreateLinkedPullZone": false,
+	}
+
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return dataApiResult, err
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /compute/script: %+v", string(bodyBytes)))
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script", c.apiUrl), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return dataApiResult, err
+	}
+
+	defer utils.Drain(resp.Body)
+
+	if resp.StatusCode != http.StatusCreated {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return dataApiResult, err
+		}
+		return dataApiResult, errors.New(resp.Status)
+	}
+
+	bodyResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return dataApiResult, err
+	}
+
+	err = json.Unmarshal(bodyResp, &dataApiResult)
+	if err != nil {
+		return dataApiResult, err
+	}
+
+	return dataApiResult, nil
+}
+
+func (c *Client) setComputeScriptCode(ctx context.Context, id int64, content string) error {
+	body := map[string]string{
+		"Code": content,
+	}
+
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /compute/script/%d/code: %+v", id, string(bodyBytes)))
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, id), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return err
+	}
+
+	defer utils.Drain(resp.Body)
+
+	if resp.StatusCode != http.StatusNoContent {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
+		return errors.New(resp.Status)
+	}
+
+	return nil
+}
+
 func (c *Client) UpdateComputeScript(ctx context.Context, data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
 	id := data.Id
 
-	data, err := c.UpdateComputeScriptWithoutGet(data, previousData)
-	if err != nil {
-		return data, err
-	}
-
-	return c.GetComputeScript(ctx, id)
-}
-
-func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData ComputeScript) (ComputeScript, error) {
-	id := data.Id
-
-	// update attributes
+	// update info
 	if data.Name != previousData.Name {
-		body, err := json.Marshal(map[string]string{
-			"Name": data.Name,
-		})
-
+		err := c.updateComputeScript(ctx, id, data)
 		if err != nil {
-			return ComputeScript{}, err
+			return data, err
 		}
-
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d", c.apiUrl, id), bytes.NewReader(body))
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		defer utils.Drain(resp.Body)
-
-		if resp.StatusCode != http.StatusOK {
-			bodyResp, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			return ComputeScript{}, errors.New(obj.Message)
-		}
-
-		utils.Drain(resp.Body) // force drain before the next request
 	}
 
 	// update code
 	if data.Content != previousData.Content {
-		body, err := json.Marshal(map[string]string{
-			"Code": data.Content,
-		})
-
+		err := c.setComputeScriptCode(ctx, id, data.Content)
 		if err != nil {
 			return ComputeScript{}, err
 		}
-
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/code", c.apiUrl, id), bytes.NewReader(body))
-		if err != nil {
-			return ComputeScript{}, err
-		}
-
-		defer utils.Drain(resp.Body)
-
-		if resp.StatusCode != http.StatusNoContent {
-			bodyResp, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return ComputeScript{}, err
-			}
-
-			return ComputeScript{}, errors.New(obj.Message)
-		}
-
-		utils.Drain(resp.Body) // force drain before the next request
 
 		// publish script
 		if previousData.CurrentReleaseId > 0 {
@@ -299,7 +247,36 @@ func (c *Client) UpdateComputeScriptWithoutGet(data ComputeScript, previousData 
 		}
 	}
 
-	return data, nil
+	return c.GetComputeScript(ctx, id)
+}
+
+func (c *Client) updateComputeScript(ctx context.Context, id int64, data ComputeScript) error {
+	body, err := json.Marshal(map[string]string{
+		"Name": data.Name,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("POST /compute/script/%d: %+v", id, string(body)))
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d", c.apiUrl, id), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	defer utils.Drain(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
+		return errors.New(resp.Status)
+	}
+
+	return nil
 }
 
 func (c *Client) DeleteComputeScript(id int64) error {
@@ -315,6 +292,10 @@ func (c *Client) DeleteComputeScript(id int64) error {
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
 		return errors.New(resp.Status)
 	}
 
@@ -338,7 +319,11 @@ func (c *Client) publishComputeScript(data ComputeScript) error {
 	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
-		return extractErrorMessage(resp)
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
+		return errors.New(resp.Status)
 	}
 
 	return nil

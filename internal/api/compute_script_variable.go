@@ -94,94 +94,87 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 
 func (c *Client) CreateComputeScriptVariable(dataApi ComputeScriptVariable) (ComputeScriptVariable, error) {
 	scriptId := dataApi.ScriptId
+
+	dataApiResult, err := c.createComputeScriptVariable(scriptId, dataApi)
+	if err != nil {
+		return dataApi, err
+	}
+
+	return c.GetComputeScriptVariable(scriptId, dataApiResult.Id)
+}
+
+func (c *Client) createComputeScriptVariable(scriptId int64, dataApi ComputeScriptVariable) (ComputeScriptVariable, error) {
+	var dataApiResult ComputeScriptVariable
+
 	bodyBytes, err := json.Marshal(dataApi)
 	if err != nil {
-		return ComputeScriptVariable{}, err
+		return dataApiResult, err
 	}
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/variables/add", c.apiUrl, scriptId), bytes.NewReader(bodyBytes))
 	if err != nil {
-		return ComputeScriptVariable{}, err
+		return dataApiResult, err
 	}
 
 	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err = extractErrorMessage(resp)
 		if err != nil {
-			return ComputeScriptVariable{}, err
+			return dataApiResult, err
 		}
-
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return ComputeScriptVariable{}, err
-		}
-
-		return ComputeScriptVariable{}, errors.New(obj.Message)
+		return dataApiResult, errors.New(resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ComputeScriptVariable{}, err
+		return dataApiResult, err
 	}
 
-	dataApiResult := ComputeScriptVariable{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
 
-	utils.Drain(resp.Body) // force drain before the next request
-
-	return c.GetComputeScriptVariable(scriptId, dataApiResult.Id)
+	return dataApiResult, nil
 }
 
 func (c *Client) UpdateComputeScriptVariable(dataApi ComputeScriptVariable) (ComputeScriptVariable, error) {
 	id := dataApi.Id
 	scriptId := dataApi.ScriptId
 
-	// update attributes
-	{
-		dataApi.Id = 0
-		body, err := json.Marshal(dataApi)
-
-		if err != nil {
-			return ComputeScriptVariable{}, err
-		}
-
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/variables/%d", c.apiUrl, scriptId, id), bytes.NewReader(body))
-		if err != nil {
-			return ComputeScriptVariable{}, err
-		}
-
-		defer utils.Drain(resp.Body)
-
-		if resp.StatusCode != http.StatusOK {
-			bodyResp, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return ComputeScriptVariable{}, err
-			}
-
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return ComputeScriptVariable{}, err
-			}
-
-			return ComputeScriptVariable{}, errors.New(obj.Message)
-		}
-
-		utils.Drain(resp.Body) // force drain before the next request
+	err := c.updateComputeScriptVariable(scriptId, id, dataApi)
+	if err != nil {
+		return dataApi, err
 	}
 
 	return c.GetComputeScriptVariable(scriptId, id)
+}
+
+func (c *Client) updateComputeScriptVariable(scriptId int64, id int64, dataApi ComputeScriptVariable) error {
+	dataApi.Id = 0
+	body, err := json.Marshal(dataApi)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/variables/%d", c.apiUrl, scriptId, id), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	defer utils.Drain(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
+		return errors.New(resp.Status)
+	}
+
+	return nil
 }
 
 func (c *Client) DeleteComputeScriptVariable(scriptId int64, id int64) error {
@@ -197,6 +190,10 @@ func (c *Client) DeleteComputeScriptVariable(scriptId int64, id int64) error {
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
 		return errors.New(resp.Status)
 	}
 
