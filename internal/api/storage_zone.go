@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -37,6 +38,8 @@ func (c *Client) GetStorageZone(ctx context.Context, id int64) (StorageZone, err
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -55,7 +58,6 @@ func (c *Client) GetStorageZone(ctx context.Context, id int64) (StorageZone, err
 		"response": string(bodyResp),
 	})
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -82,6 +84,8 @@ func (c *Client) CreateStorageZone(ctx context.Context, data StorageZone) (Stora
 		return StorageZone{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Debug(ctx, "POST /storagezone", map[string]interface{}{
 		"payload": string(body),
 		"status":  resp.Status,
@@ -100,13 +104,14 @@ func (c *Client) CreateStorageZone(ctx context.Context, data StorageZone) (Stora
 	if err != nil {
 		return StorageZone{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := StorageZone{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	data.Id = dataApiResult.Id
 	return c.UpdateStorageZone(ctx, data)
@@ -131,6 +136,8 @@ func (c *Client) UpdateStorageZone(ctx context.Context, dataApi StorageZone) (St
 		return StorageZone{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Debug(ctx, fmt.Sprintf("POST /storagezone/%d", id), map[string]interface{}{
 		"payload": string(body),
 		"status":  resp.Status,
@@ -145,6 +152,8 @@ func (c *Client) UpdateStorageZone(ctx context.Context, dataApi StorageZone) (St
 		return StorageZone{}, errors.New("update storage zone failed with " + resp.Status)
 	}
 
+	utils.Drain(resp.Body) // force drain before the next request
+
 	dataApiResult, err := c.GetStorageZone(ctx, id)
 	if err != nil {
 		return dataApiResult, err
@@ -158,6 +167,8 @@ func (c *Client) DeleteStorageZone(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	tflog.Debug(ctx, fmt.Sprintf("DELETE /storagezone/%d", id), map[string]interface{}{
 		"status": resp.Status,

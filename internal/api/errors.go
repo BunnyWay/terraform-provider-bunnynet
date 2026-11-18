@@ -20,7 +20,7 @@ func extractErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	_ = response.Body.Close()
+	_ = response.Body.Close() // @TODO check if still needed
 	var responseObj struct {
 		Message string `json:"Message"`
 	}
@@ -39,7 +39,7 @@ func extractDatabaseErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	_ = response.Body.Close()
+	_ = response.Body.Close() // @TODO check if still needed
 	var responseObj struct {
 		Message string `json:"error"`
 	}
@@ -58,7 +58,7 @@ func extractMCErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	_ = response.Body.Close()
+	_ = response.Body.Close() // @TODO check if still needed
 
 	{
 		var responseObj []struct {
@@ -101,7 +101,7 @@ func extractShieldErrorMessage(response *http.Response) error {
 		return nil
 	}
 
-	_ = response.Body.Close()
+	_ = response.Body.Close() // @TODO check if still needed
 	var responseObj struct {
 		Error struct {
 			Message  string `json:"message"`

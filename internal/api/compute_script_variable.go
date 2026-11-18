@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -28,6 +29,8 @@ func (c *Client) GetComputeScriptVariableByName(scriptId int64, name string) (Co
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -41,7 +44,6 @@ func (c *Client) GetComputeScriptVariableByName(scriptId int64, name string) (Co
 		EdgeScriptVariables []ComputeScriptVariable `json:"EdgeScriptVariables"`
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &scriptData)
 	if err != nil {
 		return data, err
@@ -65,6 +67,8 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -78,7 +82,6 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -91,89 +94,87 @@ func (c *Client) GetComputeScriptVariable(scriptId int64, id int64) (ComputeScri
 
 func (c *Client) CreateComputeScriptVariable(dataApi ComputeScriptVariable) (ComputeScriptVariable, error) {
 	scriptId := dataApi.ScriptId
+
+	dataApiResult, err := c.createComputeScriptVariable(scriptId, dataApi)
+	if err != nil {
+		return dataApi, err
+	}
+
+	return c.GetComputeScriptVariable(scriptId, dataApiResult.Id)
+}
+
+func (c *Client) createComputeScriptVariable(scriptId int64, dataApi ComputeScriptVariable) (ComputeScriptVariable, error) {
+	var dataApiResult ComputeScriptVariable
+
 	bodyBytes, err := json.Marshal(dataApi)
 	if err != nil {
-		return ComputeScriptVariable{}, err
+		return dataApiResult, err
 	}
 
 	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/variables/add", c.apiUrl, scriptId), bytes.NewReader(bodyBytes))
 	if err != nil {
-		return ComputeScriptVariable{}, err
+		return dataApiResult, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
-		bodyResp, err := io.ReadAll(resp.Body)
+		err = extractErrorMessage(resp)
 		if err != nil {
-			return ComputeScriptVariable{}, err
+			return dataApiResult, err
 		}
-
-		_ = resp.Body.Close()
-		var obj struct {
-			Message string `json:"Message"`
-		}
-
-		err = json.Unmarshal(bodyResp, &obj)
-		if err != nil {
-			return ComputeScriptVariable{}, err
-		}
-
-		return ComputeScriptVariable{}, errors.New(obj.Message)
+		return dataApiResult, errors.New(resp.Status)
 	}
 
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ComputeScriptVariable{}, err
+		return dataApiResult, err
 	}
-	_ = resp.Body.Close()
 
-	dataApiResult := ComputeScriptVariable{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return dataApiResult, err
 	}
 
-	return c.GetComputeScriptVariable(scriptId, dataApiResult.Id)
+	return dataApiResult, nil
 }
 
 func (c *Client) UpdateComputeScriptVariable(dataApi ComputeScriptVariable) (ComputeScriptVariable, error) {
 	id := dataApi.Id
 	scriptId := dataApi.ScriptId
 
-	// update attributes
-	{
-		dataApi.Id = 0
-		body, err := json.Marshal(dataApi)
-
-		if err != nil {
-			return ComputeScriptVariable{}, err
-		}
-
-		resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/variables/%d", c.apiUrl, scriptId, id), bytes.NewReader(body))
-		if err != nil {
-			return ComputeScriptVariable{}, err
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			bodyResp, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return ComputeScriptVariable{}, err
-			}
-
-			_ = resp.Body.Close()
-			var obj struct {
-				Message string `json:"Message"`
-			}
-
-			err = json.Unmarshal(bodyResp, &obj)
-			if err != nil {
-				return ComputeScriptVariable{}, err
-			}
-
-			return ComputeScriptVariable{}, errors.New(obj.Message)
-		}
+	err := c.updateComputeScriptVariable(scriptId, id, dataApi)
+	if err != nil {
+		return dataApi, err
 	}
 
 	return c.GetComputeScriptVariable(scriptId, id)
+}
+
+func (c *Client) updateComputeScriptVariable(scriptId int64, id int64, dataApi ComputeScriptVariable) error {
+	dataApi.Id = 0
+	body, err := json.Marshal(dataApi)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/compute/script/%d/variables/%d", c.apiUrl, scriptId, id), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	defer utils.Drain(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
+		return errors.New(resp.Status)
+	}
+
+	return nil
 }
 
 func (c *Client) DeleteComputeScriptVariable(scriptId int64, id int64) error {
@@ -182,11 +183,17 @@ func (c *Client) DeleteComputeScriptVariable(scriptId int64, id int64) error {
 		return err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
+		err = extractErrorMessage(resp)
+		if err != nil {
+			return err
+		}
 		return errors.New(resp.Status)
 	}
 

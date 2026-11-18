@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -53,6 +54,8 @@ func (c *Client) GetPullzoneWafRule(ctx context.Context, pullzoneId int64, ruleI
 	if err != nil {
 		return PullzoneWafRule{}, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return PullzoneWafRule{}, ErrNotFound
@@ -102,6 +105,8 @@ func (c *Client) CreatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		return PullzoneWafRule{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -121,6 +126,8 @@ func (c *Client) CreatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 	if err != nil {
 		return PullzoneWafRule{}, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetPullzoneWafRule(ctx, data.PullzoneId, result.Id)
 }
@@ -138,6 +145,8 @@ func (c *Client) UpdatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		return PullzoneWafRule{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
 		if err != nil {
@@ -158,6 +167,8 @@ func (c *Client) UpdatePullzoneWafRule(ctx context.Context, data PullzoneWafRule
 		return PullzoneWafRule{}, err
 	}
 
+	utils.Drain(resp.Body) // force drain before the next request
+
 	return c.GetPullzoneWafRule(ctx, data.PullzoneId, data.Id)
 }
 
@@ -168,6 +179,8 @@ func (c *Client) DeletePullzoneWafRule(ctx context.Context, ruleId int64) error 
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

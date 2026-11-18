@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -26,6 +27,8 @@ func (c *Client) GetComputeScriptActiveRelease(scriptId int64) (ComputeScriptRel
 		return response, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return response, ErrNotFound
 	}
@@ -39,7 +42,6 @@ func (c *Client) GetComputeScriptActiveRelease(scriptId int64) (ComputeScriptRel
 		return response, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &response)
 	return response, err
 }

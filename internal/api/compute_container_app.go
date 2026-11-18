@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -207,6 +208,8 @@ func (c *Client) GetComputeContainerApp(ctx context.Context, id string) (Compute
 		return ComputeContainerApp{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return ComputeContainerApp{}, ErrNotFound
 	}
@@ -223,7 +226,6 @@ func (c *Client) GetComputeContainerApp(ctx context.Context, id string) (Compute
 
 	tflog.Debug(ctx, fmt.Sprintf("GET /mc/apps/%s: %s", id, string(bodyResp)))
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
 	if err != nil {
 		return ComputeContainerApp{}, err
@@ -297,6 +299,8 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		err := extractMCErrorMessage(resp)
 		if err != nil {
@@ -306,11 +310,10 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 		return ComputeContainerApp{}, errors.New(resp.Status)
 	}
 
-	bodyStr, _ := io.ReadAll(resp.Body)
-
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	bodyStr, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ComputeContainerApp{}, err
+	}
 
 	tflog.Debug(ctx, fmt.Sprintf("%s %s response: %s", method, url, string(bodyStr)))
 
@@ -322,6 +325,8 @@ func (c *Client) UpdateComputeContainerApp(ctx context.Context, data ComputeCont
 	if err != nil {
 		return ComputeContainerApp{}, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetComputeContainerApp(ctx, result.Id)
 }
@@ -392,6 +397,8 @@ func (c *Client) DeleteComputeContainerApp(id string) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

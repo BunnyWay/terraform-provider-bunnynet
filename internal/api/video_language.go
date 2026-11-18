@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -40,6 +41,8 @@ func (c *Client) GetVideoLanguages() ([]VideoLanguage, error) {
 		return []VideoLanguage{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return []VideoLanguage{}, errors.New(resp.Status)
 	}
@@ -49,7 +52,6 @@ func (c *Client) GetVideoLanguages() ([]VideoLanguage, error) {
 		return []VideoLanguage{}, err
 	}
 
-	_ = resp.Body.Close()
 	var languages []VideoLanguage
 
 	err = json.Unmarshal(bodyResp, &languages)

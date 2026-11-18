@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 )
@@ -99,6 +100,8 @@ func (c *Client) getJWTToken() (string, error) {
 		return "", err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return "", errors.New(resp.Status)
 	}
@@ -108,7 +111,6 @@ func (c *Client) getJWTToken() (string, error) {
 		return "", err
 	}
 
-	_ = resp.Body.Close()
 	var obj struct {
 		Token string `json:"Token"`
 	}

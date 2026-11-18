@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneshieldresourcevalidator"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -34,6 +35,8 @@ func (c *Client) getPullzoneShieldBotCategorization(ctx context.Context, shieldZ
 	if err != nil {
 		return result, err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		err := extractShieldErrorMessage(resp)
@@ -119,6 +122,8 @@ func (c *Client) pullzoneShieldBotCategorizationUpdateCategoryAction(ctx context
 		return err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Debug(ctx, fmt.Sprintf("PUT /shield/shield-zone/%d/bot-categorization/categories/%d: %s", shieldZoneId, categoryId, resp.Status))
 
 	if resp.StatusCode != http.StatusOK {
@@ -148,6 +153,8 @@ func (c *Client) pullzoneShieldBotCategorizationUpdateBotAction(ctx context.Cont
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	tflog.Debug(ctx, fmt.Sprintf("PUT /shield/shield-zone/%d/bot-categorization/bots/%d: %s", shieldZoneId, botId, resp.Status))
 

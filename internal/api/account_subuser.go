@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -32,6 +33,8 @@ func (c *Client) GetAccountSubuser(ctx context.Context, id string) (AccountSubus
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Info(ctx, fmt.Sprintf("GET /team/member/%s: %s", id, resp.Status))
 
 	if resp.StatusCode == http.StatusNotFound {
@@ -49,7 +52,6 @@ func (c *Client) GetAccountSubuser(ctx context.Context, id string) (AccountSubus
 
 	tflog.Info(ctx, fmt.Sprintf("GET /team/member/%s: %s", id, string(bodyResp)))
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -73,6 +75,8 @@ func (c *Client) GetAccountSubuserByEmail(ctx context.Context, email string) (Ac
 		return AccountSubuser{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Info(ctx, fmt.Sprintf("GET /team/member: %s", resp.Status))
 
 	if resp.StatusCode == http.StatusNotFound {
@@ -88,7 +92,6 @@ func (c *Client) GetAccountSubuserByEmail(ctx context.Context, email string) (Ac
 		return AccountSubuser{}, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
 	if err != nil {
 		return AccountSubuser{}, err
@@ -116,6 +119,8 @@ func (c *Client) CreateAccountSubuser(ctx context.Context, data AccountSubuser) 
 		return AccountSubuser{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	tflog.Info(ctx, fmt.Sprintf("POST /team/member: %s", string(body)))
 
 	if resp.StatusCode != http.StatusCreated {
@@ -131,13 +136,14 @@ func (c *Client) CreateAccountSubuser(ctx context.Context, data AccountSubuser) 
 	if err != nil {
 		return AccountSubuser{}, err
 	}
-	_ = resp.Body.Close()
 
 	var dataApiResult AccountSubuser
 	err = json.Unmarshal(bodyResp, &dataApiResult)
 	if err != nil {
 		return AccountSubuser{}, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	return c.GetAccountSubuser(ctx, dataApiResult.Id)
 }
@@ -158,10 +164,7 @@ func (c *Client) UpdateAccountSubuser(ctx context.Context, data AccountSubuser) 
 		return AccountSubuser{}, err
 	}
 
-	defer func() {
-		_, _ = io.Copy(io.Discard, resp.Body)
-		_ = resp.Body.Close()
-	}()
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		err := extractErrorMessage(resp)
@@ -172,6 +175,8 @@ func (c *Client) UpdateAccountSubuser(ctx context.Context, data AccountSubuser) 
 		return AccountSubuser{}, errors.New("update account sub-user failed with " + resp.Status)
 	}
 
+	utils.Drain(resp.Body) // force drain before the next request
+
 	return c.GetAccountSubuser(ctx, id)
 }
 
@@ -180,6 +185,8 @@ func (c *Client) DeleteAccountSubuser(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

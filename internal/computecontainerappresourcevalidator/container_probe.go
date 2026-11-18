@@ -51,7 +51,12 @@ func (c containerProbe) ValidateObject(ctx context.Context, request validator.Ob
 		return
 	}
 
-	obj, _ := request.ConfigValue.ToObjectValue(ctx)
+	obj, diags := request.ConfigValue.ToObjectValue(ctx)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
 	attrs := obj.Attributes()
 
 	if attrs["type"].IsNull() {

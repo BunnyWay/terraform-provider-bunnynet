@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/memorycache"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
@@ -196,6 +197,8 @@ func (c *Client) GetPullzone(id int64) (Pullzone, error) {
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -209,7 +212,6 @@ func (c *Client) GetPullzone(id int64) (Pullzone, error) {
 		return data, err
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -230,6 +232,8 @@ func (c *Client) GetPullzoneByName(ctx context.Context, name string) (Pullzone, 
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return data, errors.New(resp.Status)
 	}
@@ -245,11 +249,12 @@ func (c *Client) GetPullzoneByName(ctx context.Context, name string) (Pullzone, 
 		Items []Pullzone `json:"Items"`
 	}
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &result)
 	if err != nil {
 		return data, err
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	for _, pullzone := range result.Items {
 		if pullzone.Name == name {
@@ -278,6 +283,8 @@ func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
 		return Pullzone{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusCreated {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -291,7 +298,6 @@ func (c *Client) CreatePullzone(data Pullzone) (Pullzone, error) {
 	if err != nil {
 		return Pullzone{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := Pullzone{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
@@ -330,6 +336,8 @@ func (c *Client) UpdatePullzoneWithBody(id int64, body []byte) (Pullzone, error)
 		return Pullzone{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -338,6 +346,8 @@ func (c *Client) UpdatePullzoneWithBody(id int64, body []byte) (Pullzone, error)
 
 		return Pullzone{}, errors.New("update pullzone failed with " + resp.Status)
 	}
+
+	utils.Drain(resp.Body) // force drain before the next request
 
 	dataApiResult, err := c.GetPullzone(id)
 	if err != nil {
@@ -356,6 +366,8 @@ func (c *Client) DeletePullzone(id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound

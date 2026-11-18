@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
 	"io"
 	"net/http"
 	"slices"
@@ -30,6 +31,8 @@ func (c *Client) GetRegions() ([]Region, error) {
 		return []Region{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		return []Region{}, errors.New(resp.Status)
 	}
@@ -39,7 +42,6 @@ func (c *Client) GetRegions() ([]Region, error) {
 		return []Region{}, err
 	}
 
-	_ = resp.Body.Close()
 	var regions []Region
 
 	err = json.Unmarshal(bodyResp, &regions)

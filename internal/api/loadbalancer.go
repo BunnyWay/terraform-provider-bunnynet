@@ -97,6 +97,8 @@ func (c *Client) GetLoadbalancer(ctx context.Context, id int64) (Loadbalancer, e
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode == http.StatusNotFound {
 		return data, ErrNotFound
 	}
@@ -112,7 +114,6 @@ func (c *Client) GetLoadbalancer(ctx context.Context, id int64) (Loadbalancer, e
 
 	tflog.Debug(ctx, fmt.Sprintf("GET /loadbalancer/%d: %s", id, string(bodyResp)))
 
-	_ = resp.Body.Close()
 	err = json.Unmarshal(bodyResp, &data)
 	if err != nil {
 		return data, err
@@ -153,6 +154,8 @@ func (c *Client) CreateLoadbalancer(ctx context.Context, data Loadbalancer) (Loa
 		return Loadbalancer{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
 		err := extractErrorMessage(resp)
 		if err != nil {
@@ -166,7 +169,6 @@ func (c *Client) CreateLoadbalancer(ctx context.Context, data Loadbalancer) (Loa
 	if err != nil {
 		return Loadbalancer{}, err
 	}
-	_ = resp.Body.Close()
 
 	dataApiResult := Loadbalancer{}
 	err = json.Unmarshal(bodyResp, &dataApiResult)
@@ -192,6 +194,8 @@ func (c *Client) UpdateLoadbalancer(ctx context.Context, data Loadbalancer) (Loa
 		return Loadbalancer{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	loadbalancerCache.Delete(data.Id)
 
 	if resp.StatusCode != http.StatusOK {
@@ -207,7 +211,6 @@ func (c *Client) UpdateLoadbalancer(ctx context.Context, data Loadbalancer) (Loa
 	if err != nil {
 		return data, err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("POST /loadbalancer/%d: %s", data.Id, string(bodyResp)))
 
@@ -227,6 +230,8 @@ func (c *Client) DeleteLoadbalancer(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	loadbalancerCache.Delete(id)
 
@@ -276,6 +281,8 @@ func (c *Client) CreateLoadbalancerGroup(ctx context.Context, data LoadbalancerG
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	loadbalancerCache.Delete(data.LoadbalancerId)
 
 	if resp.StatusCode != http.StatusOK {
@@ -291,7 +298,6 @@ func (c *Client) CreateLoadbalancerGroup(ctx context.Context, data LoadbalancerG
 	if err != nil {
 		return data, err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("POST /loadbalancer/%d/origingroup: %s", data.LoadbalancerId, string(bodyResp)))
 
@@ -323,6 +329,8 @@ func (c *Client) UpdateLoadbalancerGroup(ctx context.Context, data LoadbalancerG
 		return data, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	loadbalancerCache.Delete(data.LoadbalancerId)
 
 	if resp.StatusCode != http.StatusOK {
@@ -338,7 +346,6 @@ func (c *Client) UpdateLoadbalancerGroup(ctx context.Context, data LoadbalancerG
 	if err != nil {
 		return data, err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("POST /loadbalancer/%d/origingroup/%d: %s", data.LoadbalancerId, data.Id, string(bodyResp)))
 
@@ -362,6 +369,8 @@ func (c *Client) DeleteLoadbalancerGroup(ctx context.Context, loadbalancerId int
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	loadbalancerCache.Delete(loadbalancerId)
 
@@ -408,6 +417,8 @@ func (c *Client) CreateLoadbalancerOrigin(ctx context.Context, data Loadbalancer
 		return LoadbalancerOrigin{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	loadbalancerCache.Delete(data.LoadbalancerId)
 
 	if resp.StatusCode != http.StatusOK {
@@ -423,7 +434,6 @@ func (c *Client) CreateLoadbalancerOrigin(ctx context.Context, data Loadbalancer
 	if err != nil {
 		return LoadbalancerOrigin{}, err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("POST /loadbalancer/%d/origingroup/%d/origin: %s", data.LoadbalancerId, data.Id, string(bodyResp)))
 
@@ -455,6 +465,8 @@ func (c *Client) UpdateLoadbalancerOrigin(ctx context.Context, data Loadbalancer
 		return LoadbalancerOrigin{}, err
 	}
 
+	defer utils.Drain(resp.Body)
+
 	loadbalancerCache.Delete(data.LoadbalancerId)
 
 	if resp.StatusCode != http.StatusOK {
@@ -470,7 +482,6 @@ func (c *Client) UpdateLoadbalancerOrigin(ctx context.Context, data Loadbalancer
 	if err != nil {
 		return LoadbalancerOrigin{}, err
 	}
-	_ = resp.Body.Close()
 
 	tflog.Debug(ctx, fmt.Sprintf("POST /loadbalancer/%d/origingroup/%d/origin/%d: %s", data.LoadbalancerId, data.GroupId, data.Id, string(bodyResp)))
 
@@ -496,6 +507,8 @@ func (c *Client) DeleteLoadbalancerOrigin(ctx context.Context, loadbalancerId in
 	if err != nil {
 		return err
 	}
+
+	defer utils.Drain(resp.Body)
 
 	loadbalancerCache.Delete(loadbalancerId)
 
