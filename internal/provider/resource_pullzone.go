@@ -406,7 +406,7 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
-				Description: "Indicates whether Origin Shield is enabled.",
+				Description: "Indicates whether Origin Shield is enabled. It cannot be used together with `permacache_storagezone`.",
 			},
 			"originshield_concurrency_limit": schema.BoolAttribute{
 				Computed: true,
@@ -1364,6 +1364,7 @@ func (r *PullzoneResource) ConfigValidators(ctx context.Context) []resource.Conf
 		pullzoneresourcevalidator.Origin(),
 		pullzoneresourcevalidator.PermacacheCacheExpirationTime(),
 		pullzoneresourcevalidator.CacheStaleBackgroundUpdate(),
+		pullzoneresourcevalidator.OriginShieldPermacache(),
 	}
 }
 

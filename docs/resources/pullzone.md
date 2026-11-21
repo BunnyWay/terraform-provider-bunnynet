@@ -100,7 +100,7 @@ resource "bunnynet_pullzone" "example" {
 - `origin` (Block, Optional) (see [below for nested schema](#nestedblock--origin))
 - `originshield_concurrency_limit` (Boolean) Indicates whether there is a concurrency limit for Origin Shield.
 - `originshield_concurrency_requests` (Number) The number of concurrent requests for Origin Shield.
-- `originshield_enabled` (Boolean) Indicates whether Origin Shield is enabled.
+- `originshield_enabled` (Boolean) Indicates whether Origin Shield is enabled. It cannot be used together with `permacache_storagezone`.
 - `originshield_queue_requests` (Number) The number of queued requests for Origin Shield.
 - `originshield_queue_wait` (Number) The maximum wait time for queued requests in Origin Shield, in seconds.
 - `originshield_zone` (String) Options: `FR`, `IL`
