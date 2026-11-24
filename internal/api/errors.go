@@ -134,6 +134,8 @@ func extractShieldErrorMessage(response *http.Response) error {
 		return ErrShieldPlanChangeBlocked
 	case "limit_reached.waf":
 		return ErrShieldWafLimitReached
+	case "not_found_or_unauthorised_access.shieldzone":
+		return ErrNotFound
 	case "not_found_or_unauthorised_access.waf_rule":
 		return ErrNotFound
 	case "not_found.access_list":
