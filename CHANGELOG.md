@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Changed
+- resource `pullzone`: don't allow `permacache_storagezone` and `originshield_enabled` to be defined together;
+
 ### Fixed
 - resource `pullzone_shield`: mark as removed if not found;
 

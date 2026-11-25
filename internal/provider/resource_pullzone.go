@@ -11,6 +11,7 @@ import (
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/customtype"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/pullzoneresourcevalidator"
 	"github.com/bunnyway/terraform-provider-bunnynet/internal/utils"
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
@@ -396,6 +397,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				},
 				Validators: []validator.Int64{
 					int64validator.AtLeast(0),
+					int64validator.ConflictsWith(
+						path.MatchRelative().AtParent().AtName("originshield_enabled"),
+					),
 				},
 				Description: "The storage zone ID for Perma-Cache.",
 			},
@@ -405,6 +409,11 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Default:  booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.Bool{
+					boolvalidator.ConflictsWith(
+						path.MatchRelative().AtParent().AtName("permacache_storagezone"),
+					),
 				},
 				Description: "Indicates whether Origin Shield is enabled.",
 			},
