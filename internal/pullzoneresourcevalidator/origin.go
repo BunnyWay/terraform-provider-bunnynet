@@ -62,6 +62,11 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 		return
 	}
 
+	originForwardHostHeader := originAttr["forward_host_header"].(types.Bool)
+	if originForwardHostHeader.IsUnknown() {
+		return
+	}
+
 	originStorageZone := originAttr["storagezone"].(types.Int64)
 	if originStorageZone.IsUnknown() {
 		return
@@ -220,6 +225,10 @@ func (v originValidator) ValidateResource(ctx context.Context, req resource.Vali
 	case "StorageZone":
 		if originStorageZone.IsNull() || (!originStorageZone.IsUnknown() && originStorageZone.ValueInt64() <= 0) {
 			resp.Diagnostics.AddAttributeError(originTypePath, "Invalid origin.storagezone value", "StorageZone requires origin.storagezone to be defined.")
+		}
+
+		if originForwardHostHeader.ValueBool() {
+			resp.Diagnostics.AddAttributeError(originTypePath, "Invalid origin.forward_host_header value", "StorageZone requires origin.forward_host_header to be false.")
 		}
 
 	case "LoadBalancer":

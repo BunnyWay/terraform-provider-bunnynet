@@ -22,6 +22,7 @@ var testOriginOriginType = tftypes.Object{
 		"type":                        tftypes.String,
 		"url":                         tftypes.String,
 		"host_header":                 tftypes.String,
+		"forward_host_header":         tftypes.Bool,
 		"storagezone":                 tftypes.Number,
 		"loadbalancer":                tftypes.Number,
 		"script":                      tftypes.Number,
@@ -103,6 +104,7 @@ func TestOrigin(t *testing.T) {
 		// invalid args
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 0}, nil),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: -1}, nil),
+		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, ForwardHostHeader: true}, nil),
 		// unexpected args
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, Url: "https://example.com"}, nil),
 		testOriginMakeTestCase(true, "StorageZone", originPayload{Storagezone: 12345, Loadbalancer: 12345}, nil),
@@ -201,6 +203,7 @@ func TestOrigin(t *testing.T) {
 						CustomType: customtype.PullzoneOriginUrlType{},
 					},
 					"host_header":                 schema.StringAttribute{},
+					"forward_host_header":         schema.BoolAttribute{},
 					"storagezone":                 schema.Int64Attribute{},
 					"loadbalancer":                schema.Int64Attribute{},
 					"script":                      schema.Int64Attribute{},
@@ -280,6 +283,7 @@ func testOriginMakeTestCase(err bool, ot string, op originPayload, filters any) 
 type originPayload struct {
 	Url                      string
 	HostHeader               string
+	ForwardHostHeader        bool
 	Storagezone              int64
 	Loadbalancer             int64
 	Script                   int64
@@ -294,6 +298,7 @@ type originPayload struct {
 func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 	var url any = nil
 	var hostHeader any = nil
+	var forwardHostHeader bool
 	var storagezone any = nil
 	var loadbalancer any = nil
 	var script any = nil
@@ -309,6 +314,10 @@ func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 
 	if payload.HostHeader != "" {
 		hostHeader = payload.HostHeader
+	}
+
+	if payload.ForwardHostHeader {
+		forwardHostHeader = true
 	}
 
 	if payload.Storagezone != 0 {
@@ -347,6 +356,7 @@ func testOriginMakeOrigin(ot string, payload originPayload) tftypes.Value {
 		"type":                        tftypes.NewValue(tftypes.String, ot),
 		"url":                         tftypes.NewValue(tftypes.String, url),
 		"host_header":                 tftypes.NewValue(tftypes.String, hostHeader),
+		"forward_host_header":         tftypes.NewValue(tftypes.Bool, forwardHostHeader),
 		"storagezone":                 tftypes.NewValue(tftypes.Number, storagezone),
 		"loadbalancer":                tftypes.NewValue(tftypes.Number, loadbalancer),
 		"script":                      tftypes.NewValue(tftypes.Number, script),
