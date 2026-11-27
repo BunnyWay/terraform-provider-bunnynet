@@ -625,8 +625,9 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Description: "The port number for log forwarding.",
 			},
 			"log_forward_token": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Optional:  true,
+				Computed:  true,
+				Sensitive: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -765,9 +766,10 @@ func (r *PullzoneResource) Schema(ctx context.Context, req resource.SchemaReques
 				Description: "The access key used to authenticate the requests.",
 			},
 			"s3_auth_secret": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(""),
+				Optional:  true,
+				Computed:  true,
+				Sensitive: true,
+				Default:   stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
