@@ -75,7 +75,7 @@ resource "bunnynet_pullzone" "example" {
 - `log_forward_port` (Number) The port number for log forwarding.
 - `log_forward_protocol` (String) Options: `DataDog`, `TCP`, `TCPEncrypted`, `UDP`
 - `log_forward_server` (String) The server address for log forwarding.
-- `log_forward_token` (String) The token used for log forwarding authentication.
+- `log_forward_token` (String, Sensitive) The token used for log forwarding authentication.
 - `log_storage_enabled` (Boolean) Indicates whether log storage is enabled.
 - `log_storage_zone` (Number) The storage zone ID for log storage.
 - `optimizer_burrow` (Boolean) Indicates whether Burrow Smart Routing should be enabled.
@@ -111,7 +111,7 @@ resource "bunnynet_pullzone" "example" {
 - `s3_auth_enabled` (Boolean) Indicates whether requests to origin will be signed with AWS Signature Version 4.
 - `s3_auth_key` (String) The access key used to authenticate the requests.
 - `s3_auth_region` (String) The region name of the bucket used to authenticate the requests.
-- `s3_auth_secret` (String) The secret key used to authenticate the requests.
+- `s3_auth_secret` (String, Sensitive) The secret key used to authenticate the requests.
 - `safehop_connection_timeout` (Number) The amount of seconds to wait when connecting to the origin. Otherwise the request will fail or retry.
 - `safehop_enabled` (Boolean)
 - `safehop_response_timeout` (Number) The amount of seconds to wait when waiting for the origin reply. Otherwise the request will fail or retry.

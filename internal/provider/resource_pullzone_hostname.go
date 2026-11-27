@@ -132,9 +132,10 @@ func (r *PullzoneHostnameResource) Schema(ctx context.Context, req resource.Sche
 				MarkdownDescription: `The certificate for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate data, so you'll have to make sure you're importing the correct certificate.`,
 			},
 			"certificate_key": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(""),
+				Optional:  true,
+				Computed:  true,
+				Sensitive: true,
+				Default:   stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

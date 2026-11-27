@@ -9,6 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Fixed
+- resource `pullzone`: mark `s3_auth_secret` and `log_forward_token` as sensitive;
+- resource `pullzone_hostname`: mark `certificate_key` as sensitive;
+- resource `compute_script`: mark `deployment_key` as sensitive;
+- data source `pullzone`: preserve resource-schema sensitivity for `s3_auth_secret`, `log_forward_token` and `token_auth_key`;
+
+**Upgrade note:** root-module outputs that expose these attributes (directly, or by returning the whole resource or data source object) must now declare `sensitive = true`. Expressions that derive `for_each` keys or set members from these values may need to be restructured.
+
 ## 0.20.3 - 2026-11-25
 
 ### Changed

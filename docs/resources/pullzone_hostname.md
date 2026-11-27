@@ -42,7 +42,7 @@ resource "bunnynet_pullzone_hostname" "custom" {
 ### Optional
 
 - `certificate` (String) The certificate for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate data, so you'll have to make sure you're importing the correct certificate.
-- `certificate_key` (String) The certificate private key for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate key, so you'll have to make sure you're importing the correct certificate key.
+- `certificate_key` (String, Sensitive) The certificate private key for the hostname, in PEM format. ***Important***: the Bunny API will not return the certificate key, so you'll have to make sure you're importing the correct certificate key.
 - `force_ssl` (Boolean) Indicates whether SSL should be enforced for the hostname.
 - `tls_enabled` (Boolean) Indicates whether the hostname should support HTTPS. If a custom certificate is not provided via the <code>certificate</code> attribute, a Domain-validated TLS certificate will be automatically obtained and managed by Bunny. ***Important***: it is not possible to tell managed and custom certificates apart for imported resources.
 

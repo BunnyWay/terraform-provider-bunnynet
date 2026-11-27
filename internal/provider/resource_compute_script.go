@@ -86,7 +86,8 @@ func (r *ComputeScriptResource) Schema(ctx context.Context, req resource.SchemaR
 				Description: "The code of the script.",
 			},
 			"deployment_key": schema.StringAttribute{
-				Computed: true,
+				Computed:  true,
+				Sensitive: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

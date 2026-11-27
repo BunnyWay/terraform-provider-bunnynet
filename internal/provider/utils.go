@@ -95,6 +95,7 @@ func resourceAttrToDatasourceAttr(ra rschema.Attribute) dschema.Attribute {
 			Description:         ra.Description,
 			MarkdownDescription: ra.MarkdownDescription,
 			CustomType:          ra.CustomType,
+			Sensitive:           ra.Sensitive,
 		}
 
 	case rschema.Float64Attribute:
@@ -103,6 +104,7 @@ func resourceAttrToDatasourceAttr(ra rschema.Attribute) dschema.Attribute {
 			Description:         ra.Description,
 			MarkdownDescription: ra.MarkdownDescription,
 			CustomType:          ra.CustomType,
+			Sensitive:           ra.Sensitive,
 		}
 
 	case rschema.Int64Attribute:
@@ -111,6 +113,7 @@ func resourceAttrToDatasourceAttr(ra rschema.Attribute) dschema.Attribute {
 			Description:         ra.Description,
 			MarkdownDescription: ra.MarkdownDescription,
 			CustomType:          ra.CustomType,
+			Sensitive:           ra.Sensitive,
 		}
 
 	case rschema.SetAttribute:
@@ -120,6 +123,7 @@ func resourceAttrToDatasourceAttr(ra rschema.Attribute) dschema.Attribute {
 			Description:         ra.Description,
 			MarkdownDescription: ra.MarkdownDescription,
 			CustomType:          ra.CustomType,
+			Sensitive:           ra.Sensitive,
 		}
 
 	case rschema.StringAttribute:
@@ -128,6 +132,7 @@ func resourceAttrToDatasourceAttr(ra rschema.Attribute) dschema.Attribute {
 			Description:         ra.Description,
 			MarkdownDescription: ra.MarkdownDescription,
 			CustomType:          ra.CustomType,
+			Sensitive:           ra.Sensitive,
 		}
 
 	default:
